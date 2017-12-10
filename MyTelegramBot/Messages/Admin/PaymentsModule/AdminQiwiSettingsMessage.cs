@@ -21,12 +21,13 @@ namespace MyTelegramBot.Messages.Admin
 
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                var api = db.QiwiApi.Where(q => q.Enable == true).OrderByDescending(q=>q.Id).FirstOrDefault();
+                var api = db.PaymentType.Where(q => q.Id == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi)).Include(q => q.PaymentTypeConfig).FirstOrDefault();
 
                 if (api != null)
                 {
-                    mess =Bold("Номер телефона: ") + api.Telephone + NewLine() + Bold("Ключ: ") + api.Token + 
-                        NewLine() +Bold("Дата добавления: ") + api.DateAdd.ToString() +
+                    mess =Bold("Номер телефона: ") + api.PaymentTypeConfig.OrderByDescending(o=>o.Id).FirstOrDefault().Login + NewLine() + Bold("Ключ: ") +
+                        api.PaymentTypeConfig.OrderByDescending(o => o.Id).FirstOrDefault().Pass + 
+                        NewLine() +Bold("Дата добавления: ") + api.PaymentTypeConfig.OrderByDescending(o => o.Id).FirstOrDefault().TimeStamp.ToString()+
                         NewLine()+ Italic("Что такое QIWI API и где взять ключ ? ")+ "/whatisqiwiapi "+
                         NewLine() + "Вернуться в панель администратора /admin";
 

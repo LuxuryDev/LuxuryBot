@@ -87,8 +87,7 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o => o.OrderProduct).
                     Include(o => o.OrderAddress).
                     Include(o=>o.OrdersInWork).
-                    Include(o=>o.PaymentType).
-                    Include(o=>o.OrderPayment).FirstOrDefault();
+                    FirstOrDefault();
                
                 var Address = db.Address.Where(a => a.Id == Order.OrderAddress.FirstOrDefault().AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
@@ -98,15 +97,11 @@ namespace MyTelegramBot.Messages.Admin
                 string Paid = "";
 
                 ///////////Провереряем какой метод оплаты и наличие платежей////////////
-                if (Order.PaymentType!= null)
+                if (Order.Invoice!= null)
                 {
-                    PaymentMethodName = Order.PaymentType.Name;
+                    PaymentMethodName = "Метод оплаты";
                 }
 
-                else
-                {
-                    PaymentMethodName = db.PaymentType.Where(p=>p.Id==Order.PaymentTypeId).FirstOrDefault().Name;
-                }
 
                 if (Order.BotInfo == null)
                     Order.BotInfo = db.BotInfo.Where(b => b.Id == Order.BotInfoId).FirstOrDefault();

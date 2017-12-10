@@ -50,12 +50,14 @@ namespace MyTelegramBot.Messages
                         Include(o => o.OrderDone).
                         Include(o => o.FeedBack).
                         Include(o => o.OrderProduct).
-                        Include(o => o.OrderPayment).
                         Include(o => o.OrderAddress).Include(o=>o.BotInfo)
                         .Include(o=>o.OrderProduct).FirstOrDefault();
 
                 if(Order!=null && Order.OrderProduct.Count==0)
                     Order.OrderProduct = db.OrderProduct.Where(op => op.OrderId == Order.Id).ToList();
+
+                if (Order != null && Order.OrderAddress.Count == 0)
+                    Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).ToList();
 
                 if (Order != null)
                 {
@@ -103,16 +105,6 @@ namespace MyTelegramBot.Messages
 
                         if (Order.OrderDone != null && Order.OrderDone.Count > 0 && Order.FeedBack != null && Order.FeedBack.Text != null) // Есть отзыв к заказ
                             feedback = Order.FeedBack.Text + " | " + Order.FeedBack.DateAdd.ToString();
-
-                        if (Order.Paid == false && Order.OrderDone.Count == 0 && Order.PaymentTypeId== QiwiPayMethodId) 
-                            // заказ еще не оплачен. Метод оплаты Киви
-                        {
-                            paid = "Нет";
-                            PaymentFaq = QiwiNoPaid(db.QiwiApi.Where(q=>q.Enable==true).OrderByDescending(q=>q.Id).FirstOrDefault().Telephone, total);
-                        }
-
-                        if (Order.Paid == false && Order.PaymentTypeId == PaymentOnReceiptId) // Заказ не выполнен и способ оплаты "При получении"
-                            paid = "Нет";
 
 
                         if (Order.Paid == true) // Заказ оплачен

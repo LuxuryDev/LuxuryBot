@@ -120,20 +120,25 @@ namespace MyTelegramBot.Messages
 
                 string message = String.Empty;
 
+                string currency = String.Empty;
+
                 if (IdList.Count() > 0)
                 {
                     foreach (int id in IdList)
                     {
+
                         string name = db.Product.Where(p => p.Id == id).FirstOrDefault().Name;
                         int count = basket.Where(p => p.ProductId == id).Count();
-                        double price = db.ProductPrice.Where(p => p.ProductId == id && p.Enabled).FirstOrDefault().Value;
-                        message += counter.ToString() + ") " + name + " " + count.ToString() + " x " + price.ToString() + " руб. " + " = " + (count * price).ToString() + " руб." + Bot.BotMessage.NewLine();
-                        total += price * count;
+                        var price = db.ProductPrice.Where(p => p.ProductId == id && p.Enabled).Include(p=>p.Currency).FirstOrDefault();
+                        message += counter.ToString() + ") " + name + " " + count.ToString() + 
+                            " x " + price.ToString() + price.Currency.ShortName + " = " + (count * price.Value).ToString() + price.Currency.ShortName + Bot.BotMessage.NewLine();
+                        total += price.Value * count;
                         counter++;
+                        currency = price.Currency.ShortName;
 
                     }
 
-                    return message + Bot.BotMessage.NewLine() + Bot.BotMessage.Bold("Общая стоимость: ") + total.ToString() + " руб.";
+                    return message + Bot.BotMessage.NewLine() + Bot.BotMessage.Bold("Общая стоимость: ") + total.ToString() + currency;
                 }
 
                 else

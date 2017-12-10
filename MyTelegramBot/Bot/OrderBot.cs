@@ -207,6 +207,10 @@ namespace MyTelegramBot.Bot
                 //Пользователь записал свой ник в настройках, и нажал далее на картинке
                 case "VerifyUserName":
                     return await UserNameCheck();
+
+                case "BackToMyOrder":
+                   return await BackToOrder();
+
                 default:
                     break;
                     
@@ -218,7 +222,7 @@ namespace MyTelegramBot.Bot
 
             //Пользователь нажал на кнопку "Я оплатил"
             if (base.CommandName == CheckPayCmd)
-                return await CheckPay();
+                return OkResult;
 
             //Пользователь нажал добавить отзыв, ему пришло форсе реплай сообещнеи "Оставить отзыв к заказу:N". Если отзыва еще нет
             if (base.CommandName == CmdAddFeedBack && Order != null && Order.FeedBack == null)

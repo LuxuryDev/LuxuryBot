@@ -25,11 +25,15 @@ namespace MyTelegramBot
                 if (Product.Unit == null)
                     Product.Unit = db.Units.Where(u => u.Id == Product.UnitId).FirstOrDefault();
 
+                if (Price == null)
+                    Price = db.ProductPrice.Where(p => p.Id == PriceId).Include(p=>p.Currency).FirstOrDefault();
             }
+            
+
 
             if (Price != null && Product != null && Product.Unit != null)
-                return Product.Name + " " + Price.Value.ToString() + " руб. " +
-                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " руб.";
+                return Product.Name + " " + Price.Value.ToString() + Price.Currency.ShortName +
+                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " "+ Price.Currency.ShortName;
 
             else
                 return String.Empty;
@@ -45,25 +49,28 @@ namespace MyTelegramBot
 
                 if (Product.Stock == null || Product.Stock.Count == 0)
                     Product.Stock = db.Stock.Where(s => s.ProductId == ProductId).OrderByDescending(s => s.Id).ToList();
+
+                if (Price == null)
+                    Price = db.ProductPrice.Where(p => p.Id == PriceId).Include(p => p.Currency).FirstOrDefault();
             }
 
             if (Price != null && Product != null && Product.Unit != null && Product.Stock.Count > 0 && Product.Stock.FirstOrDefault().Balance >=
                 Count)
-                return Product.Name + " " + Price.Value.ToString() + " руб. " +
-                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " руб."
+                return Product.Name + " " + Price.Value.ToString() + " " + Price.Currency.ShortName +
+                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " " + Price.Currency.ShortName
                     + " | в наличии: " + Product.Stock.FirstOrDefault().Balance.ToString() + " " + Product.Unit.ShortName;
 
             //если заказывают больше чем есть. Выделяем жирным
             if (Price != null && Product != null && Product.Unit != null && Product.Stock.Count > 0 && Product.Stock.FirstOrDefault().Balance <
                 Count)
-                return Product.Name + " " + Price.Value.ToString() + " руб. " +
-                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " руб."
+                return Product.Name + " " + Price.Value.ToString() + " " + Price.Currency.ShortName+
+                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " " + Price.Currency.ShortName
                     + " |" + Bot.BotMessage.Bold("в наличии: " + Product.Stock.FirstOrDefault().Balance.ToString() + " " + Product.Unit.ShortName);
 
             //в наличии 0
             if (Price != null && Product != null && Product.Unit != null && Product.Stock.Count == 0)
-                return Product.Name + " " + Price.Value.ToString() + " руб. " +
-                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " руб."
+                return Product.Name + " " + Price.Value.ToString() + " " + Price.Currency.ShortName+
+                    " x " + Count.ToString() + " " + Product.Unit.ShortName + " = " + (Count * Price.Value).ToString() + " " + Price.Currency.ShortName
                     + " |" + Bot.BotMessage.Bold(" в наличии: 0 " + Product.Unit.ShortName);
 
             else

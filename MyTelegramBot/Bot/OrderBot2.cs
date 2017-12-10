@@ -50,6 +50,13 @@ namespace MyTelegramBot.Bot
             }
         }
 
+        private async Task<IActionResult> BackToOrder()
+        {                
+            OrderViewMsg = new OrderViewMessage(this.Order);
+            await EditMessage(OrderViewMsg.BuildMessage());
+            return OkResult;
+        }
+
         /// <summary>
         /// Отправить пользователю список его заказов
         /// </summary>
@@ -93,7 +100,7 @@ namespace MyTelegramBot.Bot
                 var method = db.PaymentType.Where(p => p.Enable == true).FirstOrDefault();
                 base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
                 //если включена верификация номера телефона, то проверяем есть ли БД номер телефона текущего пользователя
-                if (method != null && ConfigurationBot.VerifyTelephone)
+                if (method != null && ConfigurationBot!=null && ConfigurationBot.VerifyTelephone)
                     return await TelephoneCheck(id);
 
                 else // Если верификации номера телефона нет, то проверяем указан ли у пользователя UserName
@@ -361,18 +368,21 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> OrderSave()
         {
-            var new_order = AddOrder();
+            Bot.Order.InsertNewOrder insertNewOrder = new Bot.Order.InsertNewOrder(FollowerId, BotInfo);
 
-            OrderViewMsg = new OrderViewMessage(new_order);
+            var new_order = insertNewOrder.AddOrder();
+
+            InvoiceViewMessage invoiceViewMessage = new InvoiceViewMessage(new_order.Invoice, new_order.Id,"BackToMyOrder");
+
+            if (new_order != null && new_order.Invoice != null)
+                await EditMessage(invoiceViewMessage.BuildMessage());
 
             // Если тип платежа "при получении", то отправляем уведомление о новом заказке Админам
-            if (new_order!=null && OrderViewMsg !=null && await EditMessage(OrderViewMsg.BuildMessage()) != null && new_order.PaymentTypeId==PaymentOnReceipt)
-               return await OrderRedirectToAdmins(new_order.Id);
+            if (new_order.Invoice==null)
+                await OrderRedirectToAdmins(new_order.Id);
 
-            
 
-            else
-                return base.NotFoundResult;
+            return OkResult;
         }
 
         /// <summary>
@@ -409,63 +419,6 @@ namespace MyTelegramBot.Bot
 
         }
 
-
-        /// <summary>
-        /// Добавить информацию о заказе в таблицу Order
-        /// </summary>
-        /// <returns>Id заказа</returns>
-        private Orders AddOrder()
-        {
-            List<IGrouping<int, Basket>> basket = new List<IGrouping<int, Basket>>();
-            OrderTemp OrderTmp = new OrderTemp();
-
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                basket = db.Basket.Where(b => b.FollowerId == FollowerId && b.Enable && b.BotInfoId==BotInfo.Id).GroupBy(b => b.ProductId).ToList();
-                OrderTmp = db.OrderTemp.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotInfo.Id).FirstOrDefault();
-                decimal? Number = 0;
-                var LastOrder = db.Orders.OrderByDescending(o => o.Id).FirstOrDefault();
-
-                if (LastOrder != null)
-                    Number = LastOrder.Number;
-
-                if (OrderTmp != null && OrderTmp.PaymentTypeId != null)
-                {
-                    Orders NewOrder = new Orders
-                    {
-                        DateAdd = DateTime.Now,
-                        FollowerId = FollowerId,
-                        Text = OrderTmp.Text,
-                        Number = Number + 1,
-                        PaymentTypeId = OrderTmp.PaymentTypeId,
-                        Paid = false,
-                        BotInfoId=BotInfo.Id
-                    };
-
-                    db.Orders.Add(NewOrder);
-                    db.SaveChanges();
-                    db.OrderAddress.Add(
-                        new OrderAddress
-                        {
-                            OrderId = NewOrder.Id,
-                            AdressId = Convert.ToInt32(OrderTmp.AddressId)
-                        });
-
-                    foreach (var group in basket)
-                       FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group);
-
-                    
-
-                    db.OrderTemp.Remove(OrderTmp);
-                    db.SaveChanges();
-
-                    return NewOrder;
-                }
-
-                else
-                    return null;
-            }
-        }
 
         /// <summary>
         /// Добавить отзыв к заказу
@@ -527,50 +480,6 @@ namespace MyTelegramBot.Bot
         }
 
         /// <summary>
-        /// Перенести данные из таблицы Basket в таблицу ORderProducr
-        /// </summary>
-        /// <param name="ProductId"></param>
-        /// <param name="OrderId"></param>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        private OrderProduct FromBasketToOrderPosition(int ProductId, int OrderId, IGrouping<int, Basket> group)
-        {
-            var Summa = group.Sum(p => p.Amount);
-
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                ProductPrice price = db.ProductPrice.Where(p => p.ProductId == ProductId && p.Enabled).FirstOrDefault();
-
-
-                if (price != null)
-                {
-                    OrderProduct orderProduct = new OrderProduct
-                    {
-                        ProductId = ProductId,
-                        OrderId = OrderId,
-                        DateAdd = DateTime.Now,
-                        Count = Summa,
-                        PriceId = price.Id,
-
-                    };
-
-                    foreach (var product in group)
-                        db.Basket.Remove(product);
-
-                    db.OrderProduct.Add(orderProduct);
-
-                    db.SaveChanges();
-
-                    return orderProduct;
-
-                }
-
-                else
-                    return null;
-            }
-        }
-
-        /// <summary>
         /// Добавить адрес доставки к заказу (в таблицу OrderTemp !!!)
         /// </summary>
         private void AddAddressToOrderTemp(int AddressId)
@@ -623,69 +532,68 @@ namespace MyTelegramBot.Bot
         /// Проверяем поступил ли платеж на киви кошелек
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> CheckPay()
-        {
-            try
-            {
-                using (MarketBotDbContext db = new MarketBotDbContext())
-                {
-                    var order = db.Orders.Where(o => o.Id == OrderId && o.FollowerId == FollowerId).
-                        Include(o => o.OrderConfirm).
-                        Include(o => o.OrderDeleted).
-                        Include(o => o.OrderDone).
-                        Include(o => o.FeedBack).
-                        Include(o => o.OrderProduct).
-                        Include(o => o.OrderPayment).
-                        Include(o => o.OrderAddress).FirstOrDefault();
+        //private async Task<IActionResult> CheckPay()
+        //{
+        //    try
+        //    {
+        //        using (MarketBotDbContext db = new MarketBotDbContext())
+        //        {
+        //            var order = db.Orders.Where(o => o.Id == OrderId && o.FollowerId == FollowerId).
+        //                Include(o => o.OrderConfirm).
+        //                Include(o => o.OrderDeleted).
+        //                Include(o => o.OrderDone).
+        //                Include(o => o.FeedBack).
+        //                Include(o => o.OrderProduct).
+        //                Include(o => o.OrderAddress).FirstOrDefault();
 
-                    double total = GeneralFunction.OrderTotalPrice(order.OrderProduct.ToList());
-                    var QiwiPayment = await Services.Qiwi.QiwiFunction.SearchPayment(Convert.ToInt32(order.Number), db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Token, db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Telephone);
+        //            double total = GeneralFunction.OrderTotalPrice(order.OrderProduct.ToList());
+        //            var QiwiPayment = await Services.Qiwi.QiwiFunction.SearchPayment(Convert.ToInt32(order.Number), db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Token, db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Telephone);
 
-                    var payments = db.OrderPayment.Where(o => o.OrderId == order.Id).Include(o => o.Payment).ToList();
+        //            var payments = db.OrderPayment.Where(o => o.OrderId == order.Id).Include(o => o.Payment).ToList();
 
-                    double debit = 0.0;
+        //            double debit = 0.0;
 
-                    foreach (OrderPayment pay in payments)
-                        debit += pay.Payment.Summ;
-
-
-                    if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
-                    {
-                        AddPaymentToDb(order.Id, QiwiPayment.txnId, QiwiPayment.sum.amount,QiwiPayMethodId,true);
-                        OrderViewMsg = new Messages.OrderViewMessage(order.Id);
-                        await base.EditMessage(new BotMessage { TextMessage = "Платеж подтвержден!" , CallBackTitleText="" });
-                        await OrderRedirectToAdmins(order.Id,order);
-
-                    }
-
-                    if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status != "SUCCESS")
-                        await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж еще не подтвержден!", CallBackTitleText = "" });
+        //            foreach (OrderPayment pay in payments)
+        //                debit += pay.Payment.Summ;
 
 
-                    if (QiwiPayment != null && total > debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
-                        await base.SendMessage(ChatId, new BotMessage { TextMessage = "Необходимо доплатить еще " + (total - QiwiPayment.sum.amount).ToString() + " руб.", CallBackTitleText = "" });
+        //            if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
+        //            {
+        //                AddPaymentToDb(order.Id, QiwiPayment.txnId, QiwiPayment.sum.amount,QiwiPayMethodId,true);
+        //                OrderViewMsg = new Messages.OrderViewMessage(order.Id);
+        //                await base.EditMessage(new BotMessage { TextMessage = "Платеж подтвержден!" , CallBackTitleText="" });
+        //                await OrderRedirectToAdmins(order.Id,order);
 
-                    if (QiwiPayment == null)
-                        await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж не найден!", CallBackTitleText = "" });
+        //            }
 
-                    //if (QiwiPayment == null)
-                    //{
-                    //    AddPaymentToDb(order.Id, 1111, 123,QiwiPayMethodId,true);
-                    //    OrderViewMsg = new Messages.OrderViewMessage(order);
-                    //    await base.EditMessage(OrderViewMsg.BuildMessage());
-                    //    await OrderRedirectToAdmins(order.Id, order);
-                    //}
+        //            if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status != "SUCCESS")
+        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж еще не подтвержден!", CallBackTitleText = "" });
 
-                    return OkResult;
-                }
-            }
 
-            catch
-            {
-                return NotFoundResult;
+        //            if (QiwiPayment != null && total > debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
+        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Необходимо доплатить еще " + (total - QiwiPayment.sum.amount).ToString() + " руб.", CallBackTitleText = "" });
 
-            }
-        }
+        //            if (QiwiPayment == null)
+        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж не найден!", CallBackTitleText = "" });
+
+        //            //if (QiwiPayment == null)
+        //            //{
+        //            //    AddPaymentToDb(order.Id, 1111, 123,QiwiPayMethodId,true);
+        //            //    OrderViewMsg = new Messages.OrderViewMessage(order);
+        //            //    await base.EditMessage(OrderViewMsg.BuildMessage());
+        //            //    await OrderRedirectToAdmins(order.Id, order);
+        //            //}
+
+        //            return OkResult;
+        //        }
+        //    }
+
+        //    catch
+        //    {
+        //        return NotFoundResult;
+
+        //    }
+        //}
 
         /// <summary>
         /// Заносим инф о платеже в БЖ
@@ -694,40 +602,40 @@ namespace MyTelegramBot.Bot
         /// <param name="TxId">id транзакции в киви</param>
         /// <param name="Summ">сумма</param>
         /// <returns></returns>
-        private OrderPayment AddPaymentToDb(int orderID, long TxId, double Summ,int PaymentTypeId=2, bool Paid=true)
-        {
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                var order = db.Orders.Where(o => o.Id == orderID).FirstOrDefault();
+        //private OrderPayment AddPaymentToDb(int orderID, long TxId, double Summ,int PaymentTypeId=2, bool Paid=true)
+        //{
+        //    using (MarketBotDbContext db = new MarketBotDbContext())
+        //    {
+        //        var order = db.Orders.Where(o => o.Id == orderID).FirstOrDefault();
 
-                order.Paid = Paid;
+        //        order.Paid = Paid;
 
-                Payment payment = new Payment
-                {
-                    DataAdd = DateTime.Now,
-                    Comment = Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(), order.Number.ToString()),
-                    PaymentTypeId = PaymentTypeId,
-                    TxId = TxId.ToString(),
-                    Summ = Summ
+        //        Payment payment = new Payment
+        //        {
+        //            DataAdd = DateTime.Now,
+        //            Comment = Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(), order.Number.ToString()),
+        //            PaymentTypeId = PaymentTypeId,
+        //            TxId = TxId.ToString(),
+        //            Summ = Summ
 
-                };
+        //        };
 
-                db.Payment.Add(payment);
+        //        db.Payment.Add(payment);
 
-                db.SaveChanges();
+        //        db.SaveChanges();
 
-                OrderPayment orderPayment = new OrderPayment
-                {
-                    OrderId = order.Id,
-                    PaymentId = payment.Id
-                };
+        //        OrderPayment orderPayment = new OrderPayment
+        //        {
+        //            OrderId = order.Id,
+        //            PaymentId = payment.Id
+        //        };
 
-                db.OrderPayment.Add(orderPayment);
+        //        db.OrderPayment.Add(orderPayment);
 
-                db.SaveChanges();
+        //        db.SaveChanges();
 
-                return orderPayment;
-            }
-        }
+        //        return orderPayment;
+        //    }
+        //}
     }
 }

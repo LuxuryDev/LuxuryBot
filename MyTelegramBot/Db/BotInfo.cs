@@ -13,7 +13,6 @@ namespace MyTelegramBot
             HelpDesk = new HashSet<HelpDesk>();
             OrderTemp = new HashSet<OrderTemp>();
             Orders = new HashSet<Orders>();
-            QiwiApi = new HashSet<QiwiApi>();
             TelegramMessage = new HashSet<TelegramMessage>();
         }
 
@@ -31,7 +30,6 @@ namespace MyTelegramBot
         public ICollection<HelpDesk> HelpDesk { get; set; }
         public ICollection<OrderTemp> OrderTemp { get; set; }
         public ICollection<Orders> Orders { get; set; }
-        public ICollection<QiwiApi> QiwiApi { get; set; }
         public ICollection<TelegramMessage> TelegramMessage { get; set; }
     }
 }

@@ -1,0 +1,33 @@
+﻿@model MyTelegramBot.BotInfo
+@{
+    //ViewData["Title"] = "Список смартфонов";
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+
+@using (Html.BeginForm("Save", "Home", FormMethod.Post))
+{
+    <p>
+        <label>Название бота</label><br />
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
+    </p>
+
+    <p>
+        <label>Токен</label><br />
+        @Html.TextBoxFor(m => m.Token, new { @class = "form-control", @placeholder = "Введите токен доступа который вы получили от BotFather" })
+    </p>
+    <p>
+        <label>
+            @Html.CheckBoxFor(m => m.Configuration.FirstOrDefault().VerifyTelephone)
+            Требовать от пользователей номер телефона при оформлении заказа
+        </label>
+
+        <label>
+            @Html.CheckBoxFor(m => m.Configuration.FirstOrDefault().OwnerPrivateNotify)
+            Получать в ЛС уведомления о новых заказах /тех.заявках и изменениях в них
+        </label>
+    </p>
+<p>
+        <input type="submit" value="Отправить" />
+    </p>
+}

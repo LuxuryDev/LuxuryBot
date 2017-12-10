@@ -72,7 +72,7 @@ namespace MyTelegramBot.Messages.Admin
             {
                 // base.TextMessage = product.ToString()+ " - "+ Quantity.ToString()+" шт.";
 
-                base.TextMessage = Product.AdminMessage();
+              
 
                 base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(AdminBot.AdminProductInCategoryCmd, Product.CategoryId));
 
@@ -97,6 +97,8 @@ namespace MyTelegramBot.Messages.Admin
                 CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductId));
 
                 InlineImageBtn = new InlineKeyboardCallbackButton("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductId));
+
+                base.TextMessage = Product.AdminMessage();
 
                 if (Product.Enable == true)
                     ProductEditEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователей", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductId));

@@ -18,6 +18,7 @@ namespace MyTelegramBot
         public virtual DbSet<AttachmentFs> AttachmentFs { get; set; }
         public virtual DbSet<AttachmentTelegram> AttachmentTelegram { get; set; }
         public virtual DbSet<AttachmentType> AttachmentType { get; set; }
+        public virtual DbSet<AvailableСities> AvailableСities { get; set; }
         public virtual DbSet<Basket> Basket { get; set; }
         public virtual DbSet<BlackList> BlackList { get; set; }
         public virtual DbSet<BotInfo> BotInfo { get; set; }
@@ -27,6 +28,7 @@ namespace MyTelegramBot
         public virtual DbSet<Configuration> Configuration { get; set; }
         public virtual DbSet<Currency> Currency { get; set; }
         public virtual DbSet<FeedBack> FeedBack { get; set; }
+        public virtual DbSet<FeedBackAttachmentFs> FeedBackAttachmentFs { get; set; }
         public virtual DbSet<Follower> Follower { get; set; }
         public virtual DbSet<HelpDesk> HelpDesk { get; set; }
         public virtual DbSet<HelpDeskAnswer> HelpDeskAnswer { get; set; }
@@ -34,22 +36,22 @@ namespace MyTelegramBot
         public virtual DbSet<HelpDeskAttachment> HelpDeskAttachment { get; set; }
         public virtual DbSet<HelpDeskInWork> HelpDeskInWork { get; set; }
         public virtual DbSet<House> House { get; set; }
+        public virtual DbSet<Invoice> Invoice { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
         public virtual DbSet<OrderAddress> OrderAddress { get; set; }
         public virtual DbSet<OrderConfirm> OrderConfirm { get; set; }
         public virtual DbSet<OrderDeleted> OrderDeleted { get; set; }
         public virtual DbSet<OrderDone> OrderDone { get; set; }
-        public virtual DbSet<OrderPayment> OrderPayment { get; set; }
         public virtual DbSet<OrderProduct> OrderProduct { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<OrdersInWork> OrdersInWork { get; set; }
         public virtual DbSet<OrderTemp> OrderTemp { get; set; }
         public virtual DbSet<Payment> Payment { get; set; }
         public virtual DbSet<PaymentType> PaymentType { get; set; }
+        public virtual DbSet<PaymentTypeConfig> PaymentTypeConfig { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductPhoto> ProductPhoto { get; set; }
         public virtual DbSet<ProductPrice> ProductPrice { get; set; }
-        public virtual DbSet<QiwiApi> QiwiApi { get; set; }
         public virtual DbSet<Raiting> Raiting { get; set; }
         public virtual DbSet<Region> Region { get; set; }
         public virtual DbSet<ReportsRequestLog> ReportsRequestLog { get; set; }
@@ -163,8 +165,26 @@ namespace MyTelegramBot
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<AvailableСities>(entity =>
+            {
+                entity.Property(e => e.CityName)
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Timestamp).HasColumnType("datetime");
+            });
+
             modelBuilder.Entity<Basket>(entity =>
             {
+                entity.HasIndex(e => e.BotInfoId)
+                    .HasName("IX_Basket_bot");
+
+                entity.HasIndex(e => e.FollowerId)
+                    .HasName("IX_Basket_Follower");
+
+                entity.HasIndex(e => e.ProductId)
+                    .HasName("IX_Basket_Prod");
+
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.HasOne(d => d.BotInfo)
@@ -310,6 +330,10 @@ namespace MyTelegramBot
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Code)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Name)
                     .HasMaxLength(50)
                     .IsUnicode(false);
@@ -342,6 +366,23 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_Feedback_Raiting");
             });
 
+            modelBuilder.Entity<FeedBackAttachmentFs>(entity =>
+            {
+                entity.HasKey(e => new { e.FeedBackId, e.AttachmentFsId });
+
+                entity.HasOne(d => d.AttachmentFs)
+                    .WithMany(p => p.FeedBackAttachmentFs)
+                    .HasForeignKey(d => d.AttachmentFsId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FeedBackAttachmentFs_AttachmentFs");
+
+                entity.HasOne(d => d.FeedBack)
+                    .WithMany(p => p.FeedBackAttachmentFs)
+                    .HasForeignKey(d => d.FeedBackId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FeedBackAttachmentFs_FeedBack");
+            });
+
             modelBuilder.Entity<Follower>(entity =>
             {
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
@@ -366,6 +407,12 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<HelpDesk>(entity =>
             {
+                entity.HasIndex(e => e.BotInfoId)
+                    .HasName("IX_HelpDesk_Bot");
+
+                entity.HasIndex(e => e.FollowerId)
+                    .HasName("IX_HelpDesk_Follower");
+
                 entity.Property(e => e.Text)
                     .HasMaxLength(1000)
                     .IsUnicode(false);
@@ -465,6 +512,24 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_House_Street");
             });
 
+            modelBuilder.Entity<Invoice>(entity =>
+            {
+                entity.Property(e => e.AccountNumber)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Comment)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CreateTimestamp).HasColumnType("datetime");
+
+                entity.HasOne(d => d.PaymentType)
+                    .WithMany(p => p.Invoice)
+                    .HasForeignKey(d => d.PaymentTypeId)
+                    .HasConstraintName("FK_Invoice_PaymentType");
+            });
+
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -558,25 +623,14 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_OrderDone_Orders");
             });
 
-            modelBuilder.Entity<OrderPayment>(entity =>
-            {
-                entity.HasKey(e => new { e.PaymentId, e.OrderId });
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderPayment)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderPayment_Orders");
-
-                entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.OrderPayment)
-                    .HasForeignKey(d => d.PaymentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderPayment_Payment");
-            });
-
             modelBuilder.Entity<OrderProduct>(entity =>
             {
+                entity.HasIndex(e => e.OrderId)
+                    .HasName("IX_OrderProduct_Order");
+
+                entity.HasIndex(e => e.ProductId)
+                    .HasName("IX_OrderProduct_Prod");
+
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Order)
@@ -598,6 +652,12 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<Orders>(entity =>
             {
+                entity.HasIndex(e => e.BotInfoId)
+                    .HasName("IX_Orders_Bot");
+
+                entity.HasIndex(e => e.FollowerId)
+                    .HasName("IX_Orders_Follower");
+
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.Property(e => e.Number).HasColumnType("decimal(18, 0)");
@@ -617,10 +677,10 @@ namespace MyTelegramBot
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Order_Follower");
 
-                entity.HasOne(d => d.PaymentType)
+                entity.HasOne(d => d.Invoice)
                     .WithMany(p => p.Orders)
-                    .HasForeignKey(d => d.PaymentTypeId)
-                    .HasConstraintName("FK_Orders_PaymentType");
+                    .HasForeignKey(d => d.InvoiceId)
+                    .HasConstraintName("FK_Orders_Invoice");
             });
 
             modelBuilder.Entity<OrdersInWork>(entity =>
@@ -677,19 +737,49 @@ namespace MyTelegramBot
                     .HasMaxLength(200)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.PaymentType)
+                entity.HasOne(d => d.Order)
                     .WithMany(p => p.Payment)
-                    .HasForeignKey(d => d.PaymentTypeId)
-                    .HasConstraintName("FK_Payment_PaymentType");
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("FK_Payment_Orders");
             });
 
             modelBuilder.Entity<PaymentType>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Code)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Name)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<PaymentTypeConfig>(entity =>
+            {
+                entity.Property(e => e.Host)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Login)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Pass)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Port)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.TimeStamp).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Payment)
+                    .WithMany(p => p.PaymentTypeConfig)
+                    .HasForeignKey(d => d.PaymentId)
+                    .HasConstraintName("FK_PaymentTypeConfig_PaymentType");
             });
 
             modelBuilder.Entity<Product>(entity =>
@@ -765,24 +855,6 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_Price_Product");
             });
 
-            modelBuilder.Entity<QiwiApi>(entity =>
-            {
-                entity.Property(e => e.DateAdd).HasColumnType("datetime");
-
-                entity.Property(e => e.Telephone)
-                    .HasMaxLength(20)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.Token)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.HasOne(d => d.BotInfo)
-                    .WithMany(p => p.QiwiApi)
-                    .HasForeignKey(d => d.BotInfoId)
-                    .HasConstraintName("FK_QiwiApi_BotInfo");
-            });
-
             modelBuilder.Entity<Raiting>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -816,6 +888,9 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<Stock>(entity =>
             {
+                entity.HasIndex(e => e.ProductId)
+                    .HasName("IX_Stock_Prod");
+
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.Property(e => e.Text)

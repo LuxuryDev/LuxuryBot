@@ -735,14 +735,14 @@ namespace MyTelegramBot.Bot
             {
                 var product =db.Product.Where(p => p.Id == ProductId).FirstOrDefault();
 
-                if (product != null && product.Enable == true)
+                if (product != null && product.Enable == true || product!=null && product.Enable==null)
                 {
                     product.Enable = false;
                     db.SaveChanges();
                     return await SendProductFunc(product, base.MessageId);
                 }
 
-                if (product != null && product.Enable == false)
+                if (product != null && product.Enable == false || product != null && product.Enable == null)
                 {
                     product.Enable = true;
                     db.SaveChanges();

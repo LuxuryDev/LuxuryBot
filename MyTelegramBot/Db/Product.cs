@@ -81,14 +81,25 @@ namespace MyTelegramBot
 
                 MenuStatus = "Скрыто от пользователей";
             if (Stock.Count > 0)
-                Balance = Stock.OrderByDescending(s => s.Id).FirstOrDefault().Balance; 
+                Balance = Stock.OrderByDescending(s => s.Id).FirstOrDefault().Balance;
 
-            return  Bot.BotMessage.Bold("Название: ")+Name + Bot.BotMessage.NewLine() +
-            Bot.BotMessage.Bold("Цена: ") + ProductPrice.Where(p => p.Enabled).OrderByDescending(o=>o.Id).FirstOrDefault().ToString() +" / " +Unit.ShortName + Bot.BotMessage.NewLine() +
-            Bot.BotMessage.Bold("Категория: ") +Category.Name + Bot.BotMessage.NewLine()+
-            Bot.BotMessage.Bold("Описание: ") + Text + Bot.BotMessage.NewLine() +
-            Bot.BotMessage.Bold("В наличии: ")+Balance.ToString() + Bot.BotMessage.NewLine()+
-            Bot.BotMessage.Bold("В меню: ") + MenuStatus;
+            if (Unit == null)
+                Unit = Connection.getConnection().Units.Where(u => u.Id == UnitId).FirstOrDefault();
+
+            try
+            {
+                return Bot.BotMessage.Bold("Название: ") + Name + Bot.BotMessage.NewLine() +
+                Bot.BotMessage.Bold("Цена: ") + ProductPrice.Where(p => p.Enabled).OrderByDescending(o => o.Id).FirstOrDefault().ToString() + " / " + Unit.ShortName + Bot.BotMessage.NewLine() +
+                Bot.BotMessage.Bold("Категория: ") + Category.Name + Bot.BotMessage.NewLine() +
+                Bot.BotMessage.Bold("Описание: ") + Text + Bot.BotMessage.NewLine() +
+                Bot.BotMessage.Bold("В наличии: ") + Balance.ToString() + Bot.BotMessage.NewLine() +
+                Bot.BotMessage.Bold("В меню: ") + MenuStatus;
+            }
+
+            catch (Exception e)
+            {
+                return String.Empty;
+            }
         }
     }
 }

@@ -463,16 +463,16 @@ namespace MyTelegramBot.Bot.AdminModule
         /// <returns></returns>
         private async Task<IActionResult> AddQiwiTelephone()
         {
-            QiwiApi qiwi = new QiwiApi
+            PaymentTypeConfig qiwi = new PaymentTypeConfig
             {
-                DateAdd = DateTime.Now,
+                TimeStamp = DateTime.Now,
                 Enable = false,
-                Telephone = base.ReplyToMessageText
+                Login = base.ReplyToMessageText
             };
            
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                db.QiwiApi.Add(qiwi);
+                db.PaymentTypeConfig.Add(qiwi);
 
                 if (VerifyPhoneNumber(base.ReplyToMessageText) && db.SaveChanges()>0 && await ForceReplyBuilder(EnterQiwiApi) !=null)
                     return OkResult;
@@ -494,11 +494,11 @@ namespace MyTelegramBot.Bot.AdminModule
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                var qiwi = db.QiwiApi.Where(q => q.Enable == false).OrderByDescending(q=>q.Id).FirstOrDefault();
+                var qiwi = db.PaymentType.Where(q => q.Id == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi)).FirstOrDefault();
 
-                if (qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.Telephone, base.ReplyToMessageText))
+                if (qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.PaymentTypeConfig.OrderByDescending(q=>q.Id).FirstOrDefault().Login, base.ReplyToMessageText))
                 {
-                    qiwi.Token = base.ReplyToMessageText;
+                    qiwi.PaymentTypeConfig.OrderByDescending(q => q.Id).FirstOrDefault().Pass = base.ReplyToMessageText;
                     qiwi.Enable = true;
                     db.SaveChanges();
                     await SendMessage(new BotMessage { TextMessage = "Успех!" });
@@ -534,65 +534,9 @@ namespace MyTelegramBot.Bot.AdminModule
         /// <returns></returns>
         private async Task<IActionResult> PaymentMethodEnable()
         {
-            int Id = Argumetns[0];
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
+            //переписать
+            return OkResult;
 
-                var Method = db.PaymentType.Where(p => p.Id == Id).FirstOrDefault();
-
-                
-
-                if (Method != null && Method.Enable == true && db.PaymentType.Where(p => p.Enable == true).ToList().Count > 1) // если был активет, делаем не активным
-                {
-                    Method.Enable = false;
-                    db.SaveChanges();
-                    await EditMessage(AdminPayMethodsSettingsMsg.BuildMessage());
-                    return OkResult;
-                }
-
-                var qiwi = db.QiwiApi.Where(q => q.Enable == true).OrderByDescending(q => q.Id).FirstOrDefault();
-
-
-                if (Method != null && Method.Enable == false && Method.Id == 2
-                    && qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.Telephone, qiwi.Token)) // если был не активет, делаем  активным. И если это Киви, то проверяем настроен ли он
-                {
-                    Method.Enable = true;
-                    db.SaveChanges();
-                    await EditMessage(AdminPayMethodsSettingsMsg.BuildMessage());
-                    return OkResult;
-                }
-
-                if (Method != null && Method.Enable == false && Method.Id == 2
-                    && qiwi == null) // если был не активет, делаем  активным. И если это Киви, то проверяем настроен ли он. Если киви даже не настроен то присывлаем сообщение 
-                {
-                    await SendMessage(new BotMessage { TextMessage = "Ошибка! Qiwi платежи не настроены. Нажмите сюда если хотите настроить /qiwi" });
-                    return OkResult;
-                }
-
-                if (Method != null && Method.Enable == false && Method.Id == 2
-                    && qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.Telephone, qiwi.Token) == false) // При тестировании киви апи произошла ошибка и функция вернула False
-                {
-                    await SendMessage(new BotMessage { TextMessage = "Ошибка! Qiwi платежи не настроены. Нажмите сюда если хотите настроить /qiwi" });
-                    return OkResult;
-                }
-
-                if (Method != null && Method.Enable == false && Method.Id!=2) // если был не активет, делаем  активным
-                {
-                    Method.Enable = true;
-                    db.SaveChanges();
-                    await EditMessage(AdminPayMethodsSettingsMsg.BuildMessage());
-                    return OkResult;
-                }
-
-
-
-                else
-                {
-                    await base.AnswerCallback();
-                    return OkResult;
-                }
-
-            }
         }
 
         /// <summary>

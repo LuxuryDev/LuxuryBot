@@ -5,6 +5,11 @@ namespace MyTelegramBot
 {
     public partial class FeedBack
     {
+        public FeedBack()
+        {
+            FeedBackAttachmentFs = new HashSet<FeedBackAttachmentFs>();
+        }
+
         public int Id { get; set; }
         public string Text { get; set; }
         public DateTime? DateAdd { get; set; }
@@ -13,5 +18,6 @@ namespace MyTelegramBot
 
         public Orders Order { get; set; }
         public Raiting Raiting { get; set; }
+        public ICollection<FeedBackAttachmentFs> FeedBackAttachmentFs { get; set; }
     }
 }

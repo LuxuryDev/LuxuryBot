@@ -249,7 +249,7 @@ namespace MyTelegramBot.Bot
 
         protected bool IsOwner()
         {
-            if (BotOwner == ChatId)
+            if (BotInfo.OwnerChatId == ChatId)
                 return true;
 
             else
@@ -272,7 +272,7 @@ namespace MyTelegramBot.Bot
                 BotInfo bot = new BotInfo();
                 using (MarketBotDbContext db = new MarketBotDbContext())
                 {
-                    bot = db.BotInfo.Where(b=>b.Name==name).Include(b=>b.Configuration).Include(b=>b.QiwiApi).FirstOrDefault();
+                    bot = db.BotInfo.Where(b=>b.Name==name).Include(b=>b.Configuration).FirstOrDefault();
 
                     if (bot != null)
                     {
@@ -302,7 +302,7 @@ namespace MyTelegramBot.Bot
                 }
             }
 
-            catch
+            catch (Exception exp)
             {
                 return null;
             }
@@ -492,24 +492,27 @@ namespace MyTelegramBot.Bot
                     await AnswerCallback(message.CallBackTitleText);
 
                 //максимальная длина подписи для фотографии 200 символов
-                if (message.MediaFile.Caption != null 
+                if (message.MediaFile!=null && message.MediaFile.Caption != null 
                     && message.MediaFile.Caption != "" && message.MediaFile.Caption.Length < 200)
                     mess= await Telegram.SendPhotoAsync(ChatId, message.MediaFile.FileTo, message.MediaFile.Caption, false, 0, message.MessageReplyMarkup);
 
-                if (message.MediaFile.Caption == null)
+                if (message.MediaFile != null && message.MediaFile.Caption == null)
                     mess= await Telegram.SendPhotoAsync(ChatId, message.MediaFile.FileTo, "", false, 0, message.MessageReplyMarkup);
 
                 //если подпись для фотографии больше 200 символом, то разибваем на два сообщения 1) Фото 2) Текст
-                if (message.MediaFile.Caption != null && message.MediaFile.Caption != "" && message.MediaFile.Caption.Length >= 200)
+                if (message.MediaFile != null && message.MediaFile.Caption != null && message.MediaFile.Caption != "" && message.MediaFile.Caption.Length >= 200)
                 {
                     mess= await Telegram.SendPhotoAsync(this.ChatId, message.MediaFile.FileTo, "");
                     await SendMessage(this.ChatId, new BotMessage { TextMessage = message.MediaFile.Caption, MessageReplyMarkup = message.MessageReplyMarkup });
                 }
 
                 // если фотки нет
-                if (message.MediaFile.Caption!=null && message.MediaFile.Caption!="" && message.MediaFile.FileTo.Content==null
+                if (message.MediaFile != null && message.MediaFile.Caption!=null && message.MediaFile.Caption!="" && message.MediaFile.FileTo.Content==null
                     && message.MediaFile.FileTo.FileId==null)
-                    mess= await Telegram.SendTextMessageAsync(ChatId, message.MediaFile.Caption, ParseMode.Html, false, false, 0, message.MessageReplyMarkup);
+                    mess= await Telegram.SendTextMessageAsync(ChatId, message.TextMessage, ParseMode.Html, false, false, 0, message.MessageReplyMarkup);
+
+                if(message.MediaFile ==null)
+                    mess = await Telegram.SendTextMessageAsync(ChatId, message.TextMessage, ParseMode.Html, false, false, 0, message.MessageReplyMarkup);
 
                 //Если мы отрпавляем файл для этого бота первый раз, то Записываем FileId в базу для этог бота, что бы в следующий раз не отслылать целый файл
                 //а только FileId на сервере телеграм
