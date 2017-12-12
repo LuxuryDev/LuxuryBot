@@ -89,7 +89,7 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o=>o.OrdersInWork).
                     FirstOrDefault();
                
-                var Address = db.Address.Where(a => a.Id == Order.OrderAddress.FirstOrDefault().AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+                var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
                 double total = 0.0;
                 string Position = "";

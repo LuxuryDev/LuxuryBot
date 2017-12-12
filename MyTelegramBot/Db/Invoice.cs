@@ -8,6 +8,7 @@ namespace MyTelegramBot
         public Invoice()
         {
             Orders = new HashSet<Orders>();
+            Payment = new HashSet<Payment>();
         }
 
         public int Id { get; set; }
@@ -18,8 +19,10 @@ namespace MyTelegramBot
         public string Comment { get; set; }
         public double? Value { get; set; }
         public int? InvoiceNumber { get; set; }
+        public bool? Paid { get; set; }
 
         public PaymentType PaymentType { get; set; }
         public ICollection<Orders> Orders { get; set; }
+        public ICollection<Payment> Payment { get; set; }
     }
 }

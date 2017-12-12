@@ -10,8 +10,8 @@ namespace MyTelegramBot
         public DateTime? DataAdd { get; set; }
         public string Comment { get; set; }
         public double? Summ { get; set; }
-        public int? OrderId { get; set; }
+        public int? InvoiceId { get; set; }
 
-        public Orders Order { get; set; }
+        public Invoice Invoice { get; set; }
     }
 }

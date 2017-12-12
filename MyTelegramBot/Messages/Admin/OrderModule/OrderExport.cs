@@ -40,7 +40,7 @@ namespace MyTelegramBot.Messages.Admin
                 {
                     try
                     {
-                        var Address = db.Address.Where(a => a.Id == order.OrderAddress.FirstOrDefault().AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+                        var Address = db.Address.Where(a => a.Id == order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
                         int counter = 1;
                         string Line = "";
 

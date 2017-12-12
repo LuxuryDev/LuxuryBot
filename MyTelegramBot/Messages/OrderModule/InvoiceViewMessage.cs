@@ -28,13 +28,13 @@ namespace MyTelegramBot.Messages
             BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderId));
         }
 
-        public InvoiceViewMessage(Invoice invoice, List<Payment> list, string BackCmdName = "BackToOrder")
+        public InvoiceViewMessage(Invoice invoice, List<Payment> list, int OrderId, string BackCmdName = "BackToOrder")
         {
             this.Invoice = invoice;
             this.PaymentList = list;
 
             if(PaymentList!=null && PaymentList.Count>0)
-                BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, Convert.ToInt32(PaymentList.FirstOrDefault().OrderId)));
+                BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderId));
         }
 
         public InvoiceViewMessage BuildMessage()
@@ -42,7 +42,7 @@ namespace MyTelegramBot.Messages
             db = new MarketBotDbContext();
 
             if (PaymentList == null || PaymentList.Count == 0)
-                    PaymentList = db.Payment.Where(p => p.OrderId == OrderId).ToList();
+                    PaymentList = db.Payment.Where(p => p.InvoiceId == Invoice.Id).ToList();
 
             if (Invoice != null)
             {

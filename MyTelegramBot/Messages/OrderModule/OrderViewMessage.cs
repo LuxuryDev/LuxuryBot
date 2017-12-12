@@ -56,8 +56,8 @@ namespace MyTelegramBot.Messages
                 if(Order!=null && Order.OrderProduct.Count==0)
                     Order.OrderProduct = db.OrderProduct.Where(op => op.OrderId == Order.Id).ToList();
 
-                if (Order != null && Order.OrderAddress.Count == 0)
-                    Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).ToList();
+                if (Order != null && Order.OrderAddress==null)
+                    Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).FirstOrDefault();
 
                 if (Order != null)
                 {
@@ -73,7 +73,7 @@ namespace MyTelegramBot.Messages
 
                     double total = 0.0; // общая строисоить заказа
 
-                    var Address = db.Address.Where(a => a.Id == Order.OrderAddress.FirstOrDefault().AdressId).
+                    var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).
                         Include(a => a.House).
                         Include(a => a.House.Street).
                         Include(a => a.House.Street.City).

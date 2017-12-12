@@ -7,13 +7,11 @@ namespace MyTelegramBot
     {
         public Orders()
         {
-            OrderAddress = new HashSet<OrderAddress>();
             OrderConfirm = new HashSet<OrderConfirm>();
             OrderDeleted = new HashSet<OrderDeleted>();
             OrderDone = new HashSet<OrderDone>();
             OrderProduct = new HashSet<OrderProduct>();
             OrdersInWork = new HashSet<OrdersInWork>();
-            Payment = new HashSet<Payment>();
         }
 
         public int Id { get; set; }
@@ -29,12 +27,11 @@ namespace MyTelegramBot
         public Follower Follower { get; set; }
         public Invoice Invoice { get; set; }
         public FeedBack FeedBack { get; set; }
-        public ICollection<OrderAddress> OrderAddress { get; set; }
+        public OrderAddress OrderAddress { get; set; }
         public ICollection<OrderConfirm> OrderConfirm { get; set; }
         public ICollection<OrderDeleted> OrderDeleted { get; set; }
         public ICollection<OrderDone> OrderDone { get; set; }
         public ICollection<OrderProduct> OrderProduct { get; set; }
         public ICollection<OrdersInWork> OrdersInWork { get; set; }
-        public ICollection<Payment> Payment { get; set; }
     }
 }

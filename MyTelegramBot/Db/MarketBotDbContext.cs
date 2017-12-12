@@ -552,6 +552,9 @@ namespace MyTelegramBot
             {
                 entity.HasKey(e => new { e.AdressId, e.OrderId });
 
+                entity.HasIndex(e => e.OrderId)
+                    .IsUnique();
+
                 entity.HasOne(d => d.Adress)
                     .WithMany(p => p.OrderAddress)
                     .HasForeignKey(d => d.AdressId)
@@ -559,8 +562,8 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_OrderAdress_Adress");
 
                 entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderAddress)
-                    .HasForeignKey(d => d.OrderId)
+                    .WithOne(p => p.OrderAddress)
+                    .HasForeignKey<OrderAddress>(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OrderAdress_Order");
 
@@ -737,10 +740,10 @@ namespace MyTelegramBot
                     .HasMaxLength(200)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.Order)
+                entity.HasOne(d => d.Invoice)
                     .WithMany(p => p.Payment)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_Payment_Orders");
+                    .HasForeignKey(d => d.InvoiceId)
+                    .HasConstraintName("FK_Payment_Invoice");
             });
 
             modelBuilder.Entity<PaymentType>(entity =>
