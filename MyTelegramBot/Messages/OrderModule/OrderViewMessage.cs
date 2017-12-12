@@ -24,6 +24,7 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton RemoveOrderBtn { get; set; }
 
+        private InlineKeyboardCallbackButton ViewInvoiceBtn { get; set; }
 
         private const int QiwiPayMethodId = 2;
 
@@ -69,8 +70,6 @@ namespace MyTelegramBot.Messages
 
                     string paid = "";
 
-                    string PaymentFaq = "";
-
                     double total = 0.0; // общая строисоить заказа
 
                     var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).
@@ -85,11 +84,11 @@ namespace MyTelegramBot.Messages
                         int counter = 0; // счетчки цикла
                     
 
-                        foreach (OrderProduct p in Order.OrderProduct)
+                        foreach (OrderProduct p in Order.OrderProduct) // Состав заказа
                         {
                             counter++;
                             p.Product = db.Product.Where(x => x.Id == p.ProductId).Include(x => x.ProductPrice).FirstOrDefault();
-                            p.Price = db.ProductPrice.Where(price => price.Id == p.PriceId).FirstOrDefault();
+                            p.Price = db.ProductPrice.Where(price => price.Id == p.PriceId).Include(price=> price.Currency).FirstOrDefault();
                             Position += counter.ToString() + ") " + p.ToString() + NewLine();
                             total += p.Price.Value * p.Count;
                         }
@@ -105,33 +104,32 @@ namespace MyTelegramBot.Messages
 
                         if (Order.OrderDone != null && Order.OrderDone.Count > 0 && Order.FeedBack != null && Order.FeedBack.Text != null) // Есть отзыв к заказ
                             feedback = Order.FeedBack.Text + " | " + Order.FeedBack.DateAdd.ToString();
-
-
+                        
                         if (Order.Paid == true) // Заказ оплачен
                             paid = "Да";
 
                         if (Order.OrderDone != null && Order.OrderDone.Count > 0 && Order.FeedBack == null) // Отзыва нет, Добавляем кнопку
-                        {
                             feedback = "Нет";
-                             NonFeedBack();
-                        }
+
 
                         base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                                     + Position + NewLine()
-                                    + Bold("Общая стоимость: ") + total.ToString() + " руб." + NewLine()
+                                    + Bold("Общая стоимость: ") + total.ToString() + Order.OrderProduct.FirstOrDefault().Price.Currency.ShortName + NewLine()
                                     + Bold("Комментарий: ") + Order.Text + NewLine()
                                     + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number + NewLine()
                                     + Bold("Время: ") + Order.DateAdd.ToString() + NewLine()
                                     + Bold("Оплачено: ") + paid
                                     + NewLine() + Bold("Выполнено: ") + done
-                                    + NewLine()+Bold("Оформлен через:") +"@"+ Order.BotInfo.Name
-                                    + NewLine() + Bold("Отзыв: ") + feedback
-                                    + NewLine() + PaymentFaq;
+                                    + NewLine() + Bold("Оформлен через:") + "@" + Order.BotInfo.Name
+                                    + NewLine() + Bold("Отзыв: ") + feedback;
+
                     }
                     catch (Exception exp)
                     {
 
                     }
+
+                    SetButton();
                     base.CallBackTitleText = "Номер заказа:" + Order.Number.ToString();
                 }
 
@@ -141,60 +139,77 @@ namespace MyTelegramBot.Messages
             return this;
         }
 
-        private void NonFeedBack()
+        private void SetButton()
         {
-            AddFeedbackBtn = new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Order.Id));
 
-            base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
-                new[]{
+            if (Order.FeedBack==null && Order.OrderDone != null && Order.OrderDone.Count > 0) // Отзыва нет, заказ выполнен
+                base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
+                    new[]{
                                 new[]
                                     {
-                                            AddFeedbackBtn
-                                    }, });
-
-        }
-
-        private string QiwiNoPaid(string telephone, double total)
-        {
-            base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
-                new[]{
+                                            AddFeedBack()
+                                    },
                                 new[]
                                     {
-                                            ChekPayBtn=ChekPay(Order.Id)
+                                            ViewInvoice()
+                                    },
+                    });
+
+            if (Order.FeedBack == null && Order.InvoiceId!=null && Order.Paid == false) // Отзыва нет, заказ не оплачен
+                base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
+                    new[]{
+                                new[]
+                                    {
+                                            AddFeedBack()
+                                    },
+                                new[]
+                                    {
+                                            ViewInvoice()
+                                    },
+                                new[]
+                                    {
+                                            ChekPay()
+                                    },
+                    });
+
+            if (Order.FeedBack != null && Order.InvoiceId==null && Order.Paid == true) // Отзыва есть, заказ оплачен
+                base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
+                    new[]{
+                                new[]
+                                    {
+                                            ViewInvoice()
                                     },
 
-                });
+                    });
 
-            return NewLine() + Bold("Реквизиты:") +
-            NewLine() + Bold("Телефон: ") + telephone +
-            NewLine() + Bold("Сумма: ") + total +
-            NewLine() + Bold("Комментарий: ") + Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(), Order.Number.ToString()) +
-            NewLine() + NewLine()+
-            QiwiPaymentUrl(Convert.ToInt32(total), Order.Number, telephone);
+
+            if (Order.FeedBack == null && Order.OrderDone != null && Order.OrderDone.Count > 0 && Order.InvoiceId==null) // Отзыва нет, заказ выполнен (Тип оплаты - при получении)
+                base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
+                    new[]{
+                                new[]
+                                    {
+                                            AddFeedBack()
+                                    },
+                    });
+
+            if (Order.Invoice == null && Order.OrderDone.Count == 0) // Метод оплаты при получении, заказ не выполнен
+                base.MessageReplyMarkup = null;
         }
 
-        private string QiwiPaymentUrl(int total, decimal? OrderNumber, string Telephone)
+        private InlineKeyboardCallbackButton AddFeedBack()
         {
-            //https://qiwi.com/payment/form/<ID>?<parameter>=<value>
-            //99 - Перевод на Visa QIWI Wallet
-            //amountInteger - целая часть суммы платежа(рубли).
-            //amountFraction - дробная часть суммы платежа(копейки).
-            //currency - константа, 643.Обязательный параметр, если вы передаете в ссылке сумму платежа
-            //extra['comment'] -комментарий(только для ID = 99).Имя параметра должно быть URL-закодировано.
-            //extra['account'] - номер телефона / счета / карты пользователя.Формат совпадает с форматом параметра fields.account в соответствующем платежном запросе.Имя параметра должно быть URL - закодировано.
-
-            string amountInteger = "amountInteger=" + total.ToString();
-            string currency = "currency=643";
-            string comment = "extra['comment']=" + Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(),OrderNumber.ToString());
-            string account = "extra['account']=" + Telephone;
-
-            string url= "https://qiwi.com/payment/form/99?"+account+"&"+amountInteger+"&"+comment+"&"+currency;
-            return HrefUrl(url, "Нажмите сюда, что бы открыть заполенную платежную форму");
+            return new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Order.Id)); 
         }
 
-        private InlineKeyboardCallbackButton ChekPay(int OrderId)
+        private InlineKeyboardCallbackButton ChekPay()
         {
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd, OrderId));
+            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd, Order.Id));
+            return button;
+        }
+
+        private InlineKeyboardCallbackButton ViewInvoice()
+        {
+            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть счет на оплату", BuildCallData("ViewInvoice", Convert.ToInt32(Order.InvoiceId)));
             return button;
         }
 
