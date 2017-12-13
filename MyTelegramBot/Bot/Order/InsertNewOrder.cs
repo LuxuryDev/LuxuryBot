@@ -51,7 +51,7 @@ namespace MyTelegramBot.Bot.Order
             if (LastOrder != null)  // Узнаем последний номер заказа в БД
                 Number = LastOrder.Number;
 
-            if (OrderTmp != null && OrderTmp.PaymentTypeId != null)
+            if (OrderTmp != null && OrderTmp.PaymentTypeId != null && Basket.Count>0)
             {
 
 
@@ -184,6 +184,7 @@ namespace MyTelegramBot.Bot.Order
                     LifeTimeDuration = System.TimeSpan.FromMinutes(LifeTimeDuration),
                     PaymentTypeId = PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi),
                     Value = Total,
+                    Paid=false
 
                 };
 
@@ -197,7 +198,7 @@ namespace MyTelegramBot.Bot.Order
             }
 
             else
-                throw new Exception("QIWI платежи не настроены");
+                return null;
         }
 
 
@@ -237,7 +238,8 @@ namespace MyTelegramBot.Bot.Order
                     LifeTimeDuration = System.TimeSpan.FromMinutes(LifeTimeDuration),
                     PaymentTypeId = PaymentType.GetTypeId(paymentTypeEnum),
                     Value = Summa,
-                    Comment="-"
+                    Comment="-",
+                    Paid=false
                 };
 
                 db.Invoice.Add(invoice);

@@ -13,6 +13,32 @@ namespace MyTelegramBot.Bot
 {
     public partial class OrderBot
     {
+
+        private async Task<IActionResult> SendInvoice()
+        {
+            try
+            {
+                using (MarketBotDbContext db = new MarketBotDbContext())
+                {
+
+                    if (Order != null  && Order.Invoice!=null)
+                    {
+                        InvoiceViewMsg = new InvoiceViewMessage(Order.Invoice, Order.Id, "BackToMyOrder");
+                        await EditMessage(InvoiceViewMsg.BuildMessage());
+                        return OkResult;
+                    }
+
+                    else 
+                        return NotFoundResult;
+                 }
+            }
+
+            catch
+            {
+                return NotFoundResult;
+            }
+        }
+
         /// <summary>
         /// Показать заказ пользователя. Команда /myorder
         /// </summary>
@@ -29,7 +55,7 @@ namespace MyTelegramBot.Bot
                     // Пользователь будет видеть заказы оформелнные через других ботов
                     order = db.Orders.Where(o => o.Number == number && o.FollowerId == FollowerId).Include(o => o.OrderConfirm)
                        .Include(o => o.OrderDeleted).Include(o => o.OrderDone).Include(o => o.FeedBack).
-                        Include(o => o.OrderProduct).Include(o => o.OrderAddress).Include(o=>o.BotInfo).FirstOrDefault();
+                        Include(o => o.OrderProduct).Include(o => o.OrderAddress).Include(o=>o.BotInfo).Include(o=>o.Invoice).FirstOrDefault();
 
 
                     if (order != null)
@@ -372,13 +398,14 @@ namespace MyTelegramBot.Bot
 
             var new_order = insertNewOrder.AddOrder();
 
-            InvoiceViewMessage invoiceViewMessage = new InvoiceViewMessage(new_order.Invoice, new_order.Id,"BackToMyOrder");
-
             if (new_order != null && new_order.Invoice != null)
-                await EditMessage(invoiceViewMessage.BuildMessage());
+            {
+                InvoiceViewMsg = new InvoiceViewMessage(new_order.Invoice, new_order.Id, "BackToMyOrder");
+                await EditMessage(InvoiceViewMsg.BuildMessage());
+            }
 
             // Если тип платежа "при получении", то отправляем уведомление о новом заказке Админам
-            if (new_order.Invoice == null)
+            if (new_order!=null && new_order.Invoice == null)
             {
                 OrderViewMsg = new OrderViewMessage(new_order);
                 await EditMessage(OrderViewMsg.BuildMessage());

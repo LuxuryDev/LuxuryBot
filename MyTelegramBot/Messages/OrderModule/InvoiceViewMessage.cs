@@ -21,11 +21,14 @@ namespace MyTelegramBot.Messages
 
         private MarketBotDbContext db { get; set; }
 
+        private InlineKeyboardCallbackButton CheckPayBtn { get; set; }
+
         public InvoiceViewMessage (Invoice invoice,int OrderId,string BackCmdName= "BackToOrder")
         {
             this.Invoice = invoice;
             this.OrderId = OrderId;
             BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderId));
+            CheckPayBtn = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd, invoice.Id));
         }
 
         public InvoiceViewMessage(Invoice invoice, List<Payment> list, int OrderId, string BackCmdName = "BackToOrder")
@@ -55,15 +58,26 @@ namespace MyTelegramBot.Messages
                                  Bold("Сумма: ") + Invoice.Value.ToString() + " " + Invoice.PaymentType.Code + NewLine() +
                                  Bold("Время создания: ") + Invoice.CreateTimestamp.ToString() + NewLine() +
                                  Bold("Способо оплаты: ") + Invoice.PaymentType.Name + NewLine() + NewLine() +
-                                 "Вы должны оплатить этот счет не позднее " + Invoice.CreateTimestamp.Value.Add(Invoice.LifeTimeDuration.Value).ToString();
+                                 "Вы должны оплатить этот счет не позднее " + Invoice.CreateTimestamp.Value.Add(Invoice.LifeTimeDuration.Value).ToString()+NewLine()+
+                                 NewLine()+"После оплаты нажмите кнопку \"Я оплатил\" (Если вы оплачивали с помощью криптовалюты нажмите эту кнопку через 5-10 минут после оплаты)";
 
 
                 if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) != Services.PaymentTypeEnum.PaymentOnReceipt &&
                     PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) != Services.PaymentTypeEnum.Qiwi)
                     base.TextMessage += NewLine() + NewLine() +
-                        HrefUrl("https://live.blockcypher.com/" + Invoice.PaymentType.Code.ToLower() + "/address/" + Invoice.AccountNumber, "Посмотреть платеж");
+                        HrefUrl("https://bchain.info/LTC/addr/" + Invoice.AccountNumber, "Посмотреть платеж");
 
 
+                SetButtons();
+             
+            }
+
+                return this;
+        }
+
+        private void SetButtons()
+        {
+            if(Invoice.Paid==true)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                     new[]{
                     new[]
@@ -72,10 +86,21 @@ namespace MyTelegramBot.Messages
 
                         },
                     });
-             
-            }
 
-                return this;
+            if (Invoice.Paid == false)
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                    new[]{
+                    new[]
+                        {
+                            BackBtn,
+
+                        },
+                    new[]
+                        {
+                            CheckPayBtn,
+
+                        },
+                    });
         }
 
 

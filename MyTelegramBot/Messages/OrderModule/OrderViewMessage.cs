@@ -52,6 +52,7 @@ namespace MyTelegramBot.Messages
                         Include(o => o.FeedBack).
                         Include(o => o.OrderProduct).
                         Include(o => o.OrderAddress).Include(o=>o.BotInfo)
+                        .Include(o=>o.Invoice)
                         .Include(o=>o.OrderProduct).FirstOrDefault();
 
                 if(Order!=null && Order.OrderProduct.Count==0)
@@ -155,24 +156,9 @@ namespace MyTelegramBot.Messages
                                     },
                     });
 
-            if (Order.FeedBack == null && Order.InvoiceId!=null && Order.Paid == false) // Отзыва нет, заказ не оплачен
-                base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
-                    new[]{
-                                new[]
-                                    {
-                                            AddFeedBack()
-                                    },
-                                new[]
-                                    {
-                                            ViewInvoice()
-                                    },
-                                new[]
-                                    {
-                                            ChekPay()
-                                    },
-                    });
 
-            if (Order.FeedBack != null && Order.InvoiceId==null && Order.Paid == true) // Отзыва есть, заказ оплачен
+            if (Order.FeedBack != null  && Order.Paid == true 
+                || Order.Paid==false) // Отзыва есть, заказ оплачен или заказ не оплачен
                 base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     new[]{
                                 new[]
@@ -194,6 +180,8 @@ namespace MyTelegramBot.Messages
 
             if (Order.Invoice == null && Order.OrderDone.Count == 0) // Метод оплаты при получении, заказ не выполнен
                 base.MessageReplyMarkup = null;
+
+
         }
 
         private InlineKeyboardCallbackButton AddFeedBack()
@@ -201,15 +189,10 @@ namespace MyTelegramBot.Messages
             return new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Order.Id)); 
         }
 
-        private InlineKeyboardCallbackButton ChekPay()
-        {
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd, Order.Id));
-            return button;
-        }
 
         private InlineKeyboardCallbackButton ViewInvoice()
         {
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть счет на оплату", BuildCallData("ViewInvoice", Convert.ToInt32(Order.InvoiceId)));
+            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть счет на оплату", BuildCallData("ViewInvoice", Convert.ToInt32(Order.Id)));
             return button;
         }
 

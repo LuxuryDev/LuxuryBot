@@ -49,6 +49,8 @@ namespace MyTelegramBot.Bot
 
         private Messages.Admin.AdminOrderMessage OrderAdminMsg { get; set; }
 
+        private InvoiceViewMessage InvoiceViewMsg { get; set; }
+
         private int OrderId { get; set; }
 
         private Orders Order { get; set; }
@@ -145,7 +147,7 @@ namespace MyTelegramBot.Bot
                     using (MarketBotDbContext db = new MarketBotDbContext())
                         Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.OrderConfirm).
                             Include(o => o.OrderDone).Include(o => o.OrderDeleted).
-                            Include(o => o.OrderProduct).Include(o => o.Follower).Include(o => o.FeedBack).FirstOrDefault();
+                            Include(o => o.OrderProduct).Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.Invoice).FirstOrDefault();
 
                 }
 
@@ -210,6 +212,9 @@ namespace MyTelegramBot.Bot
 
                 case "BackToMyOrder":
                    return await BackToOrder();
+
+                case "ViewInvoice":
+                    return await SendInvoice();
 
                 default:
                     break;

@@ -131,7 +131,7 @@ namespace MyTelegramBot.Messages
                         int count = basket.Where(p => p.ProductId == id).Count();
                         var price = db.ProductPrice.Where(p => p.ProductId == id && p.Enabled).Include(p=>p.Currency).FirstOrDefault();
                         message += counter.ToString() + ") " + name + " " + count.ToString() + 
-                            " x " + price.ToString() + price.Currency.ShortName + " = " + (count * price.Value).ToString() + price.Currency.ShortName + Bot.BotMessage.NewLine();
+                            " x " + price.ToString() + " = " + (count * price.Value).ToString() + price.Currency.ShortName + Bot.BotMessage.NewLine();
                         total += price.Value * count;
                         counter++;
                         currency = price.Currency.ShortName;
