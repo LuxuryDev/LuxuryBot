@@ -55,7 +55,8 @@ namespace MyTelegramBot.Bot
             BotCommand command = new BotCommand
             {
                 Cmd = CommandName,
-                Arg = new List<int>()
+                Arg = new List<int>(),
+                M= ModuleName
             };
 
             for (int i = 0; i < Argument.Length; i++)
