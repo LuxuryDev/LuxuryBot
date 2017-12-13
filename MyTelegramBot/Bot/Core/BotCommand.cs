@@ -16,5 +16,10 @@ namespace MyTelegramBot.Bot
         /// параметр. если несколько то чере &
         /// </summary>
         public List<int> Arg { get; set; }
+
+        /// <summary>
+        /// Название модуля к которому относится команда
+        /// </summary>
+        public string M { get; set; }
     }
 }

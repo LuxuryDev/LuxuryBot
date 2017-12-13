@@ -6,6 +6,7 @@ using Telegram.Bot.Types.InlineKeyboardButtons;
 using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.EntityFrameworkCore;
 using MyTelegramBot.Bot;
+using MyTelegramBot.Bot.AdminModule;
 
 namespace MyTelegramBot.Messages.Admin
 {
@@ -22,11 +23,11 @@ namespace MyTelegramBot.Messages.Admin
         public ContactEditMessage BuildMessage()
         {
             base.TextMessage = "Выберите действие";
-            VkEditBtn = new InlineKeyboardCallbackButton("VK.COM", BuildCallData("VkEdit"));
-            InstagramEditBtn = new InlineKeyboardCallbackButton("Instagram", BuildCallData("InstagramEdit"));
-            ChatEditBtn = new InlineKeyboardCallbackButton("Чат в телеграм", BuildCallData("ChatEdit"));
-            ChannelEditBtn = new InlineKeyboardCallbackButton("Канал в телеграм", BuildCallData("ChannelEdit"));
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToAdminPanel"));
+            VkEditBtn = new InlineKeyboardCallbackButton("VK.COM", BuildCallData("VkEdit", AdminBot.ModuleName));
+            InstagramEditBtn = new InlineKeyboardCallbackButton("Instagram", BuildCallData("InstagramEdit", AdminBot.ModuleName));
+            ChatEditBtn = new InlineKeyboardCallbackButton("Чат в телеграм", BuildCallData("ChatEdit", AdminBot.ModuleName));
+            ChannelEditBtn = new InlineKeyboardCallbackButton("Канал в телеграм", BuildCallData("ChannelEdit", AdminBot.ModuleName));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToAdminPanel", AdminBot.ModuleName));
             SetInlineKeyBoard();
             return this;
         }

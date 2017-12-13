@@ -38,10 +38,10 @@ namespace MyTelegramBot.Messages.Admin
                     MethodsBtns[counter]= new InlineKeyboardCallbackButton[1];
 
                     if (pt.Enable==true)
-                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name+" "+CheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, pt.Id));
+                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name+" "+CheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
 
                     else
-                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name + " "+ UnCheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, pt.Id));
+                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name + " "+ UnCheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
 
                     counter++;
                 }

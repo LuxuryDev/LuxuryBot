@@ -17,6 +17,8 @@ namespace MyTelegramBot.Bot
     /// </summary>
     public class ProductEditBot: BotCore
     {
+        public const string ModuleName = "ProdEdit";
+
         /// <summary>
         /// Соообщение с категориями
         /// </summary>

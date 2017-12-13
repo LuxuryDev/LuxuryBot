@@ -11,6 +11,8 @@ namespace MyTelegramBot.Bot
 {
     public class OrderPositionBot:Bot.BotCore
     {
+        public const string ModuleName = "OrderPos";
+
         public const string GetPositionCmd = "GetPosition";
 
         public const string AddToPositionCmd = "AddToPosition";

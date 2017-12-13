@@ -74,40 +74,40 @@ namespace MyTelegramBot.Messages.Admin
 
               
 
-                base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(AdminBot.AdminProductInCategoryCmd, Product.CategoryId));
+                base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(AdminBot.AdminProductInCategoryCmd, AdminBot.ModuleName, Product.CategoryId));
 
-                ProductEditNameBtn = new InlineKeyboardCallbackButton("Название", BuildCallData(ProductEditBot.ProductEditNameCmd, ProductId));
+                ProductEditNameBtn = new InlineKeyboardCallbackButton("Название", BuildCallData(ProductEditBot.ProductEditNameCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditCategoryBtn = new InlineKeyboardCallbackButton("Категория", BuildCallData(ProductEditBot.ProductEditCategoryCmd, ProductId));
+                ProductEditCategoryBtn = new InlineKeyboardCallbackButton("Категория", BuildCallData(ProductEditBot.ProductEditCategoryCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditPriceBtn = new InlineKeyboardCallbackButton("Стоимость", BuildCallData(ProductEditBot.ProductEditPriceCmd, ProductId));
+                ProductEditPriceBtn = new InlineKeyboardCallbackButton("Стоимость", BuildCallData(ProductEditBot.ProductEditPriceCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditStockBtn = new InlineKeyboardCallbackButton("Остаток", BuildCallData(ProductEditBot.ProductEditStockCmd, ProductId));
+                ProductEditStockBtn = new InlineKeyboardCallbackButton("Остаток", BuildCallData(ProductEditBot.ProductEditStockCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditTextBtn = new InlineKeyboardCallbackButton("Описание", BuildCallData(ProductEditBot.ProductEditTextCmd, ProductId));
+                ProductEditTextBtn = new InlineKeyboardCallbackButton("Описание", BuildCallData(ProductEditBot.ProductEditTextCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditPhotoBtn = new InlineKeyboardCallbackButton("Фотография", BuildCallData(ProductEditBot.ProductEditPhotoCmd, ProductId));
+                ProductEditPhotoBtn = new InlineKeyboardCallbackButton("Фотография", BuildCallData(ProductEditBot.ProductEditPhotoCmd, ProductEditBot.ModuleName, ProductId));
 
-                ProductEditUrlBtn = new InlineKeyboardCallbackButton("Заметка", BuildCallData(ProductEditBot.ProductEditUrlCmd, ProductId));
+                ProductEditUrlBtn = new InlineKeyboardCallbackButton("Заметка", BuildCallData(ProductEditBot.ProductEditUrlCmd, ProductEditBot.ModuleName, ProductId));
 
-                AdminPanelBtn = new InlineKeyboardCallbackButton("Панель администратора", BuildCallData(AdminBot.BackToAdminPanelCmd));
+                AdminPanelBtn = new InlineKeyboardCallbackButton("Панель администратора", BuildCallData(AdminBot.BackToAdminPanelCmd,AdminBot.ModuleName));
 
-                UnitBtn = new InlineKeyboardCallbackButton("Ед.изм.", BuildCallData(ProductEditBot.ProudctUnitCmd, ProductId));
+                UnitBtn = new InlineKeyboardCallbackButton("Ед.изм.", BuildCallData(ProductEditBot.ProudctUnitCmd, ProductEditBot.ModuleName, ProductId));
 
-                CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductId));
+                CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductEditBot.ModuleName, ProductId));
 
-                InlineImageBtn = new InlineKeyboardCallbackButton("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductId));
+                InlineImageBtn = new InlineKeyboardCallbackButton("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductEditBot.ModuleName, ProductId));
 
                 base.TextMessage = Product.AdminMessage();
 
                 if (Product.Enable == true)
-                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователей", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductId));
+                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователей", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId));
 
                 else
-                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductId));
+                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId));
 
                 if (Product.Enable == true)
-                    OpenProductBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(ProductBot.GetProductCmd, Product.Id));
+                    OpenProductBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(ProductBot.GetProductCmd, ProductEditBot.ModuleName, Product.Id));
 
                        
 

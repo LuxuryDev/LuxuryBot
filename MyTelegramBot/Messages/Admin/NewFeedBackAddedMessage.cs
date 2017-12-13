@@ -24,7 +24,7 @@ namespace MyTelegramBot.Messages.Admin
             if (Order!=null)
             {
                 base.TextMessage = Bold("Новый отзыв:") + NewLine() + "Добавлен отзыв к заказу №" + Order.Number.ToString();
-                OpenOrderBtn = new InlineKeyboardCallbackButton("Посмотреть детали заказа", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, Order.Id));
+                OpenOrderBtn = new InlineKeyboardCallbackButton("Посмотреть детали заказа", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, OrderProccesingBot.ModuleName, Order.Id));
 
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{

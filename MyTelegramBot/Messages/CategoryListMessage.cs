@@ -44,7 +44,7 @@ namespace MyTelegramBot.Messages
         {
             Cmd = "ProductInCategory";
             BackCmd = "MainMenu";
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.MainMenuBot.ModuleName));
             
         }
 
@@ -56,7 +56,7 @@ namespace MyTelegramBot.Messages
         {
             this.Cmd = Cmd;
             this.BackCmd =AdminBot.BackToAdminPanelCmd;
-            BackBtn= new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd));
+            BackBtn= new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd, AdminBot.ModuleName));
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace MyTelegramBot.Messages
             this.EditProductId = EditProductId;
             this.Cmd = Cmd;
             this.BackCmd = "SelectProduct";
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,this.EditProductId));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.ProductEditBot.ModuleName,this.EditProductId));
         }
 
         public CategoryListMessage BuildMessage()
@@ -80,7 +80,7 @@ namespace MyTelegramBot.Messages
             
             CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count+2][];
 
-            ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент", BuildCallData("ViewAllProduct"));
+            ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент", BuildCallData("ViewAllProduct",Bot.CategoryBot.ModuleName));
 
             int count = 0;
             if (Categorys.Count > 0)
@@ -89,14 +89,14 @@ namespace MyTelegramBot.Messages
                 {
                     if (EditProductId > 0) // Если меняем категорию в которой находится товар. Для админа
                     {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd, EditProductId, cat.Id));
+                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd, Bot.CategoryEditBot.ModuleName,EditProductId,cat.Id));
                         CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
                         CategoryListBtn[count][0] = button;
                     }
 
                     else // Для меню
                     {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd, cat.Id));
+                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd,Bot.CategoryBot.ModuleName ,cat.Id));
                         CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
                         CategoryListBtn[count][0] = button;
                     }

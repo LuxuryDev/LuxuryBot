@@ -50,7 +50,7 @@ namespace MyTelegramBot.Bot
 
         public MediaFile MediaFile { get; set; }
 
-        public string BuildCallData (string CommandName, params int [] Argument)
+        public string BuildCallData (string CommandName,string ModuleName , params int [] Argument)
         {
             BotCommand command = new BotCommand
             {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Telegram.Bot.Types.InlineKeyboardButtons;
 using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.EntityFrameworkCore;
+using MyTelegramBot.Bot.AdminModule;
 
 namespace MyTelegramBot.Messages.Admin
 {
@@ -23,7 +24,7 @@ namespace MyTelegramBot.Messages.Admin
 
         public OrderMiniViewMessage BuildMessage()
         {
-            OpenBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData("OpenOrder", OrderId));
+            OpenBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData("OpenOrder", OrderProccesingBot.ModuleName, OrderId));
 
             base.MessageReplyMarkup = new InlineKeyboardMarkup(new[] { new[] { OpenBtn } });
 

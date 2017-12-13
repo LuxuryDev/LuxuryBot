@@ -28,7 +28,7 @@ namespace MyTelegramBot.Messages
 
         public UserNameImageMessage BuilMessage()
         {
-            NextBtn = new InlineKeyboardCallbackButton("Далее", BuildCallData("VerifyUserName"));
+            NextBtn = new InlineKeyboardCallbackButton("Далее", BuildCallData("VerifyUserName",Bot.OrderBot.ModuleName));
 
             // файл еще не разу не отправлялся. Считываем его из папки 
             if (Configuration.UserNameFaqFileId==null || Configuration.UserNameFaqFileId!=null && Configuration.UserNameFaqFileId=="")

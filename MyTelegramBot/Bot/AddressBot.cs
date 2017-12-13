@@ -8,7 +8,9 @@ namespace MyTelegramBot.Bot
 {
     public class AddressBot:Bot.BotCore
     {
- 
+
+        public const string ModuleName = "Addr";
+
         private AddressListMessage ViewAddressListMsg { get; set; }
 
         private NewAddressConfirmMessage ConfirmNewAddress { get; set; }

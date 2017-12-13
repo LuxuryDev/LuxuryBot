@@ -12,6 +12,8 @@ namespace MyTelegramBot.Bot
 {
     public class CategoryEditBot : BotCore
     {
+        public const string ModuleName = "CatEdit";
+
         public const string CategoryEditNameCmd = "EditCategoryName";
 
         public const string CategoryEditEnableCmd = "EditCategoryEnable";

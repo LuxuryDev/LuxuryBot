@@ -10,6 +10,8 @@ namespace MyTelegramBot.Bot
 {
     public class ProductBot : BotCore
     {
+        public const string ModuleName = "Prod";
+
         private int ProductId { get; set; }
 
         private ProductRemoveFromBasket ProductRemoveFromBasketMsg { get; set; }

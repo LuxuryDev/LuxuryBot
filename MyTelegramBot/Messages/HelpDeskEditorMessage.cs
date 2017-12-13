@@ -43,8 +43,8 @@ namespace MyTelegramBot.Messages
 
             if (HelpDesk!=null && !HelpDesk.Send==true)
             {
-                AddAttachBtn = new InlineKeyboardCallbackButton("Добавить файл", BuildCallData("AddAttachHelpDesk"));
-                SendBtn = new InlineKeyboardCallbackButton("Отправить заявку", BuildCallData("SendHelpDesk", HelpDesk.Id));
+                AddAttachBtn = new InlineKeyboardCallbackButton("Добавить файл", BuildCallData("AddAttachHelpDesk",Bot.HelpDeskBot.ModuleName));
+                SendBtn = new InlineKeyboardCallbackButton("Отправить заявку", BuildCallData("SendHelpDesk", Bot.HelpDeskBot.ModuleName,HelpDesk.Id));
 
                 if (HelpDesk.HelpDeskAttachment != null)
                     base.TextMessage = Bold("Описание проблемы: ")+ HelpDesk.Text + NewLine() + Bold("Прикрепленных файлов: ") + HelpDesk.HelpDeskAttachment.Count.ToString();

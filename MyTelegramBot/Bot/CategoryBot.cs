@@ -10,6 +10,8 @@ namespace MyTelegramBot.Bot
 {
     public class CategoryBot:BotCore
     {
+        public const string ModuleName = "Cat";
+
         private int CategoryId { get; set; }
 
         private Category Category { get; set; }

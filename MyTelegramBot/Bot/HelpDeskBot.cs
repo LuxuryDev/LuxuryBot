@@ -13,6 +13,8 @@ namespace MyTelegramBot.Bot
 {
     public class HelpDeskBot : BotCore
     {
+        public const string ModuleName = "Help";
+
         private HelpDeskEditorMessage HelpDeskEditorMsg { get; set; }
 
         const int AttachTypePhoto = 1;

@@ -13,6 +13,8 @@ namespace MyTelegramBot.Bot
 {
     public partial class OrderBot:Bot.BotCore
     {
+        public const string ModuleName = "Order";
+
         /// <summary>
         /// Сообщение с просибой отправить свой номер телефона
         /// </summary>

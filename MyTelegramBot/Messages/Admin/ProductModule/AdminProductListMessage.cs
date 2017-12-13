@@ -20,7 +20,7 @@ namespace MyTelegramBot.Messages.Admin
         public AdminProductListMessage(int CategoryId)
         {
             this.CategoryId = CategoryId;
-            base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.ProductEditBot.BackToAdminProductInCategoryCmd));
+            base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.ProductEditBot.BackToAdminProductInCategoryCmd, Bot.ProductEditBot.ModuleName));
         }
         public AdminProductListMessage BildMessage()
         {
@@ -38,7 +38,7 @@ namespace MyTelegramBot.Messages.Admin
                 foreach (Product product in ProductList)
                 {
                     ProductListBtn[counter] = new InlineKeyboardCallbackButton[1];
-                    ProductListBtn[counter][0] = new InlineKeyboardCallbackButton(product.Name, BuildCallData("SelectProduct", product.Id));
+                    ProductListBtn[counter][0] = new InlineKeyboardCallbackButton(product.Name, BuildCallData(Bot.ProductEditBot.SelectProductCmd,Bot.ProductEditBot.ModuleName, product.Id));
                     counter++;
 
                 }

@@ -259,42 +259,42 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton AddProductToBasket(int ProductId)
         {
-            string data= base.BuildCallData(Bot.ProductBot.AddToBasketCmd, ProductId);
+            string data= base.BuildCallData(Bot.ProductBot.AddToBasketCmd,ProductBot.ModuleName ,ProductId);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("+" , data);
             return button;
         }
 
         private InlineKeyboardCallbackButton RemoveFromBasket (int ProductId)
         {
-            string data = base.BuildCallData(Bot.ProductBot.RemoveFromBasketCmd, ProductId);
+            string data = base.BuildCallData(Bot.ProductBot.RemoveFromBasketCmd,ProductBot.ModuleName ,ProductId);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("-", data);
             return button;
         }
 
         private InlineKeyboardCallbackButton ListingProduct(int ProductId, string BtnText)
         {
-            string data = base.BuildCallData(Bot.ProductBot.GetProductCmd, ProductId);     
+            string data = base.BuildCallData(Bot.ProductBot.GetProductCmd, ProductBot.ModuleName, ProductId);     
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(BtnText, data);
             return button;
         }
 
         private InlineKeyboardCallbackButton MoreInfoProduct (int ProductId)
         {
-            string data = base.BuildCallData(Bot.ProductBot.MoreInfoProductCmd, ProductId);
+            string data = base.BuildCallData(Bot.ProductBot.MoreInfoProductCmd, ProductBot.ModuleName,ProductId);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Подробнее"+ " \ud83d\udd24", data);
             return button;
         }
 
         private InlineKeyboardCallbackButton ReturnToCatalogList()
         {
-            string data = base.BuildCallData("ReturnToCatalogList");
+            string data = base.BuildCallData("ReturnToCatalogList",CategoryBot.ModuleName);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("\u2934\ufe0f", data);
             return button;
         }
 
         private InlineKeyboardCallbackButton ViewBasket()
         {
-            string data = base.BuildCallData(Bot.BasketBot.ViewBasketCmd);
+            string data = base.BuildCallData(Bot.BasketBot.ViewBasketCmd, BasketBot.ModuleName);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть корзину"+ "\u2139\ufe0f", data);
             return button;
         }

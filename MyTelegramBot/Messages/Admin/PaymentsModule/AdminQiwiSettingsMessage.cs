@@ -31,7 +31,7 @@ namespace MyTelegramBot.Messages.Admin
                         NewLine()+ Italic("Что такое QIWI API и где взять ключ ? ")+ "/whatisqiwiapi "+
                         NewLine() + "Вернуться в панель администратора /admin";
 
-                    EditBtn = new InlineKeyboardCallbackButton("Изменить", BuildCallData(AdminBot.QiwiEditCmd));
+                    EditBtn = new InlineKeyboardCallbackButton("Изменить", BuildCallData(AdminBot.QiwiEditCmd, AdminBot.ModuleName));
 
                     base.MessageReplyMarkup = new InlineKeyboardMarkup(
                         new[]{
@@ -47,7 +47,7 @@ namespace MyTelegramBot.Messages.Admin
                     mess = "Данные отсутствуют Нажмите кнопку добавить" +
                         NewLine() + Italic("Что такое QIWI API и где взять ключ ? ") + "/whatisqiwiapi " +
                         NewLine() + "Вернуться в панель администратора /admin";
-                    AddBtn = new InlineKeyboardCallbackButton("Добавить", BuildCallData(AdminBot.QiwiAddEdit));
+                    AddBtn = new InlineKeyboardCallbackButton("Добавить", BuildCallData(AdminBot.QiwiAddEdit, AdminBot.ModuleName));
 
                     base.MessageReplyMarkup = new InlineKeyboardMarkup(
                         new[]{

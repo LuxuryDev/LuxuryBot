@@ -19,7 +19,7 @@ namespace MyTelegramBot.Messages
 
         public ViewAllProductMessage()
         {
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackCategoryList"));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackCategoryList",Bot.CategoryBot.ModuleName));
         }
 
         public ViewAllProductMessage BuildMessage()

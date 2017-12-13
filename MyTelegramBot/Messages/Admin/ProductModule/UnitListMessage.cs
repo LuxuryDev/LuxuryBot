@@ -22,7 +22,7 @@ namespace MyTelegramBot.Messages.Admin
         public UnitListMessage(int ProductId)
         {
             this.ProductId = ProductId;
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToProductEditor", ProductId));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToProductEditor", Bot.ProductEditBot.ModuleName, ProductId));
         }
 
         public UnitListMessage BuildMessage()
@@ -36,8 +36,8 @@ namespace MyTelegramBot.Messages.Admin
                 for (int i=0; i < units.Count / 2; i=i+1)
                 {
                     UnitsBtn[i] = new InlineKeyboardCallbackButton[2];
-                    UnitsBtn[i][0] = new InlineKeyboardCallbackButton(units[i*2].Name + "- " + units[i * 2].ShortName, BuildCallData("UpdateProductUnit", ProductId, units[i * 2].Id));
-                    UnitsBtn[i][1] = new InlineKeyboardCallbackButton(units[(i*2)+1].Name + "- " + units[(i * 2) + 1].ShortName, BuildCallData("UpdateProductUnit", ProductId, units[(i * 2) + 1].Id));
+                    UnitsBtn[i][0] = new InlineKeyboardCallbackButton(units[i*2].Name + "- " + units[i * 2].ShortName, BuildCallData("UpdateProductUnit",Bot.ProductEditBot.ModuleName ,ProductId, units[i * 2].Id));
+                    UnitsBtn[i][1] = new InlineKeyboardCallbackButton(units[(i*2)+1].Name + "- " + units[(i * 2) + 1].ShortName, BuildCallData("UpdateProductUnit", Bot.ProductEditBot.ModuleName, ProductId, units[(i * 2) + 1].Id));
                 }
 
                 UnitsBtn[UnitsBtn.Length-1] = new InlineKeyboardCallbackButton[1];

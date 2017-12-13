@@ -115,17 +115,17 @@ namespace MyTelegramBot.Messages.Admin
 
         private void CreateBtn()
         {
-            ViewAttachBtn = new InlineKeyboardCallbackButton("Посмотреть вложения", BuildCallData(HelpDeskProccessingBot.ViewAttachCmd, HelpDesk.Id));
+            ViewAttachBtn = new InlineKeyboardCallbackButton("Посмотреть вложения", BuildCallData(HelpDeskProccessingBot.ViewAttachCmd, HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
 
-            AddCommentBtn = new InlineKeyboardCallbackButton("Добавить комментарий", BuildCallData(HelpDeskProccessingBot.AddHelpAnswerCmd, HelpDesk.Id));
+            AddCommentBtn = new InlineKeyboardCallbackButton("Добавить комментарий", BuildCallData(HelpDeskProccessingBot.AddHelpAnswerCmd, HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
 
-            ClosedBtn = new InlineKeyboardCallbackButton("Закрыть заявку", BuildCallData(HelpDeskProccessingBot.CloseHelpCmd, HelpDesk.Id));
+            ClosedBtn = new InlineKeyboardCallbackButton("Закрыть заявку", BuildCallData(HelpDeskProccessingBot.CloseHelpCmd, HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
 
-            TakeToWorkBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData(HelpDeskProccessingBot.TakeHelpCmd, HelpDesk.Id));
+            TakeToWorkBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData(HelpDeskProccessingBot.TakeHelpCmd, HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
 
-            ViewContactBtn = new InlineKeyboardCallbackButton("Контактные данные", BuildCallData(HelpDeskProccessingBot.ViewContactCmd, Convert.ToInt32(HelpDesk.FollowerId)));
+            ViewContactBtn = new InlineKeyboardCallbackButton("Контактные данные", BuildCallData(HelpDeskProccessingBot.ViewContactCmd, HelpDeskProccessingBot.ModuleName, Convert.ToInt32(HelpDesk.FollowerId)));
 
-            FreeHelpBtn = new InlineKeyboardCallbackButton("Освободить", BuildCallData(HelpDeskProccessingBot.FreeHelpCmd, HelpDesk.Id));
+            FreeHelpBtn = new InlineKeyboardCallbackButton("Освободить", BuildCallData(HelpDeskProccessingBot.FreeHelpCmd, HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
 
 
         }

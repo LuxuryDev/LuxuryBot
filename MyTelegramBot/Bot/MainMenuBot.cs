@@ -8,6 +8,9 @@ namespace MyTelegramBot.Bot
 {
     public class MainMenuBot: BotCore
     {
+
+        public const string ModuleName = "Main";
+
         MainMenuBotMessage MainMenuMsg { get; set; }
 
         ContactMessage ContactMsg { get; set; }

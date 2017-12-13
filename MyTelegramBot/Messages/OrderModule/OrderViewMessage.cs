@@ -186,13 +186,13 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton AddFeedBack()
         {
-            return new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Order.Id)); 
+            return new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Bot.OrderBot.ModuleName, Order.Id)); 
         }
 
 
         private InlineKeyboardCallbackButton ViewInvoice()
         {
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть счет на оплату", BuildCallData("ViewInvoice", Convert.ToInt32(Order.Id)));
+            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Посмотреть счет на оплату", BuildCallData("ViewInvoice", Bot.OrderBot.ModuleName, Convert.ToInt32(Order.Id)));
             return button;
         }
 

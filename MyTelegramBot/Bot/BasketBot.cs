@@ -10,6 +10,7 @@ namespace MyTelegramBot.Bot
 {
     public class BasketBot:BotCore
     {
+        public const string ModuleName = "Bskt";
 
         public const string ViewBasketCmd = "ViewBasket";
 

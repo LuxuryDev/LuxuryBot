@@ -41,7 +41,7 @@ namespace MyTelegramBot.Messages.Admin
                     {
                         var telegram_attach= db.AttachmentTelegram.Where(a => a.AttachmentFsId == attachFs.AttachmentFsId && a.BotInfoId == BotId).FirstOrDefault();
                         GetHelpDeskBtn = new InlineKeyboardCallbackButton("Вернуться к заявке №" + HelpDesk.Number.ToString(),
-                                                                            BuildCallData(Bot.AdminModule.HelpDeskProccessingBot.GetHelpDeskCmd, HelpDesk.Id));
+                                                                            BuildCallData(Bot.AdminModule.HelpDeskProccessingBot.GetHelpDeskCmd, Bot.AdminModule.HelpDeskProccessingBot.ModuleName, HelpDesk.Id));
                         try
                         {
                             BotMessage[counter] = new Bot.BotMessage();

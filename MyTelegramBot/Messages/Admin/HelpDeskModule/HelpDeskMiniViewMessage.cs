@@ -26,7 +26,7 @@ namespace MyTelegramBot.Messages.Admin
 
         public HelpDeskMiniViewMessage BuildMessage()
         {
-            OpenBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(Bot.AdminModule.HelpDeskProccessingBot.GetHelpDeskCmd, HelpDeskId));
+            OpenBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(Bot.AdminModule.HelpDeskProccessingBot.GetHelpDeskCmd, Bot.AdminModule.HelpDeskProccessingBot.ModuleName, HelpDeskId));
 
             base.MessageReplyMarkup = new InlineKeyboardMarkup(new[] { new[] { OpenBtn } });
 

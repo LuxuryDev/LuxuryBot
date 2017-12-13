@@ -37,15 +37,15 @@ namespace MyTelegramBot.Messages.Admin
 
             if (Category != null)
             {
-                EditCategoryNameBtn = new InlineKeyboardCallbackButton("Изменить название", BuildCallData(Bot.CategoryEditBot.CategoryEditNameCmd, CategoryId));
+                EditCategoryNameBtn = new InlineKeyboardCallbackButton("Изменить название", BuildCallData(Bot.CategoryEditBot.CategoryEditNameCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
 
                 if(Category.Enable)
-                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователя", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, CategoryId));
+                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователя", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
 
                 else
-                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, CategoryId));
+                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
 
-                BackToAdminPanelBtn = new InlineKeyboardCallbackButton("Панель Администратора", BuildCallData(AdminBot.BackToAdminPanelCmd));
+                BackToAdminPanelBtn = new InlineKeyboardCallbackButton("Панель Администратора", BuildCallData(AdminBot.BackToAdminPanelCmd, Bot.AdminModule.AdminBot.ModuleName));
 
                 SetInlineKeyBoard();               
 

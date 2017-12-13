@@ -21,7 +21,7 @@ namespace MyTelegramBot.Messages
         public BasketPositionListMessage(int FollowerId)
         {
             this.FollowerId = FollowerId;
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd,Bot.BasketBot.ModuleName));
         }
 
         public BasketPositionListMessage BuildMessage()
@@ -38,7 +38,8 @@ namespace MyTelegramBot.Messages
                 foreach(var position in Basket)
                 {
                     ProductBtn[counter] = new InlineKeyboardCallbackButton[1];
-                    ProductBtn[counter][0] = new InlineKeyboardCallbackButton((counter + 1).ToString() + ") " + position.ElementAt(0).Product.Name, BuildCallData(Bot.BasketBot.EditBasketProductCmd, position.ElementAt(0).ProductId));
+                    ProductBtn[counter][0] = new InlineKeyboardCallbackButton((counter + 1).ToString() + ") " + position.ElementAt(0).Product.Name, 
+                                                                                BuildCallData(Bot.BasketBot.EditBasketProductCmd,Bot.BasketBot.ModuleName ,position.ElementAt(0).ProductId));
                     counter++;
                 }
 

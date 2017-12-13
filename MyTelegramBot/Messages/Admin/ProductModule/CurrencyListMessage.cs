@@ -19,7 +19,7 @@ namespace MyTelegramBot.Messages.Admin
         public CurrencyListMessage(int ProductId)
         {
             this.ProductId = ProductId;
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToProductEditor", ProductId));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("BackToProductEditor", Bot.ProductEditBot.ModuleName,ProductId));
         }
 
         public CurrencyListMessage BuildMessage()
@@ -34,7 +34,7 @@ namespace MyTelegramBot.Messages.Admin
                 foreach (Currency c in cur)
                 {
                     CurrencyBtns[counter] = new InlineKeyboardCallbackButton[1];
-                    CurrencyBtns[counter][0] = new InlineKeyboardCallbackButton(c.Name + "-" + c.ShortName, BuildCallData("UpdateProductCurrency", ProductId, c.Id));
+                    CurrencyBtns[counter][0] = new InlineKeyboardCallbackButton(c.Name + "-" + c.ShortName, BuildCallData("UpdateProductCurrency", Bot.ProductEditBot.ModuleName, ProductId, c.Id));
                     counter++;
                 }
 

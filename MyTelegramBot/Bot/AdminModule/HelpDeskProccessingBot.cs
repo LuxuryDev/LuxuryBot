@@ -13,6 +13,8 @@ namespace MyTelegramBot.Bot.AdminModule
 {
     public class HelpDeskProccessingBot : Bot.BotCore
     {
+        public const string ModuleName = "HelpAdm";
+
         public const string ViewAttachCmd = "ViewAttach";
 
         public const string AddHelpAnswerCmd = "AddHelpAnswer";

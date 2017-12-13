@@ -27,18 +27,16 @@ namespace MyTelegramBot.Messages
         {
             this.Invoice = invoice;
             this.OrderId = OrderId;
-            BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderId));
-            CheckPayBtn = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd, invoice.Id));
+
+            if(BackCmdName== "BackToOrder")
+                BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName,Bot.AdminModule.OrderProccesingBot.ModuleName ,OrderId));
+
+            else
+                BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderBot.ModuleName, OrderId));
+
+            CheckPayBtn = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd,OrderBot.ModuleName ,invoice.Id));
         }
 
-        public InvoiceViewMessage(Invoice invoice, List<Payment> list, int OrderId, string BackCmdName = "BackToOrder")
-        {
-            this.Invoice = invoice;
-            this.PaymentList = list;
-
-            if(PaymentList!=null && PaymentList.Count>0)
-                BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderId));
-        }
 
         public InvoiceViewMessage BuildMessage()
         {

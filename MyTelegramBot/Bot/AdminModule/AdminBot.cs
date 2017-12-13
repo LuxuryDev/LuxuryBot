@@ -14,6 +14,8 @@ namespace MyTelegramBot.Bot.AdminModule
 {
     public class AdminBot : BotCore
     {
+        public const string ModuleName = "Admin";
+
         private AdminPanelCmdMessage AdminCmdListMsg { get; set; }
 
         private CategoryListMessage CategoryListMsg { get; set; }
@@ -45,8 +47,6 @@ namespace MyTelegramBot.Bot.AdminModule
         public const string CategoryCreateCmd = "CategoryCreate";
 
         public const string NotyfiCreateCmd = "NotyfiCreate";
-
-        public const string SelectProductCmd = "SelectProduct";
 
         public const string AdminProductInCategoryCmd = "AdminProductInCategory";
 

@@ -185,25 +185,25 @@ namespace MyTelegramBot.Messages.Admin
 
         private void CreateBtns()
         {
-            EditOrderPositionBtn = new InlineKeyboardCallbackButton("Изменить содержание заказа"+ " \ud83d\udd8a", BuildCallData(OrderProccesingBot.CmdEditOrderPosition, Order.Id));
+            EditOrderPositionBtn = new InlineKeyboardCallbackButton("Изменить содержание заказа"+ " \ud83d\udd8a", BuildCallData(OrderProccesingBot.CmdEditOrderPosition, OrderProccesingBot.ModuleName, Order.Id));
 
-            ViewTelephoneNumberBtn = new InlineKeyboardCallbackButton("Контактные данные"+ " \ud83d\udcde", BuildCallData(OrderProccesingBot.CmdGetTelephone, Order.Id));
+            ViewTelephoneNumberBtn = new InlineKeyboardCallbackButton("Контактные данные"+ " \ud83d\udcde", BuildCallData(OrderProccesingBot.CmdGetTelephone, OrderProccesingBot.ModuleName, Order.Id));
 
-            ViewAddressOnMapBtn = new InlineKeyboardCallbackButton("Показать на карте"+ " \ud83c\udfd8", BuildCallData(OrderProccesingBot.CmdViewAddressOnMap, Order.Id));
+            ViewAddressOnMapBtn = new InlineKeyboardCallbackButton("Показать на карте"+ " \ud83c\udfd8", BuildCallData(OrderProccesingBot.CmdViewAddressOnMap, OrderProccesingBot.ModuleName, Order.Id));
 
-            DoneBtn = new InlineKeyboardCallbackButton("Выполнено"+" \ud83d\udc4c\ud83c\udffb", BuildCallData(OrderProccesingBot.CmdDoneOrder, Order.Id));
+            DoneBtn = new InlineKeyboardCallbackButton("Выполнено"+" \ud83d\udc4c\ud83c\udffb", BuildCallData(OrderProccesingBot.CmdDoneOrder, OrderProccesingBot.ModuleName, Order.Id));
 
-            DeleteBtn = new InlineKeyboardCallbackButton("Удалить"+ " \u2702\ufe0f", BuildCallData(OrderProccesingBot.CmdOrderDelete, Order.Id));
+            DeleteBtn = new InlineKeyboardCallbackButton("Удалить"+ " \u2702\ufe0f", BuildCallData(OrderProccesingBot.CmdOrderDelete, OrderProccesingBot.ModuleName, Order.Id));
 
-            RecoveryBtn = new InlineKeyboardCallbackButton("Восстановить", BuildCallData(OrderProccesingBot.CmdRecoveryOrder, Order.Id));
+            RecoveryBtn = new InlineKeyboardCallbackButton("Восстановить", BuildCallData(OrderProccesingBot.CmdRecoveryOrder, OrderProccesingBot.ModuleName, Order.Id));
 
-            ConfirmBtn = new InlineKeyboardCallbackButton("Согласован"+ " \ud83e\udd1d", BuildCallData(OrderProccesingBot.CmdConfirmOrder, Order.Id));
+            ConfirmBtn = new InlineKeyboardCallbackButton("Согласован"+ " \ud83e\udd1d", BuildCallData(OrderProccesingBot.CmdConfirmOrder, OrderProccesingBot.ModuleName, Order.Id));
 
-            ViewPaymentBtn = new InlineKeyboardCallbackButton("Посмотреть платеж" + " \ud83d\udcb5", BuildCallData("ViewPayment", Order.Id));
+            ViewPaymentBtn = new InlineKeyboardCallbackButton("Посмотреть платеж" + " \ud83d\udcb5", BuildCallData("ViewPayment", OrderProccesingBot.ModuleName, Order.Id));
 
-            TakeOrderBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData("TakeOrder", Order.Id));
+            TakeOrderBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData("TakeOrder", OrderProccesingBot.ModuleName, Order.Id));
 
-            FreeOrderBtn = new InlineKeyboardCallbackButton("Освободить", BuildCallData("FreeOrder", Order.Id));
+            FreeOrderBtn = new InlineKeyboardCallbackButton("Освободить", BuildCallData("FreeOrder", OrderProccesingBot.ModuleName, Order.Id));
         }
 
         private void SetInlineKeyBoard()

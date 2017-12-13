@@ -42,7 +42,7 @@ namespace MyTelegramBot.Messages.Admin
                 int Amount = OrderProductList.Count();
 
                 PostitionsBtn = new InlineKeyboardCallbackButton[Amount + 1][];
-                base.BackBtn = new InlineKeyboardCallbackButton("Назад",BuildCallData(Bot.OrderBot.CmdBackToOrder,OrderId));
+                base.BackBtn = new InlineKeyboardCallbackButton("Назад",BuildCallData(Bot.OrderBot.CmdBackToOrder, OrderBot.ModuleName, OrderId));
 
                 int Counter = 0;
 
@@ -64,7 +64,7 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton ProductPosition (int PositionId, string BtnText)
         {
-            string data = BuildCallData("GetPosition", PositionId);
+            string data = BuildCallData(Bot.OrderPositionBot.GetPositionCmd,Bot.OrderPositionBot.ModuleName ,PositionId);
             InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton(BtnText, data);
             return btn;
         }

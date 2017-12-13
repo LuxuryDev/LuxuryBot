@@ -22,7 +22,7 @@ namespace MyTelegramBot.Messages
         public AddressListMessage (int FollowerId)
         {
             this.FollowerId = FollowerId;
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd, Bot.BasketBot.ModuleName));
         }
         public  AddressListMessage BuildMessage()
         {
@@ -76,14 +76,14 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton AddressBtn(string text, int Id)
         {
-            string data = BuildCallData(Bot.OrderBot.CmdGetAddress, Id);
+            string data = BuildCallData(Bot.OrderBot.CmdGetAddress, Bot.OrderBot.ModuleName,Id);
             InlineKeyboardCallbackButton  btn = new InlineKeyboardCallbackButton(text, data);
             return btn;
         }
 
         private InlineKeyboardCallbackButton AddAddress()
         {
-            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Добавить", BuildCallData(Bot.AddressBot.CmdAddAddress));
+            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Добавить", BuildCallData(Bot.AddressBot.CmdAddAddress, Bot.AddressBot.ModuleName));
             return btn;
         }
     }

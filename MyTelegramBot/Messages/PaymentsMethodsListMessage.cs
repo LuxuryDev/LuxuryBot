@@ -20,7 +20,7 @@ namespace MyTelegramBot.Messages
 
         public PaymentsMethodsListMessage()
         {
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.OrderBot.CmdAddressEditor));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.OrderBot.CmdAddressEditor, OrderBot.ModuleName));
         }
 
         public PaymentsMethodsListMessage BuildMessage()
@@ -41,7 +41,7 @@ namespace MyTelegramBot.Messages
                     foreach(PaymentType pt in methods)
                     {
                         PaymentsMethodsListBtns [counter] = new InlineKeyboardCallbackButton[1];
-                        PaymentsMethodsListBtns [counter][0] = new InlineKeyboardCallbackButton(pt.Name, BuildCallData(OrderBot.PaymentMethodCmd, pt.Id));
+                        PaymentsMethodsListBtns [counter][0] = new InlineKeyboardCallbackButton(pt.Name, BuildCallData(OrderBot.PaymentMethodCmd, OrderBot.ModuleName,pt.Id));
                         counter++;
                     }
 

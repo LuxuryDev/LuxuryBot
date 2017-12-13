@@ -31,8 +31,8 @@ namespace MyTelegramBot.Messages
         {
             this.FollowerId = FollowerId;
             this.ProductId = ProductId;
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketPositionCmd, this.FollowerId));
-            BackToBasketBtn = new InlineKeyboardCallbackButton("Вернуться в корзину", BuildCallData(Bot.BasketBot.BackToBasketCmd));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketPositionCmd, Bot.BasketBot.ModuleName, this.FollowerId));
+            BackToBasketBtn = new InlineKeyboardCallbackButton("Вернуться в корзину", BuildCallData(Bot.BasketBot.BackToBasketCmd, Bot.BasketBot.ModuleName));
         }
 
         public BasketPositionEditMessage BuildMessage()
@@ -46,16 +46,16 @@ namespace MyTelegramBot.Messages
             if (Positions != null && Positions.Count()>0)
             {
                 base.TextMessage = Positions.FirstOrDefault().Product.Name + " " + Positions.Count() + " шт.";
-                AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.BasketBot.AddProductToBasketCmd, Positions.FirstOrDefault().ProductId));
-                RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.BasketBot.RemoveProductFromBasketCmd, Positions.FirstOrDefault().ProductId));
+                AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.BasketBot.AddProductToBasketCmd, Bot.BasketBot.ModuleName, Positions.FirstOrDefault().ProductId));
+                RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.BasketBot.RemoveProductFromBasketCmd, Bot.BasketBot.ModuleName, Positions.FirstOrDefault().ProductId));
                 SetInlineKeyBoard();
             }
 
             else // Пользователь удалил последнюю еденицу этого товара. Значит теперь его 0 шт.
             {
                 base.TextMessage =Product.Name+ " 0 шт.";
-                AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.BasketBot.AddProductToBasketCmd, ProductId));
-                RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.BasketBot.RemoveProductFromBasketCmd, ProductId));
+                AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.BasketBot.AddProductToBasketCmd, Bot.BasketBot.ModuleName , ProductId));
+                RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.BasketBot.RemoveProductFromBasketCmd, Bot.BasketBot.ModuleName, ProductId));
                 SetInlineKeyBoard();
             }
 

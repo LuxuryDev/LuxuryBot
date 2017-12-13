@@ -38,11 +38,11 @@ namespace MyTelegramBot.Messages.Admin
 
             base.CallBackTitleText = orderProduct.Product.Name;
 
-            AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.OrderPositionBot.AddToPositionCmd, PositionId));
+            AddBtn = new InlineKeyboardCallbackButton("+", BuildCallData(Bot.OrderPositionBot.AddToPositionCmd, Bot.OrderPositionBot.ModuleName, PositionId));
 
-            RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.OrderPositionBot.RemoveFromPositionCmd, PositionId));
+            RemoveBtn = new InlineKeyboardCallbackButton("-", BuildCallData(Bot.OrderPositionBot.RemoveFromPositionCmd, Bot.OrderPositionBot.ModuleName, PositionId));
 
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, orderProduct.OrderId));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, OrderProccesingBot.ModuleName, orderProduct.OrderId));
 
             SetInlineKeyBoard();
 

@@ -14,6 +14,8 @@ namespace MyTelegramBot.Bot.AdminModule
 {
     public partial class OrderProccesingBot : Bot.BotCore
     {
+        public const string ModuleName = "Or";
+
         StockChangesMessage StockChangesMsg { get; set; }
        
         /// <summary>

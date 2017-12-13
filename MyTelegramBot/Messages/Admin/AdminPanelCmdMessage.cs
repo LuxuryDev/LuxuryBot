@@ -39,11 +39,11 @@ namespace MyTelegramBot.Messages.Admin
         {
 
 
-                EditProductBtn = new InlineKeyboardCallbackButton("Изменить товар"+ " \ud83d\udd8a", BuildCallData(AdminBot.ProductEditCmd));
-                EditCategoryBtn = new InlineKeyboardCallbackButton("Изменить категорию"+ " \ud83d\udd8a", BuildCallData(AdminBot.CategoryEditCmd));
-                ContactEditPanelBtn= new InlineKeyboardCallbackButton("Изменить контактные данные"+ " \ud83d\udd8a", BuildCallData(AdminBot.ContactEditCmd));
-                NoConfirmOrdersBtn = new InlineKeyboardCallbackButton("Показать необработанные заказы" + " \ud83d\udcd2", BuildCallData(AdminBot.NoConfirmOrderCmd));
-                PaymentsEnableListBtn = new InlineKeyboardCallbackButton("Выбрать доступные методы оплаты" + " \ud83d\udcb0", BuildCallData(AdminBot.PayMethodsListCmd));
+                EditProductBtn = new InlineKeyboardCallbackButton("Изменить товар"+ " \ud83d\udd8a", BuildCallData(AdminBot.ProductEditCmd, AdminBot.ModuleName));
+                EditCategoryBtn = new InlineKeyboardCallbackButton("Изменить категорию"+ " \ud83d\udd8a", BuildCallData(AdminBot.CategoryEditCmd, AdminBot.ModuleName));
+                ContactEditPanelBtn= new InlineKeyboardCallbackButton("Изменить контактные данные"+ " \ud83d\udd8a", BuildCallData(AdminBot.ContactEditCmd, AdminBot.ModuleName));
+                NoConfirmOrdersBtn = new InlineKeyboardCallbackButton("Показать необработанные заказы" + " \ud83d\udcd2", BuildCallData(AdminBot.NoConfirmOrderCmd, AdminBot.ModuleName));
+                PaymentsEnableListBtn = new InlineKeyboardCallbackButton("Выбрать доступные методы оплаты" + " \ud83d\udcb0", BuildCallData(AdminBot.PayMethodsListCmd, AdminBot.ModuleName));
 
             base.TextMessage = Bold("Панель администратора") + NewLine() +
                                "1) Показать текущие остатки /currentstock" + NewLine() +
