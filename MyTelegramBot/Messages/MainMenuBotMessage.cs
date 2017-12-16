@@ -29,12 +29,15 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton MyOrdersBtn { get; set; }
 
+        private InlineKeyboardCallbackButton HelpBtn { get; set; }
+
         public MainMenuBotMessage BuildMessage ()
         {
             MenuBtn = new InlineKeyboardCallbackButton("Каталог товаров"+ " \ud83d\udcc3", BuildCallData("Menu",Bot.CategoryBot.ModuleName));
             ContactBtn = new InlineKeyboardCallbackButton("Контакты" + " \u260e\ufe0f", BuildCallData("Contact", Bot.MainMenuBot.ModuleName));
             ViewBasketBtn = new InlineKeyboardCallbackButton("Корзина" + " \ud83d\uded2", BuildCallData(Bot.BasketBot.ViewBasketCmd,Bot.BasketBot.ModuleName));
             MyOrdersBtn = new InlineKeyboardCallbackButton("Мои заказы"+ " \ud83d\udce6", BuildCallData(Bot.OrderBot.MyOrdersListCmd,Bot.OrderBot.ModuleName));
+            HelpBtn = new InlineKeyboardCallbackButton("Техническая поддержка", BuildCallData("Help", Bot.HelpDeskBot.ModuleName));
             SetInlineKeyBoard();
             base.TextMessage = "Выберите действие";
             return this;
@@ -61,6 +64,10 @@ namespace MyTelegramBot.Messages
                 new[]
                         {
                             MyOrdersBtn
+                        },
+                new[]
+                        {
+                            HelpBtn
                         }
 
                  });

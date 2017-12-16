@@ -217,17 +217,11 @@ namespace MyTelegramBot.Bot.AdminModule
                     case "/export":
                         return await OrderExport();
 
-                    case "/qiwi":
-                        return await SendQiwiInfo();
-
                     case PayMethodsListCmd:
                         return await SendPaymentMethods();
 
                     case PaymentTypeEnableCmd:
                         return await PaymentMethodEnable();
-
-                    case WhatIsQiwiApiCmd:
-                        return await SendWhatIsQiwiApi();
 
                     case StatCmd:
                         return await SendStat();
@@ -276,14 +270,6 @@ namespace MyTelegramBot.Bot.AdminModule
 
                 if (base.OriginalMessage.Contains(ForceReplyChannel))
                     return await UpdateChannel();
-
-                if (base.OriginalMessage == EnterPhoneNumber) // пользователь отправил номер телефона своего киви кошелька
-                    return await AddQiwiTelephone();
-
-                if (base.OriginalMessage == EnterQiwiApi)
-                    return await AddQiwiApiKey();
-
-
 
                 else
                     return null;
@@ -489,31 +475,31 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
-        /// <summary>
-        /// Отправить сообщение с описание что такое Киви  Апи и где взять ключ
-        /// </summary>
-        /// <returns></returns>
-        private async Task<IActionResult> SendWhatIsQiwiApi()
-        {
-            try
-            {
-                string text = "1) Перейдите на сайт https://qiwi.com/api" + BotMessage.NewLine() +
-                 "2) Нажмите на кнопку Выпустить новый токен" + BotMessage.NewLine() +
-                 "3) Выбрите следующие пункты: Запрос информации о профиле кошелька, Просмотр истории платежей " + Bot.BotMessage.NewLine() +
-                 "4) Подтвердите все действия и сохраните токен, что бы потом отправить его Боту" + BotMessage.NewLine() +
-                 "5) Настройте Qiwi /qiwi";
+        ///// <summary>
+        ///// Отправить сообщение с описание что такое Киви  Апи и где взять ключ
+        ///// </summary>
+        ///// <returns></returns>
+        //private async Task<IActionResult> SendWhatIsQiwiApi()
+        //{
+        //    try
+        //    {
+        //        string text = "1) Перейдите на сайт https://qiwi.com/api" + BotMessage.NewLine() +
+        //         "2) Нажмите на кнопку Выпустить новый токен" + BotMessage.NewLine() +
+        //         "3) Выбрите следующие пункты: Запрос информации о профиле кошелька, Просмотр истории платежей " + Bot.BotMessage.NewLine() +
+        //         "4) Подтвердите все действия и сохраните токен, что бы потом отправить его Боту" + BotMessage.NewLine() +
+        //         "5) Настройте Qiwi /qiwi";
 
 
-                await SendMessage(new BotMessage { TextMessage = text });
+        //        await SendMessage(new BotMessage { TextMessage = text });
 
-                return OkResult;
-            }
+        //        return OkResult;
+        //    }
 
-            catch
-            {
-                return NotFoundResult;
-            }
-        }
+        //    catch
+        //    {
+        //        return NotFoundResult;
+        //    }
+        //}
 
         /// <summary>
         /// Отправить сообщение со статистикой
@@ -549,76 +535,76 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
-        /// <summary>
-        /// Добавить номер телефона киви кошелька в бд
-        /// </summary>
-        /// <returns></returns>
-        private async Task<IActionResult> AddQiwiTelephone()
-        {
-            PaymentTypeConfig qiwi = new PaymentTypeConfig
-            {
-                TimeStamp = DateTime.Now,
-                Enable = false,
-                Login = base.ReplyToMessageText
-            };
+        ///// <summary>
+        ///// Добавить номер телефона киви кошелька в бд
+        ///// </summary>
+        ///// <returns></returns>
+        //private async Task<IActionResult> AddQiwiTelephone()
+        //{
+        //    PaymentTypeConfig qiwi = new PaymentTypeConfig
+        //    {
+        //        TimeStamp = DateTime.Now,
+        //        Enable = false,
+        //        Login = base.ReplyToMessageText
+        //    };
            
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                db.PaymentTypeConfig.Add(qiwi);
+        //    using (MarketBotDbContext db = new MarketBotDbContext())
+        //    {
+        //        db.PaymentTypeConfig.Add(qiwi);
 
-                if (VerifyPhoneNumber(base.ReplyToMessageText) && db.SaveChanges()>0 && await ForceReplyBuilder(EnterQiwiApi) !=null)
-                    return OkResult;
+        //        if (VerifyPhoneNumber(base.ReplyToMessageText) && db.SaveChanges()>0 && await ForceReplyBuilder(EnterQiwiApi) !=null)
+        //            return OkResult;
 
-                else
-                {
-                    await SendMessage(new BotMessage { TextMessage = "Ошибка! Не удалось определить номер телефона." });
-                    await ForceReplyBuilder(EnterPhoneNumber);
-                    return OkResult;
-                }
-            }
-        }
+        //        else
+        //        {
+        //            await SendMessage(new BotMessage { TextMessage = "Ошибка! Не удалось определить номер телефона." });
+        //            await ForceReplyBuilder(EnterPhoneNumber);
+        //            return OkResult;
+        //        }
+        //    }
+        //}
 
-        /// <summary>
-        /// Добавить токен киви в бд
-        /// </summary>
-        /// <returns></returns>
-        private async Task<IActionResult> AddQiwiApiKey()
-        {
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                var qiwi = db.PaymentType.Where(q => q.Id == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi)).FirstOrDefault();
+        ///// <summary>
+        ///// Добавить токен киви в бд
+        ///// </summary>
+        ///// <returns></returns>
+        //private async Task<IActionResult> AddQiwiApiKey()
+        //{
+        //    using (MarketBotDbContext db = new MarketBotDbContext())
+        //    {
+        //        var qiwi = db.PaymentType.Where(q => q.Id == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi)).FirstOrDefault();
 
-                if (qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.PaymentTypeConfig.OrderByDescending(q=>q.Id).FirstOrDefault().Login, base.ReplyToMessageText))
-                {
-                    qiwi.PaymentTypeConfig.OrderByDescending(q => q.Id).FirstOrDefault().Pass = base.ReplyToMessageText;
-                    qiwi.Enable = true;
-                    db.SaveChanges();
-                    await SendMessage(new BotMessage { TextMessage = "Успех!" });
-                    return await SendQiwiInfo();
-                }
+        //        if (qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.PaymentTypeConfig.OrderByDescending(q=>q.Id).FirstOrDefault().Login, base.ReplyToMessageText))
+        //        {
+        //            qiwi.PaymentTypeConfig.OrderByDescending(q => q.Id).FirstOrDefault().Pass = base.ReplyToMessageText;
+        //            qiwi.Enable = true;
+        //            db.SaveChanges();
+        //            await SendMessage(new BotMessage { TextMessage = "Успех!" });
+        //            return await SendQiwiInfo();
+        //        }
 
-                else
-                {
-                    await SendMessage(new BotMessage { TextMessage = "Не удалось подключиться к API QIWI" });
-                    await ForceReplyBuilder(EnterQiwiApi);
-                    return NotFoundResult;
-                }
-            }
-        }
+        //        else
+        //        {
+        //            await SendMessage(new BotMessage { TextMessage = "Не удалось подключиться к API QIWI" });
+        //            await ForceReplyBuilder(EnterQiwiApi);
+        //            return NotFoundResult;
+        //        }
+        //    }
+        //}
 
-        /// <summary>
-        /// Отпраявляем сообщение с текущими настройками киви кошелька
-        /// </summary>
-        /// <returns></returns>
-        private async Task<IActionResult> SendQiwiInfo()
-        {
+        ///// <summary>
+        ///// Отпраявляем сообщение с текущими настройками киви кошелька
+        ///// </summary>
+        ///// <returns></returns>
+        //private async Task<IActionResult> SendQiwiInfo()
+        //{
                     
-            if(AdminQiwiSettingsMsg!=null && await SendMessage(AdminQiwiSettingsMsg.BuildMessage()) !=null)
-                return OkResult;
+        //    if(AdminQiwiSettingsMsg!=null && await SendMessage(AdminQiwiSettingsMsg.BuildMessage()) !=null)
+        //        return OkResult;
 
-            else
-                return NotFoundResult;
-        }
+        //    else
+        //        return NotFoundResult;
+        //}
 
         /// <summary>
         /// Активировать / Деактивировать метод оплаты
@@ -955,6 +941,17 @@ namespace MyTelegramBot.Bot.AdminModule
             {
                 var admin = db.Admin.Where(a => a.FollowerId == FollowerId && a.Enable).Include(a=>a.AdminKey).Include(a=>a.Follower).FirstOrDefault();
 
+                Admin adminnew = new Admin
+                {
+                    AdminKeyId = adminKey.Id,
+                    FollowerId = FollowerId,
+                    DateAdd = DateTime.Now,
+                    NotyfiActive = true,
+                    Enable = true,
+
+                };
+
+
                 if (admin != null)
                     return await SendAdminControlPanelMsg();
 
@@ -965,7 +962,8 @@ namespace MyTelegramBot.Bot.AdminModule
                         FollowerId = FollowerId,
                         DateAdd = DateTime.Now,
                         AdminKeyId = adminKey.Id,
-                        Enable = true
+                        Enable = true,
+                        NotyfiActive=true
 
                     };
                    

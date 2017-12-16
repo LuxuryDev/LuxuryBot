@@ -34,7 +34,7 @@ namespace MyTelegramBot.Bot
 
         public async override Task<IActionResult> Response()
         {
-            if (base.CommandName == "/help")
+            if (base.CommandName == "/help" || base.CommandName == "Help")
             {
                 await SendMessage(new BotMessage { TextMessage = "Техническая поддержка." });
                 await ForceReplyBuilder("Опишите вашу проблему");

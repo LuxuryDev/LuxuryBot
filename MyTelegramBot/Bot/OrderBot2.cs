@@ -566,7 +566,8 @@ namespace MyTelegramBot.Bot
 
             await AnswerCallback(mess.TextMessage, true);
 
-            await OrderRedirectToAdmins(mess.Order.Id, mess.Order);
+            if(mess.Order.Paid==true)
+                await OrderRedirectToAdmins(mess.Order.Id);
 
             return OkResult;
         }
