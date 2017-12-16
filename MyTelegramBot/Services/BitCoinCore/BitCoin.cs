@@ -5,6 +5,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyTelegramBot.Services.BitCoinCore
 {
@@ -78,6 +79,40 @@ namespace MyTelegramBot.Services.BitCoinCore
             catch
             {
                 return default(TransactionInfo);
+            }
+        }
+
+        public double GetBalance(string Account)
+        {
+            try
+            {
+                var res = RequestRpcServer<ResultResponse>("getreceivedbyaddress", Account);
+
+                if (res != null)
+                    return Convert.ToDouble(res.result.Replace('.', ','));
+
+                else
+                    return 0.0;
+            }
+
+            catch
+            {
+                return 0.0;
+            }
+        }
+
+        public List<Listtransactions> GetListTransactions(string Account)
+        {
+            try
+            {
+                var list = RequestRpcServer<TransactionInfoList>("listtransactions", "*");
+                return list.result.Where(l => l.address == Account).ToList();
+
+            }
+
+            catch
+            {
+                return null;
             }
         }
 

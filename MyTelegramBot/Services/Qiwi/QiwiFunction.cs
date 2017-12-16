@@ -19,19 +19,17 @@ namespace MyTelegramBot.Services.Qiwi
         private static HttpClient _httpClient;
 
 
-        public static async Task<PaymentHistory.DataItem> SearchPayment (int OrderNumber, string token, string telephone)
+        public static async Task<PaymentHistory.DataItem> SearchPayment (string Comment, string token, string telephone)
         {
 
             try
             {
-                telephone = "79513022981";
                 QiwiApiSharp.Enumerations.Source[] source = new QiwiApiSharp.Enumerations.Source[1];
                 source[0] = QiwiApiSharp.Enumerations.Source.QW_RUB;
 
                 Initialize(token);
                 var history = await PaymentHistoryAsync(telephone, 10, Operation.IN, source);
-                string commet = Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(), OrderNumber.ToString());
-                var payment= history.data.Where(h => h.comment == commet).FirstOrDefault();
+                var payment= history.data.Where(h => h.comment == Comment).FirstOrDefault();
                 return payment;
             }
 

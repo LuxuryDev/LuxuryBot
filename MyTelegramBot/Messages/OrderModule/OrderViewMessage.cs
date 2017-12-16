@@ -158,7 +158,7 @@ namespace MyTelegramBot.Messages
 
 
             if (Order.FeedBack != null  && Order.Paid == true 
-                || Order.Paid==false) // Отзыва есть, заказ оплачен или заказ не оплачен
+                || Order.Paid==false || Order.Paid==true) // Отзыва есть, заказ оплачен или заказ не оплачен
                 base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     new[]{
                                 new[]
@@ -178,7 +178,7 @@ namespace MyTelegramBot.Messages
                                     },
                     });
 
-            if (Order.Invoice == null && Order.OrderDone.Count == 0) // Метод оплаты при получении, заказ не выполнен
+            if (Order.InvoiceId == null && Order.OrderDone.Count == 0) // Метод оплаты при получении, заказ не выполнен
                 base.MessageReplyMarkup = null;
 
 

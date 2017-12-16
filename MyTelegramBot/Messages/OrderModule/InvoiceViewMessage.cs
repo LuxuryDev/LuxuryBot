@@ -34,7 +34,7 @@ namespace MyTelegramBot.Messages
             else
                 BackBtn = new InlineKeyboardCallbackButton("Вернуться к заказу", BuildCallData(BackCmdName, OrderBot.ModuleName, OrderId));
 
-            CheckPayBtn = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd,OrderBot.ModuleName ,invoice.Id));
+            CheckPayBtn = new InlineKeyboardCallbackButton("Я оплатил", BuildCallData(Bot.OrderBot.CheckPayCmd,OrderBot.ModuleName , OrderId));
         }
 
 

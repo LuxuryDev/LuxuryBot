@@ -53,6 +53,8 @@ namespace MyTelegramBot.Bot
 
         private InvoiceViewMessage InvoiceViewMsg { get; set; }
 
+        private CheckPayMessage CheckPayMsg { get; set; }
+
         private int OrderId { get; set; }
 
         private Orders Order { get; set; }
@@ -150,6 +152,7 @@ namespace MyTelegramBot.Bot
                         Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.OrderConfirm).
                             Include(o => o.OrderDone).Include(o => o.OrderDeleted).
                             Include(o => o.OrderProduct).Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.Invoice).FirstOrDefault();
+                    CheckPayMsg = new CheckPayMessage(Order);
 
                 }
 
@@ -217,6 +220,9 @@ namespace MyTelegramBot.Bot
 
                 case "ViewInvoice":
                     return await SendInvoice();
+
+                case CheckPayCmd:
+                    return await CheckPay();
 
                 default:
                     break;

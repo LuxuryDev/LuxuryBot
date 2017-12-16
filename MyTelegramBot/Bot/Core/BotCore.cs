@@ -579,12 +579,12 @@ namespace MyTelegramBot.Bot
             }
         }
 
-        protected async Task<bool> AnswerCallback(string text = null)
+        protected async Task<bool> AnswerCallback(string text = null, bool ShowAlert=false)
         {
             try
             {
                 if (this.Update.CallbackQuery != null && this.CallBackQueryId != null && text != null)
-                    return await Telegram.AnswerCallbackQueryAsync(this.CallBackQueryId, text);
+                    return await Telegram.AnswerCallbackQueryAsync(this.CallBackQueryId, text, ShowAlert);
 
                 if (this.Update.CallbackQuery != null && this.CallBackQueryId != null && text == null)
                     return await Telegram.AnswerCallbackQueryAsync(this.CallBackQueryId);

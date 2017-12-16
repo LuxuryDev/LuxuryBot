@@ -6,6 +6,7 @@ using Telegram.Bot.Types.InlineKeyboardButtons;
 using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace MyTelegramBot.Messages
 {
     /// <summary>
@@ -31,6 +32,7 @@ namespace MyTelegramBot.Messages
                     Products = db.Product.Where(p => p.Enable == true).Include(p => p.ProductPrice).Include(p => p.Category).Include(p => p.Stock).ToList();
                     Categorys = db.Category.Where(c => c.Enable).Include(c => c.Product).GroupBy(c => c.Id).ToList();
                 }
+
                 string message = Bold("Ассортимент");
 
                 foreach (var cat in Categorys)
@@ -46,7 +48,8 @@ namespace MyTelegramBot.Messages
 
                             if (product.Enable==true) // провереряем указана ли цена
                             {
-                                message += NewLine() + counter.ToString() + ") " + product.Name + "  " + product.ProductPrice.Where(p => p.Enabled).FirstOrDefault().Value + " руб.";
+                                message += NewLine() + counter.ToString() + ") " + product.Name + "  " + product.ProductPrice.Where(p => p.Enabled).FirstOrDefault().Value 
+                                   +Connection.getConnection().Currency.Where(c=>c.Id== product.ProductPrice.Where(p => p.Enabled).FirstOrDefault().CurrencyId).FirstOrDefault().ShortName ;
 
                                 if (product.Stock != null && product.Stock.Count == 0 ||
                                 product.Stock != null && product.Stock.Count > 0 && product.Stock.OrderByDescending(s => s.Id).FirstOrDefault().Balance == 0)

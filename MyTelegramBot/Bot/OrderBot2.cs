@@ -559,114 +559,18 @@ namespace MyTelegramBot.Bot
         }
 
 
-        /// <summary>
-        /// Проверяем поступил ли платеж на киви кошелек
-        /// </summary>
-        /// <returns></returns>
-        //private async Task<IActionResult> CheckPay()
-        //{
-        //    try
-        //    {
-        //        using (MarketBotDbContext db = new MarketBotDbContext())
-        //        {
-        //            var order = db.Orders.Where(o => o.Id == OrderId && o.FollowerId == FollowerId).
-        //                Include(o => o.OrderConfirm).
-        //                Include(o => o.OrderDeleted).
-        //                Include(o => o.OrderDone).
-        //                Include(o => o.FeedBack).
-        //                Include(o => o.OrderProduct).
-        //                Include(o => o.OrderAddress).FirstOrDefault();
 
-        //            double total = GeneralFunction.OrderTotalPrice(order.OrderProduct.ToList());
-        //            var QiwiPayment = await Services.Qiwi.QiwiFunction.SearchPayment(Convert.ToInt32(order.Number), db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Token, db.QiwiApi.Where(q => q.Enable == true).FirstOrDefault().Telephone);
+        private async Task<IActionResult> CheckPay()
+        {
+           var mess= await CheckPayMsg.BuildMessage();
 
-        //            var payments = db.OrderPayment.Where(o => o.OrderId == order.Id).Include(o => o.Payment).ToList();
+            await AnswerCallback(mess.TextMessage, true);
 
-        //            double debit = 0.0;
+            await OrderRedirectToAdmins(mess.Order.Id, mess.Order);
 
-        //            foreach (OrderPayment pay in payments)
-        //                debit += pay.Payment.Summ;
+            return OkResult;
+        }
 
 
-        //            if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
-        //            {
-        //                AddPaymentToDb(order.Id, QiwiPayment.txnId, QiwiPayment.sum.amount,QiwiPayMethodId,true);
-        //                OrderViewMsg = new Messages.OrderViewMessage(order.Id);
-        //                await base.EditMessage(new BotMessage { TextMessage = "Платеж подтвержден!" , CallBackTitleText="" });
-        //                await OrderRedirectToAdmins(order.Id,order);
-
-        //            }
-
-        //            if (QiwiPayment != null && total <= debit + QiwiPayment.sum.amount && QiwiPayment.status != "SUCCESS")
-        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж еще не подтвержден!", CallBackTitleText = "" });
-
-
-        //            if (QiwiPayment != null && total > debit + QiwiPayment.sum.amount && QiwiPayment.status == "SUCCESS")
-        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Необходимо доплатить еще " + (total - QiwiPayment.sum.amount).ToString() + " руб.", CallBackTitleText = "" });
-
-        //            if (QiwiPayment == null)
-        //                await base.SendMessage(ChatId, new BotMessage { TextMessage = "Платеж не найден!", CallBackTitleText = "" });
-
-        //            //if (QiwiPayment == null)
-        //            //{
-        //            //    AddPaymentToDb(order.Id, 1111, 123,QiwiPayMethodId,true);
-        //            //    OrderViewMsg = new Messages.OrderViewMessage(order);
-        //            //    await base.EditMessage(OrderViewMsg.BuildMessage());
-        //            //    await OrderRedirectToAdmins(order.Id, order);
-        //            //}
-
-        //            return OkResult;
-        //        }
-        //    }
-
-        //    catch
-        //    {
-        //        return NotFoundResult;
-
-        //    }
-        //}
-
-        /// <summary>
-        /// Заносим инф о платеже в БЖ
-        /// </summary>
-        /// <param name="orderID">id заказа</param>
-        /// <param name="TxId">id транзакции в киви</param>
-        /// <param name="Summ">сумма</param>
-        /// <returns></returns>
-        //private OrderPayment AddPaymentToDb(int orderID, long TxId, double Summ,int PaymentTypeId=2, bool Paid=true)
-        //{
-        //    using (MarketBotDbContext db = new MarketBotDbContext())
-        //    {
-        //        var order = db.Orders.Where(o => o.Id == orderID).FirstOrDefault();
-
-        //        order.Paid = Paid;
-
-        //        Payment payment = new Payment
-        //        {
-        //            DataAdd = DateTime.Now,
-        //            Comment = Bot.GeneralFunction.BuildPaymentComment(Bot.GeneralFunction.GetBotName(), order.Number.ToString()),
-        //            PaymentTypeId = PaymentTypeId,
-        //            TxId = TxId.ToString(),
-        //            Summ = Summ
-
-        //        };
-
-        //        db.Payment.Add(payment);
-
-        //        db.SaveChanges();
-
-        //        OrderPayment orderPayment = new OrderPayment
-        //        {
-        //            OrderId = order.Id,
-        //            PaymentId = payment.Id
-        //        };
-
-        //        db.OrderPayment.Add(orderPayment);
-
-        //        db.SaveChanges();
-
-        //        return orderPayment;
-        //    }
-        //}
     }
 }

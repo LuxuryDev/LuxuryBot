@@ -13,5 +13,7 @@ namespace MyTelegramBot.Services
         T GetBlockInfo<T>(string BlockHash);
 
         IList<string> GetAddressByAccount(string Account=null);
+
+        double GetBalance(string Account);
     }
 }

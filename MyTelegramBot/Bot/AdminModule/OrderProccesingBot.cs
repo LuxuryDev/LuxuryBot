@@ -35,6 +35,8 @@ namespace MyTelegramBot.Bot.AdminModule
         /// </summary>
         private FeedBackOfferMessage FeedBackOfferMsg { get; set; }
 
+        private InvoiceViewMessage InvoiceViewMsg { get; set; }
+
         private int OrderId { get; set; }
 
         private Orders Order { get; set; }
@@ -128,8 +130,9 @@ namespace MyTelegramBot.Bot.AdminModule
                     using (MarketBotDbContext db = new MarketBotDbContext())
                         Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.OrderConfirm).
                             Include(o => o.OrderDone).Include(o => o.OrderDeleted).Include(o => o.OrderProduct).
-                            Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.OrderAddress).Include(o=>o.OrdersInWork).FirstOrDefault();
+                            Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.OrderAddress).Include(o=>o.Invoice).Include(o=>o.OrdersInWork).FirstOrDefault();
 
+                    InvoiceViewMsg = new InvoiceViewMessage(Order.Invoice, Order.Id);
                 }
 
             }
@@ -183,6 +186,9 @@ namespace MyTelegramBot.Bot.AdminModule
                     case "FreeOrder":
                         return await FreeOrder();
 
+                    case "ViewInvoice":
+                        return await SendInvoice();
+
                     default:
                         break;
 
@@ -220,6 +226,24 @@ namespace MyTelegramBot.Bot.AdminModule
 
         }
 
+        private async Task<IActionResult> SendInvoice()
+        {
+            try
+            {
+                if (this.Order.Invoice != null && InvoiceViewMsg!=null)
+                    await EditMessage(InvoiceViewMsg.BuildMessage());
+
+                if (this.Order.Invoice == null)
+                    await base.AnswerCallback("Счет отсутствует. Способ оплаты при получении", true);
+
+                return OkResult;
+            }
+
+            catch
+            {
+                return NotFoundResult;
+            }
+        }
 
         private async Task<IActionResult> GetOrder()
         {
@@ -389,9 +413,10 @@ namespace MyTelegramBot.Bot.AdminModule
 
                     var InWorkNow = Order.OrdersInWork.OrderByDescending(o => o.Id).FirstOrDefault();
 
+                    //заказ не находится ни у кого в обработке
                     if (Order!=null  && InWorkNow==null && db.SaveChanges() > 0 ||
                         Order != null && InWorkNow != null&&
-                        InWorkNow.FollowerId!=FollowerId && InWorkNow.InWork==false && db.SaveChanges() > 0)
+                        InWorkNow.InWork==false && db.SaveChanges() > 0)
                     {
                         Order.OrdersInWork.Add(inWork);
                         OrderAdminMsg = new AdminOrderMessage(Order,FollowerId);
@@ -400,6 +425,7 @@ namespace MyTelegramBot.Bot.AdminModule
                         await Processing.NotifyChanges(notify, this.Order.Id);
                     }
 
+                    //заказ уже кем то обрабатывается
                     if (InWorkNow != null && InWorkNow.FollowerId != FollowerId && InWorkNow.InWork==true)
                         await SendMessage(new BotMessage { TextMessage = "Заявка в обработке у " + GeneralFunction.FollowerFullName(InWorkNow.FollowerId) });
 

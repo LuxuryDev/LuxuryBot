@@ -87,8 +87,17 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o => o.OrderProduct).
                     Include(o => o.OrderAddress).
                     Include(o=>o.OrdersInWork).
+                    Include(o=>o.Invoice).
                     FirstOrDefault();
-               
+
+                ///////////Провереряем какой метод оплаты и наличие платежей////////////
+                if (Order.Invoice != null)
+                    PaymentMethodName = "Метод оплаты";
+                
+
+                if (Order != null && Order.OrderAddress == null)
+                    Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).FirstOrDefault();
+
                 var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
                 double total = 0.0;
@@ -96,11 +105,7 @@ namespace MyTelegramBot.Messages.Admin
                 int counter = 0;
                 string Paid = "";
 
-                ///////////Провереряем какой метод оплаты и наличие платежей////////////
-                if (Order.Invoice!= null)
-                {
-                    PaymentMethodName = "Метод оплаты";
-                }
+
 
 
                 if (Order.BotInfo == null)
@@ -111,7 +116,10 @@ namespace MyTelegramBot.Messages.Admin
 
                 else
                     Paid = "Не оплачено";
-              
+
+
+                if (Order.OrderProduct == null || Order.OrderProduct != null && Order.OrderProduct.Count == 0)
+                    Order.OrderProduct = db.OrderProduct.Where(o => o.OrderId == Order.Id).ToList();
 
                 foreach (OrderProduct p in Order.OrderProduct) // Вытаскиваем все товары из заказа
                 {
@@ -163,7 +171,8 @@ namespace MyTelegramBot.Messages.Admin
 
                 SetInlineKeyBoard();
 
-                return this; }
+                return this;
+            }
         }
 
         private int WhoInWork(Orders order)
@@ -199,7 +208,7 @@ namespace MyTelegramBot.Messages.Admin
 
             ConfirmBtn = new InlineKeyboardCallbackButton("Согласован"+ " \ud83e\udd1d", BuildCallData(OrderProccesingBot.CmdConfirmOrder, OrderProccesingBot.ModuleName, Order.Id));
 
-            ViewPaymentBtn = new InlineKeyboardCallbackButton("Посмотреть платеж" + " \ud83d\udcb5", BuildCallData("ViewPayment", OrderProccesingBot.ModuleName, Order.Id));
+            ViewPaymentBtn = new InlineKeyboardCallbackButton("Посмотреть счет" + " \ud83d\udcb5", BuildCallData("ViewInvoice", OrderProccesingBot.ModuleName, Order.Id));
 
             TakeOrderBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData("TakeOrder", OrderProccesingBot.ModuleName, Order.Id));
 
