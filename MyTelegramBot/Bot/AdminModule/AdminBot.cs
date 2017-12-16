@@ -38,6 +38,8 @@ namespace MyTelegramBot.Bot.AdminModule
 
         private AdminControlMessage AdminControlMsg { get; set; }
 
+        private AvailableCitiesMessage AvailableCitiesMsg { get; set; }
+
         public const string ProductCreateCmd = "ProductCreate";
 
         public const string ProductEditCmd = "ProductEdit";
@@ -104,6 +106,8 @@ namespace MyTelegramBot.Bot.AdminModule
 
         private const string RevomeGroup = "/delchat";
 
+        private const string RemoveAvailableCityCmd = "/cityremove";
+
         private int Parametr { get; set; }
         public AdminBot(Update _update) : base(_update)
         {
@@ -123,7 +127,7 @@ namespace MyTelegramBot.Bot.AdminModule
                 AdminPayMethodsSettingsMsg = new AdminPayMethodsSettings();
                 AdminControlMsg = new AdminControlMessage();
                 StatisticMsg = new StatisticMessage();
-
+                AvailableCitiesMsg = new AvailableCitiesMessage();
                 if (base.Argumetns.Count > 0)
                 {
                     Parametr = base.Argumetns[0];
@@ -244,9 +248,22 @@ namespace MyTelegramBot.Bot.AdminModule
 
                     case AddGroup:
                        return await AddBotToChat();
+
+                    case "/cities":
+                        return await SendAvailableCities();
+
+                    case "/newcity":
+                        return await ForceReplyBuilder("Введите название города");
+
                     default:
                         break;
                 }
+
+                if (base.OriginalMessage.Contains("Введите название города"))
+                    return await AddAvailableCity();
+
+                if (base.CommandName.Contains(RemoveAvailableCityCmd))
+                    return await RemoveAvailableCity();
 
                 if (base.OriginalMessage.Contains(ForceReplyVk))
                     return await UpdateVk();
@@ -266,6 +283,8 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (base.OriginalMessage == EnterQiwiApi)
                     return await AddQiwiApiKey();
 
+
+
                 else
                     return null;
             }
@@ -277,6 +296,79 @@ namespace MyTelegramBot.Bot.AdminModule
 
                 else
                     return null;
+            }
+        }
+
+        /// <summary>
+        /// Отправить сообщение со списком доступных городов
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> SendAvailableCities()
+        {
+            try
+            {
+               await SendMessage(AvailableCitiesMsg.BuildMessage());
+               return OkResult;
+            }
+
+            catch
+            {
+                return NotFoundResult;
+            }
+        }
+
+        /// <summary>
+        /// Добавить новый город к списку доступных
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> AddAvailableCity()
+        {
+            try
+            {
+                using (MarketBotDbContext db=new MarketBotDbContext())
+                {
+                    AvailableСities availableСities = new AvailableСities
+                    {
+                        CityName = ReplyToMessageText,
+                        Timestamp = DateTime.Now
+                    };
+
+                    db.AvailableСities.Add(availableСities);
+                    db.SaveChanges();
+
+                    return await SendAvailableCities();
+                }
+            }
+
+            catch
+            {
+                return NotFoundResult;
+            }
+        }
+
+        private async Task<IActionResult> RemoveAvailableCity()
+        {
+            try
+            {
+                int id = Convert.ToInt32(CommandName.Substring(RemoveAvailableCityCmd.Length));
+
+                using(MarketBotDbContext db=new MarketBotDbContext())
+                {
+                    var city = db.AvailableСities.Where(c => c.Id == id).FirstOrDefault();
+
+                    if (city != null)
+                    {
+                        db.AvailableСities.Remove(city);
+                        db.SaveChanges();
+                    }
+
+                    return await SendAvailableCities();
+                }
+            }
+
+            catch
+            {
+                return NotFoundResult;
             }
         }
 
