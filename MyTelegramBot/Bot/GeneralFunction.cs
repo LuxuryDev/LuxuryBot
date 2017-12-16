@@ -160,5 +160,44 @@ namespace MyTelegramBot.Bot
                 }
             }
         }
+
+        public static bool CheckAvailableCity(string name)
+        {
+            try
+            {
+                using (MarketBotDbContext db = new MarketBotDbContext())
+                {
+                    var city = db.AvailableСities.Where(c => c.CityName == name).FirstOrDefault();
+
+                    if (city != null)
+                        return true;
+
+                    else
+                        return false;
+                }
+            }
+
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static string AvailableCityList()
+        {
+            using (MarketBotDbContext db=new MarketBotDbContext())
+            {
+                var cities= db.AvailableСities.ToList();
+
+                string value = "";
+
+                foreach(AvailableСities ac in cities)
+                {
+                    value += ac.CityName + ",";
+                }
+
+                return value.Substring(0,value.Length-1);
+            }
+        }
     }
 }

@@ -48,9 +48,16 @@ namespace MyTelegramBot.Messages
             var street = map.response.GeoObjectCollection.featureMember.Where(f => f.GeoObject.metaDataProperty.GeocoderMetaData.kind == "street").ToList();
 
             var House = map.response.GeoObjectCollection.featureMember.Where(h => h.GeoObject.metaDataProperty.GeocoderMetaData.kind == "house").ToList();
-           
 
-            if (country== "Россия" && city!=null && city.Count>0 && street!=null && street.Count>0 && House!=null && House.Count>0 && FollowerId>0)
+            bool CheckAvailableCity=false;
+
+            if (city != null && city.Count > 0)
+                CheckAvailableCity = GeneralFunction.CheckAvailableCity(city.ElementAt(0).GeoObject.name);
+
+            if (CheckAvailableCity == false)
+                base.TextMessage = "Ваш город не поддерживается. Поддерживаются только следующие города: " +GeneralFunction.AvailableCityList();
+
+            if (CheckAvailableCity && city !=null && city.Count>0 && street!=null && street.Count>0 && House!=null && House.Count>0 && FollowerId>0)
             {
                 string HouseNumber = House[0].GeoObject.name.Substring(street[0].GeoObject.name.Length + 2);
 
@@ -73,8 +80,6 @@ namespace MyTelegramBot.Messages
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(AnswerBtn);
             }
 
-            if(country != "Россия")
-                base.TextMessage = "Доставка только по России";
 
             if (city == null || city != null && city.Count == 0)
                 base.TextMessage = "Не удалось определить населенный пункт";
@@ -234,5 +239,6 @@ namespace MyTelegramBot.Messages
 
         }
 
+     
     }
 }
