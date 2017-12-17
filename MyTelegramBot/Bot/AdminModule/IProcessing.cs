@@ -39,6 +39,12 @@ namespace MyTelegramBot.Bot.AdminModule
         /// <returns></returns>
         Task<bool> NotifyChanges(string text, int Id);
 
+        /// <summary>
+        /// Находится ли заявка в обработке у кого-то другого
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="t"></param>
+        /// <returns></returns>
         Task<bool> CheckInWorkOfAnotherUser<T>(T t);
 
     }

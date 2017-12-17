@@ -108,6 +108,9 @@ namespace MyTelegramBot.Bot.AdminModule
 
         private const string RemoveAvailableCityCmd = "/cityremove";
 
+        private const string RemoveOperatorCmd = "/removeoperator";
+
+
         private int Parametr { get; set; }
         public AdminBot(Update _update) : base(_update)
         {
@@ -271,6 +274,9 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (base.OriginalMessage.Contains(ForceReplyChannel))
                     return await UpdateChannel();
 
+                if (base.CommandName.Contains(RemoveOperatorCmd))
+                    return await RemoveOperator();
+
                 else
                     return null;
             }
@@ -282,6 +288,36 @@ namespace MyTelegramBot.Bot.AdminModule
 
                 else
                     return null;
+            }
+        }
+
+        /// <summary>
+        /// удалить оператора
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> RemoveOperator()
+        {
+            try
+            {
+                int id = Convert.ToInt32(base.CommandName.Substring(RemoveOperatorCmd.Length));
+                using(MarketBotDbContext db=new MarketBotDbContext())
+                {
+                  var admin= db.Admin.Where(a => a.Id == id).FirstOrDefault();
+
+                    if (admin != null)
+                    {
+                        db.Admin.Remove(admin);
+                        db.SaveChanges();
+                        
+                    }
+
+                    return await SendOperatorList();
+                }
+            }
+
+            catch
+            {
+                return await SendOperatorList();
             }
         }
 
@@ -332,6 +368,10 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
+        /// <summary>
+        /// Удалить город из списка доступных
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> RemoveAvailableCity()
         {
             try
@@ -417,6 +457,10 @@ namespace MyTelegramBot.Bot.AdminModule
            
         }
 
+        /// <summary>
+        /// Отправить сообщение со списком всех операторов
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> SendOperatorList()
         {
             try
@@ -434,6 +478,10 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
+        /// <summary>
+        /// Отправить сообщение со списком способов оплаты
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> SendPaymentMethods()
         {
             try
@@ -448,6 +496,10 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
+        /// <summary>
+        /// Отправить сообещние с текущими остатками по товарам
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> SendCurrentStock()
         {
             try
@@ -610,6 +662,9 @@ namespace MyTelegramBot.Bot.AdminModule
         /// Активировать / Деактивировать метод оплаты
         /// </summary>
         /// <returns></returns>
+        /// 
+
+
         private async Task<IActionResult> PaymentMethodEnable()
         {
             //переписать
