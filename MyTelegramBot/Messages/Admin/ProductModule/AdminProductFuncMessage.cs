@@ -107,7 +107,7 @@ namespace MyTelegramBot.Messages.Admin
                     ProductEditEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId));
 
                 if (Product.Enable == true)
-                    OpenProductBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(ProductBot.GetProductCmd, ProductEditBot.ModuleName, Product.Id));
+                    OpenProductBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(ProductBot.GetProductCmd, ProductBot.ModuleName, Product.Id));
 
                        
 

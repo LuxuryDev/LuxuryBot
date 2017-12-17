@@ -23,17 +23,19 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton OpenBtn { get; set; }
 
+        MarketBotDbContext db { get; set; }
+
         public ProductSearchInline(string Query)
         {
             this.Query = Query;
+            db = new MarketBotDbContext();
         }
 
         public InlineQueryResult[] ProductInlineSearch()
         {
             List<Product> product = new List<MyTelegramBot.Product>();
             SqlParameter param = new SqlParameter("@name", "%" + Query + "%");
-            using (MarketBotDbContext db = new MarketBotDbContext())
-                product = db.Product.FromSql("SELECT * FROM Product WHERE Name LIKE @name and Enable=1", param).
+            product = db.Product.FromSql("SELECT * FROM Product WHERE Name LIKE @name and Enable=1", param).
                     Include(p=>p.ProductPrice).Include(p=>p.Stock).Include(p=>p.ProductPrice).Include(p=>p.Unit).ToList();
 
 
@@ -47,13 +49,19 @@ namespace MyTelegramBot.Messages
                 textcontent[i] = new InputTextMessageContent();
                 textcontent[i].DisableWebPagePreview = true;
                 textcontent[i].MessageText = product[i].ToString();
-                
+
+                product[i].ProductPrice.Where(p => p.Enabled).FirstOrDefault().Currency 
+                    = db.Currency.Where(c => c.Id ==product[i].ProductPrice.Where(p => p.Enabled).FirstOrDefault().CurrencyId).FirstOrDefault();
 
                 article[i] = new InlineQueryResultArticle();
                 article[i].HideUrl = true;
                 article[i].Id = product[i].Id.ToString();
                 article[i].Title = product[i].Name;
-                article[i].Description = product[i].Name+" " +product[i].ProductPrice.Where(p=>p.Enabled).FirstOrDefault().Value.ToString() +" руб." + "\r\nНажмите сюда";
+                article[i].Description = product[i].Name+" " 
+                   +product[i].ProductPrice.Where(p=>p.Enabled).FirstOrDefault().Value.ToString() + " " 
+                   + product[i].ProductPrice.Where(p => p.Enabled).FirstOrDefault().Currency.ShortName
+                   + "\r\nНажмите сюда";
+
                 article[i].ThumbUrl = product[i].PhotoUrl;
                 article[i].Url = product[i].TelegraphUrl;
                 article[i].InputMessageContent = textcontent[i];
