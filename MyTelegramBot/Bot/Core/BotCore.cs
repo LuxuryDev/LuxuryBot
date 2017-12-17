@@ -182,8 +182,6 @@ namespace MyTelegramBot.Bot
 
         protected abstract void Constructor();
 
-
-
         /// <summary>
         /// id пользователя в в БД
         /// </summary>
@@ -247,6 +245,10 @@ namespace MyTelegramBot.Bot
             }
         }
 
+        /// <summary>
+        /// Является ли тот кто отправил сообщение боту, владельцем данного бота
+        /// </summary>
+        /// <returns></returns>
         protected bool IsOwner()
         {
             if (BotInfo.OwnerChatId == ChatId)
@@ -257,7 +259,7 @@ namespace MyTelegramBot.Bot
         }
 
         /// <summary>
-        /// показать токен доступа в боту
+        /// Информация о боте
         /// </summary>
         /// <returns></returns>
         private BotInfo GetBotInfo()
@@ -455,6 +457,11 @@ namespace MyTelegramBot.Bot
             }
         }
 
+        /// <summary>
+        /// Изменить сообщение
+        /// </summary>
+        /// <param name="botMessage"></param>
+        /// <returns></returns>
         protected async Task<Message> EditMessage(BotMessage botMessage)
         {
             IReplyMarkup replyMarkup;
@@ -481,6 +488,11 @@ namespace MyTelegramBot.Bot
 
         }
 
+        /// <summary>
+        /// отправить фото
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         protected async Task<Message> SendPhoto(BotMessage message)
         {
             Message mess = new Message();
@@ -751,6 +763,11 @@ namespace MyTelegramBot.Bot
             
         }
 
+        /// <summary>
+        /// Вытащить файл с сервера телеграм по id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         protected async Task<Telegram.Bot.Types.File> GetFileAsync (string id)
         {
             try
@@ -766,7 +783,6 @@ namespace MyTelegramBot.Bot
 
         private int HowMediaType(Message message)
         {
-
 
             if (message.Photo != null)
                 return 1;
@@ -803,7 +819,6 @@ namespace MyTelegramBot.Bot
 
             if (mediaFile == EnumMediaFile.VideoNote)
                 return 5;
-
 
             if (mediaFile == EnumMediaFile.Document)
                 return 6;
@@ -1043,6 +1058,11 @@ namespace MyTelegramBot.Bot
             }
         }
 
+        /// <summary>
+        /// Отправить сообщение в групповой чат в котором находятся все операторы
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         private async Task<Message> SendMessageToGroupChat(BotMessage message)
         {
             try
