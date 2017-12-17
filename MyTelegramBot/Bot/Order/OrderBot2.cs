@@ -571,12 +571,18 @@ namespace MyTelegramBot.Bot
 
         private async Task<IActionResult> CheckPay()
         {
+            
+
            var mess= await CheckPayMsg.BuildMessage();
 
             await AnswerCallback(mess.TextMessage, true);
 
-            if(mess.Order.Paid==true)
+            if (mess.Order.Paid == true)
+            {
+                InvoiceViewMsg = new InvoiceViewMessage(mess.Order.Invoice, mess.Order.Id, "BackToMyOrder");
+                await EditMessage(InvoiceViewMsg.BuildMessage());
                 await OrderRedirectToAdmins(mess.Order.Id);
+            }
 
             return OkResult;
         }

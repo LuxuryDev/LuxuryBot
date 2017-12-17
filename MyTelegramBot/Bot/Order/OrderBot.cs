@@ -95,10 +95,6 @@ namespace MyTelegramBot.Bot
 
         public const string MyOrder = "/myorder";
 
-        /// <summary>
-        /// Назад
-        /// </summary>
-        public const string CmdBackToOrder = "BackToOrder";
 
         private const string ForceReplyAddFeedBack = "Добавить отзыв к заказу:";
 

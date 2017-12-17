@@ -65,7 +65,7 @@ namespace MyTelegramBot.Messages
                                     NewLine()+  Bold("Способ оплаты:")+PaymentMethod+
                                     NewLine() + Bold("Кoмментарий к заказу: ") + Desc;
 
-                        SendBtn = new InlineKeyboardCallbackButton("Сохрнаить" + " \ud83d\udcbe", BuildCallData(Bot.OrderBot.CmdOrderSave,OrderBot.ModuleName));
+                        SendBtn = new InlineKeyboardCallbackButton("Сохранить" + " \ud83d\udcbe", BuildCallData(Bot.OrderBot.CmdOrderSave,OrderBot.ModuleName));
                         DescEditorBtn = new InlineKeyboardCallbackButton("Комментарий к заказу" + " \ud83d\udccb", BuildCallData(Bot.OrderBot.CmdOrderDesc, OrderBot.ModuleName));
                         AddressEditor = new InlineKeyboardCallbackButton("Изменить адрес"+ " \ud83d\udd8a", BuildCallData(Bot.OrderBot.CmdAddressEditor, OrderBot.ModuleName));
                         PaymentMethodEditor = new InlineKeyboardCallbackButton("Изменить способ оплаты" + " \ud83d\udd8a", BuildCallData("PaymentMethodEditor", OrderBot.ModuleName));

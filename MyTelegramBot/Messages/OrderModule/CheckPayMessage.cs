@@ -65,7 +65,7 @@ namespace MyTelegramBot.Messages
 
                 Payment payment = new Payment();
 
-                if (transaction != null && (Convert.ToDateTime(transaction.date) - invoice.CreateTimestamp).Value.Minutes <= invoice.LifeTimeDuration.Value.Minutes)
+                if (transaction != null && (Convert.ToDateTime(transaction.date) - invoice.CreateTimestamp).Value.TotalMinutes <= invoice.LifeTimeDuration.Value.TotalMinutes)
                 {
                     payment = AddPayment(invoice.Id, transaction.txnId.ToString(), transaction.sum.amount, Convert.ToDateTime(transaction.date));
 
@@ -84,6 +84,8 @@ namespace MyTelegramBot.Messages
                     
                 }
 
+                if (transaction == null)
+                    return "Платеж не найден!";
 
                 if((Convert.ToDateTime(transaction.date) - invoice.CreateTimestamp).Value.Minutes <= invoice.LifeTimeDuration.Value.Minutes)
                     return "Вы оплатили позже положеного времени. Свяжитесь с технической поддержкой!";
@@ -171,6 +173,8 @@ namespace MyTelegramBot.Messages
                 order.Paid = paid;
                 Invoice.Paid = paid;
                 int save = db.SaveChanges();
+                this.Order.Paid = paid;
+                this.Order.Invoice.Paid = paid;
                 return save;
             }
 
