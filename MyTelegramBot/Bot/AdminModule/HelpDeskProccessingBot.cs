@@ -358,7 +358,10 @@ namespace MyTelegramBot.Bot.AdminModule
                             AdminHelpDeskMsg = new AdminHelpDeskMessage(Help, FollowerId);
                             await EditMessage(await AdminHelpDeskMsg.BuldMessage());
                             await Processing.NotifyChanges("Заявка №" + Help.Number.ToString() + " закрыта. Пользователь: " + GeneralFunction.FollowerFullName(FollowerId), Help.Id);
-
+                            //Отправляем сообщение пользователю о том что его заявка закрыта
+                            long ChatId = db.Follower.Where(f => f.Id == Help.FollowerId).FirstOrDefault().ChatId;
+                            string text = "Заявка №" + Help.Number.ToString() + " Закрыта"+Bot.BotMessage.NewLine()+"Комментарий:"+answer.Text;
+                            await SendMessage(ChatId, new BotMessage { TextMessage = text });
                         }
 
                         return OkResult;
@@ -435,102 +438,6 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
-        ///// <summary>
-        ///// Заявка не обрабатывается ни одним из пользователей
-        ///// </summary>
-        ///// <param name="Help"></param>
-        ///// <returns></returns>
-        //private async Task<bool> CheckNotInWork(HelpDesk Help)
-        //{
-        //    if (Help != null && Help.InWork == false) // заявка ненаходится в обработке
-        //    {
-        //        await SendMessage(new BotMessage { TextMessage = "Необходимо взять заявку в обработку" });
-        //        return true;
-        //    }
-
-        //    else
-        //       return false;
-        //}
-
-        ///// <summary>
-        ///// Проверям находиться ли завявка в обработке у текущего пользователя
-        ///// </summary>
-        ///// <param name="Help"></param>
-        ///// <returns>вернет True если обрабатывается у текущего пользователем</returns>
-        //private async Task<bool> CheckInWork(HelpDesk Help)
-        //{
-        //    //у кого в работе в текущий момент
-        //    var in_work = Help.HelpDeskInWork.OrderByDescending(h => h.Id).FirstOrDefault();
-
-        //    if (in_work != null && in_work.FollowerId == FollowerId)
-        //        return true;
-
-        //    if (in_work != null && in_work.FollowerId != FollowerId)
-        //        return await CheckInWorkOfAnotherUser(in_work);
-
-        //    if (in_work == null && Help.InWork == false)
-        //        return await CheckNotInWork(Help);
-
-        //    else
-        //        return false;
-        //}
-
-        ///// <summary>
-        ///// Проверяет находится заявка в обработке у другого пользователя
-        ///// </summary>
-        ///// <param name="Help"></param>
-        ///// <returns></returns>
-        //private async Task<bool> CheckInWorkOfAnotherUser (HelpDeskInWork HelpInWork)
-        //{
-        //    if (HelpInWork != null && HelpInWork.FollowerId!=FollowerId)
-        //    //заявка в обрабтке у другого пользователя
-        //    {
-        //        await SendMessage(new BotMessage { TextMessage = "Заявка в обработке у пользователя: " + GeneralFunction.FollowerFullName(HelpInWork.FollowerId) });
-        //        return true;
-        //    }
-
-        //    else
-        //        return false;
-        //}
-
-        ///// <summary>
-        ///// Проверяем закрыта заявка или нет
-        ///// </summary>
-        ///// <param name="Help"></param>
-        ///// <returns></returns>
-        //private async Task<bool> CheckIsDone(HelpDesk Help)
-        //{
-        //    //заявка уже закрыта
-        //    if (Help != null && Help.Closed == true)
-        //    {
-        //        await SendMessage(new BotMessage { TextMessage = "Заявка уже закрыта" });
-        //        return true;
-        //    }
-
-        //    else
-        //        return false;
-        //}
-
-        ///// <summary>
-        ///// Увдомить всех пользвоателей об изменениях в заявке (новый коммент, заявка закрыта, взята кем то в обработку)
-        ///// </summary>
-        ///// <param name="text"></param>
-        ///// <param name="HelpDeskId"></param>
-        ///// <returns></returns>
-        //private async Task<bool> NotifyChanges(string text, int HelpDeskId)
-        //{
-        //    try
-        //    {
-        //        HelpDeskMiniViewMsg = new HelpDeskMiniViewMessage(text, HelpDeskId);
-        //        var mess = HelpDeskMiniViewMsg.BuildMessage();
-
-        //        return await SendMessageAllBotEmployeess(mess);
-        //    }
-
-        //    catch
-        //    {
-        //        return false;
-        //    }
-        //}
+      
     }
 }
