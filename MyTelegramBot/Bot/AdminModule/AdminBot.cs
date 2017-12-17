@@ -513,6 +513,10 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
+        /// <summary>
+        /// Отправить сообщние со списком всех товаров
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> SendAllProductsView()
         {
             try

@@ -14,13 +14,19 @@ namespace MyTelegramBot.Messages.Admin
 
         private List<IGrouping<int, Category>> Categorys { get; set; }
 
+        MarketBotDbContext db { get; set; }
+
+        public AdminAllProductsViewMessage()
+        {
+            db = new MarketBotDbContext();
+        }
+
         public AdminAllProductsViewMessage BuildMessage()
         {
-            using (MarketBotDbContext db = new MarketBotDbContext())
-            {
-                products = db.Product.Where(p => p.Enable == true).Include(p => p.ProductPrice).Include(p => p.Category).Include(p => p.Stock).ToList();
-                Categorys = db.Category.Where(c => c.Enable).Include(c => c.Product).GroupBy(c => c.Id).ToList();
-            }
+
+            products = db.Product.Where(p => p.Enable == true).Include(p => p.ProductPrice).Include(p => p.Category).Include(p => p.Stock).ToList();
+            Categorys = db.Category.Where(c => c.Enable).Include(c => c.Product).GroupBy(c => c.Id).ToList();
+            
             string message = Bold("Список всех товаров");
 
             foreach (var cat in Categorys)
@@ -35,11 +41,12 @@ namespace MyTelegramBot.Messages.Admin
                     foreach (Product product in category.Product)
                     {
                         ProductPrice price = product.ProductPrice.Where(p => p.Enabled).FirstOrDefault();
+                        price.Currency = db.Currency.Where(c => c.Id == price.CurrencyId).FirstOrDefault();
 
                         if (product.Enable == true && price!=null)
                         {
                             message += NewLine() + 
-                                       counter.ToString() + ") " + product.Name + "  " + price.Value + " руб." + NewLine()+
+                                       counter.ToString() + ") " + product.Name + "  " + price.Value + price.Currency.ProductPrice + NewLine()+
                                        "Изменить " + Bot.ProductEditBot.SetProductCmd + product.Id.ToString() + NewLine();
 
                             counter++;
