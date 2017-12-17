@@ -229,14 +229,6 @@ namespace MyTelegramBot.Bot.AdminModule
                     case StatCmd:
                         return await SendStat();
 
-                    // пользователь нажал на кнопку "изменить" в настройках киви.
-                    case QiwiEditCmd:
-                        return await ForceReplyBuilder(EnterPhoneNumber);
-
-                    // пользователь нажал на кнопку "добавить" в настройках киви.
-                    case EnterPhoneNumber:
-                        return await ForceReplyBuilder(EnterPhoneNumber);
-
                     case "/operators":
                         return await SendOperatorList();
 
@@ -482,11 +474,11 @@ namespace MyTelegramBot.Bot.AdminModule
         /// Отправить сообщение со списком способов оплаты
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> SendPaymentMethods()
+        private async Task<IActionResult> SendPaymentMethods(int MessageId=0)
         {
             try
             {
-                await SendMessage(AdminPayMethodsSettingsMsg.BuildMessage());
+                await SendMessage(AdminPayMethodsSettingsMsg.BuildMessage(),MessageId);
                 return OkResult;
             }
 
@@ -531,31 +523,6 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
-        ///// <summary>
-        ///// Отправить сообщение с описание что такое Киви  Апи и где взять ключ
-        ///// </summary>
-        ///// <returns></returns>
-        //private async Task<IActionResult> SendWhatIsQiwiApi()
-        //{
-        //    try
-        //    {
-        //        string text = "1) Перейдите на сайт https://qiwi.com/api" + BotMessage.NewLine() +
-        //         "2) Нажмите на кнопку Выпустить новый токен" + BotMessage.NewLine() +
-        //         "3) Выбрите следующие пункты: Запрос информации о профиле кошелька, Просмотр истории платежей " + Bot.BotMessage.NewLine() +
-        //         "4) Подтвердите все действия и сохраните токен, что бы потом отправить его Боту" + BotMessage.NewLine() +
-        //         "5) Настройте Qiwi /qiwi";
-
-
-        //        await SendMessage(new BotMessage { TextMessage = text });
-
-        //        return OkResult;
-        //    }
-
-        //    catch
-        //    {
-        //        return NotFoundResult;
-        //    }
-        //}
 
         /// <summary>
         /// Отправить сообщение со статистикой
@@ -591,88 +558,57 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
-        ///// <summary>
-        ///// Добавить номер телефона киви кошелька в бд
-        ///// </summary>
-        ///// <returns></returns>
-        //private async Task<IActionResult> AddQiwiTelephone()
-        //{
-        //    PaymentTypeConfig qiwi = new PaymentTypeConfig
-        //    {
-        //        TimeStamp = DateTime.Now,
-        //        Enable = false,
-        //        Login = base.ReplyToMessageText
-        //    };
-           
-        //    using (MarketBotDbContext db = new MarketBotDbContext())
-        //    {
-        //        db.PaymentTypeConfig.Add(qiwi);
-
-        //        if (VerifyPhoneNumber(base.ReplyToMessageText) && db.SaveChanges()>0 && await ForceReplyBuilder(EnterQiwiApi) !=null)
-        //            return OkResult;
-
-        //        else
-        //        {
-        //            await SendMessage(new BotMessage { TextMessage = "Ошибка! Не удалось определить номер телефона." });
-        //            await ForceReplyBuilder(EnterPhoneNumber);
-        //            return OkResult;
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Добавить токен киви в бд
-        ///// </summary>
-        ///// <returns></returns>
-        //private async Task<IActionResult> AddQiwiApiKey()
-        //{
-        //    using (MarketBotDbContext db = new MarketBotDbContext())
-        //    {
-        //        var qiwi = db.PaymentType.Where(q => q.Id == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi)).FirstOrDefault();
-
-        //        if (qiwi != null && await Services.Qiwi.QiwiFunction.TestConnection(qiwi.PaymentTypeConfig.OrderByDescending(q=>q.Id).FirstOrDefault().Login, base.ReplyToMessageText))
-        //        {
-        //            qiwi.PaymentTypeConfig.OrderByDescending(q => q.Id).FirstOrDefault().Pass = base.ReplyToMessageText;
-        //            qiwi.Enable = true;
-        //            db.SaveChanges();
-        //            await SendMessage(new BotMessage { TextMessage = "Успех!" });
-        //            return await SendQiwiInfo();
-        //        }
-
-        //        else
-        //        {
-        //            await SendMessage(new BotMessage { TextMessage = "Не удалось подключиться к API QIWI" });
-        //            await ForceReplyBuilder(EnterQiwiApi);
-        //            return NotFoundResult;
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Отпраявляем сообщение с текущими настройками киви кошелька
-        ///// </summary>
-        ///// <returns></returns>
-        //private async Task<IActionResult> SendQiwiInfo()
-        //{
-                    
-        //    if(AdminQiwiSettingsMsg!=null && await SendMessage(AdminQiwiSettingsMsg.BuildMessage()) !=null)
-        //        return OkResult;
-
-        //    else
-        //        return NotFoundResult;
-        //}
-
         /// <summary>
-        /// Активировать / Деактивировать метод оплаты
+        /// Вкл/откл метод оплаты
         /// </summary>
         /// <returns></returns>
-        /// 
-
-
         private async Task<IActionResult> PaymentMethodEnable()
         {
-            //переписать
-            return OkResult;
+            try
+            {
+                using(MarketBotDbContext db=new MarketBotDbContext())
+                {
+                  var conf= db.PaymentTypeConfig.Where(p => p.PaymentId == Argumetns[0]).OrderByDescending(p=>p.Id).FirstOrDefault();
+
+                    var type = db.PaymentType.Where(p => p.Id == Argumetns[0]).FirstOrDefault();
+
+
+                    if (conf != null && type.Enable == true 
+                        || PaymentType.GetPaymentTypeEnum(Argumetns[0]) == Services.PaymentTypeEnum.PaymentOnReceipt &&
+                        type.Enable == true) // пользователь хочет отключить метод оплаты. 
+                                             //Проверям настроен ли он вообще.Если пользователь хочет отключить
+                                             //метод оплаты "при получении" то conf может быть пустым т.к этот метод оплаты не требует настроек
+                    {
+                        type.Enable = false;
+                        db.SaveChanges();
+                        return await SendPaymentMethods(base.MessageId);
+                    }
+
+                    if (conf != null && type.Enable == false 
+                        || PaymentType.GetPaymentTypeEnum(Argumetns[0]) == Services.PaymentTypeEnum.PaymentOnReceipt &&
+                        type.Enable == false)
+                    {
+                        type.Enable = true;
+                        db.SaveChanges();
+                        return await SendPaymentMethods(base.MessageId);
+                    }
+
+                    if (conf == null && PaymentType.GetPaymentTypeEnum(Argumetns[0])!= Services.PaymentTypeEnum.PaymentOnReceipt) 
+                        // метод оплаты не настроен, кроме метода оплаты "При получении"
+                    {
+                        await AnswerCallback("Ошибка. Данный способ оплаты не настроен", true);
+                        return OkResult;
+                    }
+
+                    else
+                       return OkResult;
+                }
+            }
+
+            catch
+            {
+                return OkResult;
+            }
 
         }
 

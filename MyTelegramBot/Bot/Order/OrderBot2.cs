@@ -164,13 +164,22 @@ namespace MyTelegramBot.Bot
                 {
                     var method = db.PaymentType.Where(p => p.Enable == true).FirstOrDefault();
                     base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
+
                     //если включена верификация номера телефона, то проверяем есть ли БД номер телефона текущего пользователя
                     if (method != null && ConfigurationBot.VerifyTelephone)
                         await TelephoneCheck(method.Id);
 
-                    else // Если верификации номера телефона нет, то проверяем указан ли у пользователя UserName
+                    if(method != null && ConfigurationBot.VerifyTelephone==false) // Если верификации номера телефона нет, то проверяем указан ли у пользователя UserName
                         await UserNameCheck(base.ConfigurationBot, method.Id);
-                    
+
+                    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
+                    if (method == null && ConfigurationBot.VerifyTelephone)
+                        await TelephoneCheck(PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
+
+                    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
+                    if (method == null && ConfigurationBot.VerifyTelephone==false)
+                        await UserNameCheck(base.ConfigurationBot, PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
+
                 }
 
                 return OkResult;
