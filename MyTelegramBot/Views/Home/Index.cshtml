@@ -1,0 +1,25 @@
+﻿@model MyTelegramBot.BotInfo
+@{
+    //ViewData["Title"] = "Список смартфонов";
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+
+<h3>Бот</h3>
+<table class="table">
+    <tr>
+        <td>Название</td>
+        <td>Токен</td>
+        <td>Дата добавления</td>
+        <td></td>
+    </tr>
+  
+    <tr>
+        <td>@Model.Name</td>
+        <td>@Model.Token</td>
+        <td>@Model.Timestamp.ToString()</td>
+        <td><a href="~/Home/Buy/@Model.Id">Изменить</a></td>
+    </tr>
+    
+</table>
+

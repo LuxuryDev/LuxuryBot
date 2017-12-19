@@ -1,0 +1,150 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Telegram.Bot.Types.InlineKeyboardButtons;
+using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.EntityFrameworkCore;
+using MyTelegramBot.Bot;
+
+namespace MyTelegramBot.Messages
+{
+    /// <summary>
+    /// Сообщение с заказом, из таблицы OrderTemp
+    /// </summary>
+    public class OrderTempMessage:Bot.BotMessage
+    {
+        InlineKeyboardCallbackButton SendBtn { get; set; }
+
+        InlineKeyboardCallbackButton DescEditorBtn { get; set; }
+
+        InlineKeyboardCallbackButton AddressEditor { get; set; }
+
+        InlineKeyboardCallbackButton PaymentMethodEditor { get; set; }
+
+        private int FollowerId { get; set; }
+
+        private OrderTemp OrderTemp { get; set; }
+
+        private int BotId { get; set; }
+
+        public OrderTempMessage(int FollowerId, int BotId)
+        {
+            this.FollowerId = FollowerId;
+            this.BotId = BotId;
+        }
+
+        public OrderTempMessage BuildMessage()
+        {
+            using (MarketBotDbContext db = new MarketBotDbContext())
+            {
+                OrderTemp = db.OrderTemp.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.PaymentType).FirstOrDefault();
+
+                if (OrderTemp != null)
+                {
+                    var Address = db.Address.Where(a => a.Id == OrderTemp.AddressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+
+                    string PositionInfo = BasketPositionInfo.GetPositionInfo(FollowerId);
+
+                    string Desc = "-";
+
+                    string PaymentMethod = "-";
+
+                    if (OrderTemp.PaymentType != null && OrderTemp.PaymentType.Name != null)
+                        PaymentMethod = OrderTemp.PaymentType.Name;
+
+                    if (PositionInfo != null)
+                    {
+
+                        if (OrderTemp.Text != null)
+                            Desc = OrderTemp.Text;
+
+                        base.TextMessage = "Информация о заказе:" +
+                                    NewLine() + PositionInfo +
+                                    NewLine() + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number +
+                                    NewLine()+  Bold("Способ оплаты:")+PaymentMethod+
+                                    NewLine() + Bold("Кoмментарий к заказу: ") + Desc;
+
+                        SendBtn = new InlineKeyboardCallbackButton("Сохранить" + " \ud83d\udcbe", BuildCallData(Bot.OrderBot.CmdOrderSave,OrderBot.ModuleName));
+                        DescEditorBtn = new InlineKeyboardCallbackButton("Комментарий к заказу" + " \ud83d\udccb", BuildCallData(Bot.OrderBot.CmdOrderDesc, OrderBot.ModuleName));
+                        AddressEditor = new InlineKeyboardCallbackButton("Изменить адрес"+ " \ud83d\udd8a", BuildCallData(Bot.OrderBot.CmdAddressEditor, OrderBot.ModuleName));
+                        PaymentMethodEditor = new InlineKeyboardCallbackButton("Изменить способ оплаты" + " \ud83d\udd8a", BuildCallData("PaymentMethodEditor", OrderBot.ModuleName));
+
+                        SetInlineKeyBoard();
+                        return this;
+                    }
+
+                    else
+                        return null;
+                }
+
+                else
+                    return null;
+            }
+        }
+
+        private void SetInlineKeyBoard()
+        {
+            base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                new[]{
+                new[]
+                        {
+                            DescEditorBtn
+                        },
+                new[]
+                        {
+                            AddressEditor
+                        },
+                new[]
+                        {
+                            SendBtn
+                        }
+
+                 });
+        }
+    }
+
+
+    public static class BasketPositionInfo
+    {
+        public static string GetPositionInfo(int FollowerID)
+        {
+            using (MarketBotDbContext db = new MarketBotDbContext())
+            {
+                var basket = db.Basket.Where(b => b.FollowerId == FollowerID && b.Enable);
+
+                var IdList = basket.Select(b => b.ProductId).Distinct().AsEnumerable();
+
+                int counter = 1;
+
+                double total = 0.0;
+
+                string message = String.Empty;
+
+                string currency = String.Empty;
+
+                if (IdList.Count() > 0)
+                {
+                    foreach (int id in IdList)
+                    {
+
+                        string name = db.Product.Where(p => p.Id == id).FirstOrDefault().Name;
+                        int count = basket.Where(p => p.ProductId == id).Count();
+                        var price = db.ProductPrice.Where(p => p.ProductId == id && p.Enabled).Include(p=>p.Currency).FirstOrDefault();
+                        message += counter.ToString() + ") " + name + " " + count.ToString() + 
+                            " x " + price.ToString() + " = " + (count * price.Value).ToString() + price.Currency.ShortName + Bot.BotMessage.NewLine();
+                        total += price.Value * count;
+                        counter++;
+                        currency = price.Currency.ShortName;
+
+                    }
+
+                    return message + Bot.BotMessage.NewLine() + Bot.BotMessage.Bold("Общая стоимость: ") + total.ToString() + currency;
+                }
+
+                else
+                    return null;
+            }
+        }
+    }
+}

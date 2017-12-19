@@ -1,0 +1,33 @@
+﻿@model MyTelegramBot.Product
+<!DOCTYPE html>
+
+<p>
+    <label>Название товара</label><br />
+    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Название" })
+</p>
+
+<p>
+    <label>Описание</label><br />
+    @Html.TextBoxFor(m => m.Text, new { @class = "form-control", @placeholder = "Название" })
+</p>
+
+<p>
+    <label>Стоимость</label><br />
+    @Html.TextBoxFor(m => m.ProductPrice.Where(p=>p.Enabled).OrderByDescending(p=>p.Id).FirstOrDefault().Value, new { @class = "form-control", @placeholder = "Цена" })
+</p>
+
+<p>
+    <label>Категория</label><br />
+    @Html.TextBoxFor(m=>m.Category.Name, new { @class = "form-control", @placeholder = "Категория" })
+</p>
+
+<p>
+    <label>Ссылка на фотографию для Inline режима</label><br />
+    @Html.TextBoxFor(m => m.PhotoUrl, new { @class = "form-control", @placeholder = "Inlne фото" })
+</p>
+
+<p>
+    <label>Ссылка на заметку</label><br />
+    @Html.TextBoxFor(m => m.TelegraphUrl, new { @class = "form-control", @placeholder = "например на telegra.ph" })
+</p>
+

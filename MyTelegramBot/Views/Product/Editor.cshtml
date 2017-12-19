@@ -1,0 +1,41 @@
+﻿@model MyTelegramBot.Product
+<!DOCTYPE html>
+
+<img src="@ViewBag.ImageData" class="img-responsive" alt="Responsive image">
+<h3>Выберите фотографию</h3>
+<form asp-action="AddFile" asp-controller="Home" method="post" enctype="multipart/form-data">
+    <input type="file" name="uploadedFile" /><br>
+</form>
+<p>
+    <label>Название товара</label><br />
+    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Название" })
+</p>
+
+<p>
+    <label>Описание</label><br />
+    @Html.TextBoxFor(m => m.Text, new { @class = "form-control", @placeholder = "Название" })
+</p>
+
+<p>
+    <label>Стоимость</label><br />
+    @Html.TextBoxFor(m => m.ProductPrice.Where(p=>p.Enabled).OrderByDescending(p=>p.Id).FirstOrDefault().Value, new { @class = "form-control", @placeholder = "Цена" })
+</p>
+
+<p>
+    <label>Категория</label><br />
+    @Html.TextBoxFor(m=>m.Category.Name, new { @class = "form-control", @placeholder = "Категория" })
+</p>
+
+<p>
+    <label>Ссылка на фотографию для Inline режима</label><br />
+    @Html.TextBoxFor(m => m.PhotoUrl, new { @class = "form-control", @placeholder = "Inlne фото" })
+</p>
+
+<p>
+    <label>Ссылка на заметку</label><br />
+    @Html.TextBoxFor(m => m.TelegraphUrl, new { @class = "form-control", @placeholder = "например на telegra.ph" })
+</p>
+
+
+<button type="button" class="btn btn-success">Сохранить</button>
+
