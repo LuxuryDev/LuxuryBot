@@ -27,7 +27,6 @@ namespace MyTelegramBot.Controllers
             if (id > 0)
             {
                 db = new MarketBotDbContext();
-
                 var product = db.Product.Where(p => p.Id == id).Include(p => p.Unit).Include(p=>p.Category).Include(p => p.ProductPrice).Include(p => p.ProductPrice).FirstOrDefault();
                 product.ProductPhoto = db.ProductPhoto.Where(photo => photo.ProductId == product.Id).Include(photo => photo.AttachmentFs).ToList();
                 string imageBase64Data = Convert.ToBase64String(product.ProductPhoto.FirstOrDefault().AttachmentFs.Fs);
