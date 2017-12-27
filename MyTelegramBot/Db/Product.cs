@@ -22,7 +22,7 @@ namespace MyTelegramBot
         public string Text { get; set; }
         public string PhotoId { get; set; }
         public int CategoryId { get; set; }
-        public bool? Enable { get; set; }
+        public bool Enable { get; set; }
         public string TelegraphUrl { get; set; }
         public DateTime? DateAdd { get; set; }
         public string PhotoUrl { get; set; }
@@ -41,34 +41,42 @@ namespace MyTelegramBot
 
         public override string ToString()
         {
-            string StockStatus = String.Empty;
+            try
+            {
+                string StockStatus = String.Empty;
 
-            const string StockStatusMany = "Много";
+                const string StockStatusMany = "Много";
 
-            const string StockStatusFew = "Мало";
+                const string StockStatusFew = "Мало";
 
-            const string StockStatusOutOfStock = "Нет в наличии";
+                const string StockStatusOutOfStock = "Нет в наличии";
 
-            const int Many = 5;
+                const int Many = 5;
 
-            if (Stock.Count>0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance >= Many)
-                StockStatus = StockStatusMany;
+                if (Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance >= Many)
+                    StockStatus = StockStatusMany;
 
-            if (Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance > 0 && Stock.ElementAt(Stock.Count - 1).Balance <= Many)
-                StockStatus = StockStatusFew;
+                if (Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance > 0 && Stock.ElementAt(Stock.Count - 1).Balance <= Many)
+                    StockStatus = StockStatusFew;
 
-            if (Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) == null || Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance == 0)
-                StockStatus = StockStatusOutOfStock;
+                if (Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) == null || Stock.Count > 0 && Stock.ElementAt(Stock.Count - 1) != null && Stock.ElementAt(Stock.Count - 1).Balance == 0)
+                    StockStatus = StockStatusOutOfStock;
 
-            if (Stock.Count == 0)
-                StockStatus = StockStatusOutOfStock;
+                if (Stock.Count == 0)
+                    StockStatus = StockStatusOutOfStock;
 
-            var price = ProductPrice.Where(p => p.Enabled).FirstOrDefault().ToString();
+                var price = ProductPrice.Where(p => p.Enabled).FirstOrDefault().ToString();
 
-            return "Название: "+ Name + Bot.BotMessage.NewLine() +
-            "Цена: " + ProductPrice.Where(p=>p.Enabled).FirstOrDefault().ToString() + " / "+ Unit.ShortName + Bot.BotMessage.NewLine() +
-            "Описание: " + Text + Bot.BotMessage.NewLine() +
-            "В наличии: " + StockStatus;
+                return "Название: " + Name + Bot.BotMessage.NewLine() +
+                "Цена: " + ProductPrice.Where(p => p.Enabled).FirstOrDefault().ToString() + " / " + Unit.ShortName + Bot.BotMessage.NewLine() +
+                "Описание: " + Text + Bot.BotMessage.NewLine() +
+                "В наличии: " + StockStatus;
+            }
+
+            catch
+            {
+                return String.Empty;
+            }
         }
 
         public string AdminMessage()

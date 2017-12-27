@@ -7,6 +7,7 @@
 
 @using (Html.BeginForm("Save", "Home", FormMethod.Post))
 {
+
     <p>
         <label>Название бота</label><br />
         @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
