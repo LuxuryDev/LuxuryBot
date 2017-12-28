@@ -12,6 +12,8 @@ namespace MyTelegramBot.Controllers
     {
         MarketBotDbContext db;
 
+        Product Product { get; set; }
+
         public IActionResult Index()
         {
             db = new MarketBotDbContext();
@@ -45,6 +47,8 @@ namespace MyTelegramBot.Controllers
         [HttpGet]
         public IActionResult Editor (int id)
         {
+
+
             if (id > 0)
             {
                 db = new MarketBotDbContext();
@@ -75,39 +79,56 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpPost]
-        public IActionResult Save (Product product)
+        public IActionResult Save (Product SaveProduct)
         {
-            if (product != null && product.Id>0)
+            db = new MarketBotDbContext();
+            
+            if (SaveProduct != null && SaveProduct.Id > 0)
             {
-                db = new MarketBotDbContext();
-                var prod= db.Product.Where(p => p.Id == product.Id).FirstOrDefault();
-                prod.ProductPrice = db.ProductPrice.Where(pr => pr.ProductId == prod.Id && pr.Enabled == true).Include(pr => pr.Currency).OrderByDescending(pr => pr.Id).ToList();
-                prod.Name = product.Name;
-                prod.CategoryId = product.CategoryId;
-                prod.TelegraphUrl = product.TelegraphUrl;
-                prod.Enable = product.Enable;
-                prod.PhotoUrl = product.PhotoUrl;
-                prod.Text = product.Text;
-                prod.UnitId = product.UnitId;
+                Product = db.Product.Where(p => p.Id == SaveProduct.Id).FirstOrDefault();
+                Product.ProductPrice = db.ProductPrice.Where(pr => pr.ProductId == Product.Id && pr.Enabled == true).
+                    Include(pr => pr.Currency).OrderByDescending(pr => pr.Id).ToList();
+            }
+
+            //Редактируется уже сущестуюий товар. Перед этим проверятся изменилось ли имя, если изменилось,
+            //то мы проверям не занято ли оно
+            if (SaveProduct != null && SaveProduct.Id>0 && SaveProduct.Name!=null && Product != null && Product.Name==SaveProduct.Name ||
+                SaveProduct != null && SaveProduct.Id > 0 && SaveProduct.Name != null && Product != null 
+                && Product.Name != SaveProduct.Name && !CheckName(SaveProduct.Name))
+            {
+                Product.Name = SaveProduct.Name;
+                Product.CategoryId = SaveProduct.CategoryId;
+                Product.TelegraphUrl = SaveProduct.TelegraphUrl;
+                Product.Enable = SaveProduct.Enable;
+                Product.PhotoUrl = SaveProduct.PhotoUrl;
+                Product.Text = SaveProduct.Text;
+                Product.UnitId = SaveProduct.UnitId;
 
                 // Проверям изменил ли пользователь цену или тип валюты.  Если изменил то добавляем новую запись в БД
-                if (product.ProductPrice.FirstOrDefault().Value != prod.ProductPrice.FirstOrDefault().Value ||
-                    product.ProductPrice.FirstOrDefault().CurrencyId != prod.ProductPrice.FirstOrDefault().CurrencyId)
+                if (SaveProduct.ProductPrice.FirstOrDefault().Value != Product.ProductPrice.FirstOrDefault().Value 
+                    && SaveProduct.ProductPrice.FirstOrDefault().Value >0 ||
+                    SaveProduct.ProductPrice.FirstOrDefault().CurrencyId != Product.ProductPrice.FirstOrDefault().CurrencyId
+                    && SaveProduct.ProductPrice.FirstOrDefault().Value > 0)
                 {
-                    product.ProductPrice.FirstOrDefault().ProductId = prod.ProductPrice.FirstOrDefault().ProductId;
-                    ProductPriceInsert(product.ProductPrice.FirstOrDefault());
-                    DisablePrice(prod.ProductPrice.FirstOrDefault());
+                    SaveProduct.ProductPrice.FirstOrDefault().ProductId = Product.ProductPrice.FirstOrDefault().ProductId;
+                    ProductPriceInsert(SaveProduct.ProductPrice.FirstOrDefault());
+                    DisablePrice(Product.ProductPrice.FirstOrDefault());
                 }
                 db.SaveChanges();
             }
 
-            if (product != null && product.Id == 0)
-               ProductInsert(product);
-                
-            
+            ///добавление нового товара
+            if ( SaveProduct != null && SaveProduct.Name!=null && SaveProduct.Id == 0 && !CheckName(SaveProduct.Name))
+               ProductInsert(SaveProduct);
+
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Добавить новый товар в базу данных
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
         public Product ProductInsert (Product product)
         {
             if (db == null)
@@ -119,7 +140,14 @@ namespace MyTelegramBot.Controllers
                 product.ProductPrice.FirstOrDefault().DateAdd = DateTime.Now;
             }
 
-            if (product != null)
+            if(product!=null && product.Stock.FirstOrDefault() != null)
+            {
+                product.Stock.FirstOrDefault().DateAdd = DateTime.Now;
+                product.Stock.FirstOrDefault().Quantity =Convert.ToInt32(product.Stock.FirstOrDefault().Balance);
+                product.Stock.FirstOrDefault().Text = "Добавление нового товара";
+            }
+
+            if (product != null )
             {
                 product.DateAdd = DateTime.Now;
                 db.Product.Add(product);
@@ -167,21 +195,21 @@ namespace MyTelegramBot.Controllers
                 return -1;
         }
 
-        [HttpPost]
-
-        public IActionResult PhotoInsert(IFormFile file)
+        /// <summary>
+        /// Проверяем занято ли имяю Если занято то возращает TRUE
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+       public bool CheckName (string name)
         {
-            return RedirectToAction("Index");
-        }
+            if (db == null)
+                db = new MarketBotDbContext();
 
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return Content("file not selected");
+            if (db.Product.Where(p => p.Name == name).FirstOrDefault() != null)
+                return true;
 
-
-            return RedirectToAction("Files");
+            else
+                return false;
         }
     }
 }
