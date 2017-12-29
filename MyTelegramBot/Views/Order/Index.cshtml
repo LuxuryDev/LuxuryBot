@@ -1,0 +1,26 @@
+﻿@model IEnumerable<MyTelegramBot.Orders>
+@{
+    //ViewData["Title"] = "Список смартфонов";
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+<table class="table">
+    <tr>
+        <td>Номер заказа</td>
+        <td>Комментарий</td>
+        <td>Дата</td>
+        <td>Бот</td>
+    </tr>
+    @foreach (var order in Model)
+    {
+        <tr>
+            <td>@order.Number</td>
+            <td>@order.Text</td>
+            <td>@order.DateAdd</td>
+            <td><a href="~/Order/Get/@order.Number">Открыть</a></td>
+            <td><a href=@("https://t.me/"+ order.BotInfo.Name)>@order.BotInfo.Name</a></td>
+
+
+        </tr>
+    }
+</table>

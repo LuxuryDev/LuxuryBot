@@ -12,7 +12,7 @@
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Services\YandexMap\" />
-    <Folder Include="Views\Product\" />
+    <Folder Include="Views\Category\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

@@ -63,13 +63,16 @@ namespace MyTelegramBot.Controllers
                 }
 
 
-                ViewBag.Phones = new SelectList(db.Category.ToList(), "Id", "Name",product.CategoryId);
+                ViewBag.Category = new SelectList(db.Category.Where(c=>c.Enable).ToList(), "Id", "Name",product.CategoryId);
                 //ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name");
                 ViewBag.Currency = db.Currency.ToList();
                 ViewBag.Unit = new SelectList(db.Units.ToList(), "Id", "Name",product.UnitId);
 
+                if (product != null)
+                    return View(product);
 
-                return View(product);
+                else
+                    return NoContent();
             }
 
 
@@ -94,7 +97,7 @@ namespace MyTelegramBot.Controllers
             //то мы проверям не занято ли оно
             if (SaveProduct != null && SaveProduct.Id>0 && SaveProduct.Name!=null && Product != null && Product.Name==SaveProduct.Name ||
                 SaveProduct != null && SaveProduct.Id > 0 && SaveProduct.Name != null && Product != null 
-                && Product.Name != SaveProduct.Name && !CheckName(SaveProduct.Name))
+                && Product.Name != SaveProduct.Name && CheckName(SaveProduct.Name))
             {
                 Product.Name = SaveProduct.Name;
                 Product.CategoryId = SaveProduct.CategoryId;
@@ -118,7 +121,7 @@ namespace MyTelegramBot.Controllers
             }
 
             ///добавление нового товара
-            if ( SaveProduct != null && SaveProduct.Name!=null && SaveProduct.Id == 0 && !CheckName(SaveProduct.Name))
+            if ( SaveProduct != null && SaveProduct.Name!=null && SaveProduct.Id == 0 && CheckName(SaveProduct.Name))
                ProductInsert(SaveProduct);
 
             return RedirectToAction("Index");
@@ -196,7 +199,7 @@ namespace MyTelegramBot.Controllers
         }
 
         /// <summary>
-        /// Проверяем занято ли имяю Если занято то возращает TRUE
+        /// Проверяем занято ли имяю Если занято то возращает FALSE
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -206,10 +209,10 @@ namespace MyTelegramBot.Controllers
                 db = new MarketBotDbContext();
 
             if (db.Product.Where(p => p.Name == name).FirstOrDefault() != null)
-                return true;
+                return false;
 
             else
-                return false;
+                return true;
         }
     }
 }
