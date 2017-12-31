@@ -4,6 +4,17 @@
     Layout = "_Layout";
 }
 <!DOCTYPE html>
+
+@using (Html.BeginForm("Get", "Order", FormMethod.Get))
+{
+    <label>Введите номер заказа</label>
+    @Html.TextBox("Id")
+    <input type="submit" value="Открыть" class="btn btn-success" />
+}
+
+
+
+
 <table class="table">
     <tr>
         <td>Номер заказа</td>
@@ -14,13 +25,10 @@
     @foreach (var order in Model)
     {
         <tr>
-            <td>@order.Number</td>
+            <td><a href="~/Order/Get/@order.Number">@("Заказ №"+@order.Number)</a></td>
             <td>@order.Text</td>
             <td>@order.DateAdd</td>
-            <td><a href="~/Order/Get/@order.Number">Открыть</a></td>
-            <td><a href=@("https://t.me/"+ order.BotInfo.Name)>@order.BotInfo.Name</a></td>
-
-
+            <td><a href=@("https://t.me/" + order.BotInfo.Name)>@order.BotInfo.Name</a></td>
         </tr>
     }
 </table>

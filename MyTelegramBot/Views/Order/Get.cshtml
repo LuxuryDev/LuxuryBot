@@ -5,63 +5,201 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Get</h2>
+<div class="row">
+    <div class="col-md-6">
+    
+        <h4>Заказ № @Model.Number</h4>
+        <p>
+            <label>Время:</label>
+            @Html.DisplayFor(m=>m.DateAdd)
+        </p>
+        <p>
+            <label>
+                Комментарий к заказу:
+            </label>
+            @Html.DisplayFor(m=>m.Text)
+        </p>
+        <p>
+            <label>
+                Адрес доставки:
+            </label>
+            @Html.DisplayName(Model.OrderAddress.Adress.House.Street.City.Name + ", " + Model.OrderAddress.Adress.House.Street.Name + ", " + Model.OrderAddress.Adress.House.Number)
+        </p>
+        <p>
+            <label>
+                Пользователь:
+            </label>
+            <a href=@("https://t.me/"+ Model.Follower.UserName)>@(@Model.Follower.FirstName+" "+ @Model.Follower.LastName)</a>
+        </p>
 
-<div>
-    <h4>Orders</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Number)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Number)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.FollowerId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.FollowerId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Text)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Text)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.DateAdd)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.DateAdd)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Paid)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Paid)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.BotInfoId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.BotInfoId)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.InvoiceId)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.InvoiceId)
-        </dd>
-    </dl>
+        <p>
+            <label>
+                Выполнен:
+            </label>
+
+            @if (Model.OrderDone != null)
+        {
+                @Html.DisplayFor(m => m.OrderDone.OrderByDescending(d=>d.Id).FirstOrDefault().DateAdd)
+
+        }
+
+        </p>
+        <p>
+            <label>
+                Отзыв:
+            </label>
+
+            @if (Model.FeedBack != null)
+        {
+                @Html.DisplayFor(m => m.FeedBack.Text)
+
+        }
+        </p>
+    </div>
+    <div class="col-md-6">
+        @if (Model.Invoice != null)
+        {
+            <div>
+                <h4>Счет на оплату № @Model.Invoice.InvoiceNumber</h4>
+                <p>
+                    <label>Сумма:</label>
+                    @Html.DisplayName(Model.Invoice.Value.ToString())
+                </p>
+                <p>
+                    <label>
+                        Способ оплаты
+                    </label>
+                    @Html.DisplayFor(m => m.Invoice.PaymentType.Name)
+                </p>
+                <p>
+                    <label>
+                        Адрес счета получателя:
+                    </label>
+                    @Html.DisplayFor(m => m.Invoice.AccountNumber)
+                </p>
+                <p>
+                    <label>
+                        Комментарий к платежу
+                    </label>
+                    @Html.DisplayFor(m => m.Invoice.Comment)
+                </p>
+                <p>
+                    <label>
+                        Оплачен:
+                    </label>
+                    @Html.DisplayFor(m => m.Invoice.Paid)
+                </p>
+            </div>
+        }
+    </div>
 </div>
-<div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-    <a asp-action="Index">Back to List</a>
+
+<hr/>
+<h4>Состав заказа</h4>
+<table class="table">
+    <tr>
+        <td>Товар</td>
+        <td>Цена</td>
+        <td>Количество</td>
+        <td>Общая стоимость</td>
+    </tr>
+    @foreach (var item in Model.OrderProduct)
+    {
+        <tr>
+            <td><a href="~/Product/Editor/@item.ProductId">@item.Product.Name</a></td>
+            <td>@(@item.Price.Value.ToString()+" "+@item.Price.Currency.ShortName)</td>
+            <td>@item.Count</td>
+            <td>@((@item.Count*@item.Price.Value).ToString()+" "+item.Price.Currency.ShortName)</td>
+        </tr>
+    }
+</table>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#work" data-toggle="tab">Заказ взят в обработку</a></li>
+    <li><a href="#confirm" data-toggle="tab">Заказ согласован</a></li>
+    <li><a href="#done" data-toggle="tab">Заказ выполнен</a></li>
+    <li><a href="#delete" data-toggle="tab">Заказ удален</a></li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <div class="tab-pane active" id="work">
+        @if (Model.OrdersInWork != null)
+        {
+            <table class="table">
+                <tr>
+                    <td>Пользователь</td>
+                    <td>Время</td>
+                    <td>В работе</td>
+                </tr>
+                @foreach (var work in Model.OrdersInWork)
+                {
+                    <tr>
+                        <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
+                        <td>@work.Timestamp</td>
+                        <td>@work.InWork</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    <div class="tab-pane" id="confirm">
+        @if (Model.OrderConfirm != null)
+        {
+            <table class="table">
+                <tr>
+                    <td>Пользователь</td>
+                    <td>Время</td>
+                    <td>Комментарий</td>
+                </tr>
+                @foreach (var confirm in Model.OrderConfirm)
+                {
+                    <tr>
+                        <td><a href=@("https://t.me/"+ confirm.Follower.UserName)>@(@confirm.Follower.FirstName + " " + @confirm.Follower.LastName)</a></td>
+                        <td>@confirm.DateAdd</td>
+                        <td>@confirm.Text</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    <div class="tab-pane" id="done">
+        @if (Model.OrderDone != null)
+        {
+            <table class="table">
+                <tr>
+                    <td>Пользователь</td>
+                    <td>Время</td>
+                </tr>
+                @foreach (var done in Model.OrderDone)
+                {
+                    <tr>
+                        <td><a href=@("https://t.me/"+ done.Follower.UserName)>@(@done.Follower.FirstName + " " + @done.Follower.LastName)</a></td>
+                        <td>@done.DateAdd</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+    <div class="tab-pane" id="delete">
+        @if (Model.OrderDeleted != null)
+        {
+            <table class="table">
+                <tr>
+                    <td>Пользователь</td>
+                    <td>Время</td>
+                    <td>Комментарий</td>
+                </tr>
+                @foreach (var deleted in Model.OrderDeleted)
+                {
+                    <tr>
+                        <td><a href=@("https://t.me/"+ deleted.Follower.UserName)>@(@deleted.Follower.FirstName + " " + @deleted.Follower.LastName)</a></td>
+                        <td>@deleted.DateAdd</td>
+                        <td>@deleted.Text</td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
 </div>

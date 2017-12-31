@@ -38,7 +38,7 @@ namespace MyTelegramBot.Bot.Order
         public Orders AddOrder()
         {
             double total = 0.0;
-            decimal? Number = 0;
+            int Number = 0;
 
             Basket = db.Basket.Where(b => b.FollowerId == FollowerId && b.Enable && b.BotInfoId == BotInfo.Id).Include(b=>b.Product).GroupBy(b => b.ProductId).ToList();
             OrderTmp = db.OrderTemp.Where(o => o.FollowerId == FollowerId && o.BotInfoId == BotInfo.Id).FirstOrDefault();
@@ -49,7 +49,7 @@ namespace MyTelegramBot.Bot.Order
             total = BasketTotalPrice(Basket);
 
             if (LastOrder != null)  // Узнаем последний номер заказа в БД
-                Number = LastOrder.Number;
+                Number =Convert.ToInt32(LastOrder.Number);
 
             if (OrderTmp != null && OrderTmp.PaymentTypeId != null && Basket.Count>0)
             {

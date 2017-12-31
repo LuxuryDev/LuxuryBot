@@ -15,7 +15,7 @@ namespace MyTelegramBot
         }
 
         public int Id { get; set; }
-        public decimal? Number { get; set; }
+        public int? Number { get; set; }
         public int FollowerId { get; set; }
         public string Text { get; set; }
         public DateTime? DateAdd { get; set; }

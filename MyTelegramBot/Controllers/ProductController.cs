@@ -53,7 +53,10 @@ namespace MyTelegramBot.Controllers
             {
                 db = new MarketBotDbContext();
                 var product = db.Product.Where(p => p.Id == id).Include(p => p.Unit).Include(p=>p.Category).FirstOrDefault();
-                product.ProductPhoto = db.ProductPhoto.Where(photo => photo.ProductId == product.Id).Include(photo => photo.AttachmentFs).ToList();
+
+
+                product.ProductPhoto = db.ProductPhoto.Where(photo => photo.ProductId == product.Id).Include(photo=>photo.AttachmentFs).ToList();
+
                 product.ProductPrice.Add(db.ProductPrice.Where(price => price.ProductId == product.Id && price.Enabled == true).OrderByDescending(price => price.Id).FirstOrDefault());
                 if (product.ProductPhoto.FirstOrDefault() != null)
                 {
