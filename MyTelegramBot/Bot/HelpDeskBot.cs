@@ -71,7 +71,7 @@ namespace MyTelegramBot.Bot
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
 
-                var NoSendHelp = db.HelpDesk.Where(h => h.Send == false && FollowerId == FollowerId).Include(h=>h.HelpDeskAttachment).FirstOrDefault();
+                var NoSendHelp = db.HelpDesk.Where(h => h.Send == false && FollowerId == FollowerId && h.BotInfoId==BotInfo.Id).Include(h=>h.HelpDeskAttachment).FirstOrDefault();
 
                 //У пользователя есть не отправленная заявка. Работаем с ней
                 if (NoSendHelp != null && ReplyToMessageText!=null || NoSendHelp != null && ReplyToMessageText != null)
@@ -96,7 +96,8 @@ namespace MyTelegramBot.Bot
                     {
                         FollowerId = FollowerId,
                         Text = ReplyToMessageText,
-                        Send = false
+                        Send = false,
+                        BotInfoId=BotInfo.Id
                     };
 
                     db.HelpDesk.Add(help);
