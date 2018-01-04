@@ -13,6 +13,7 @@
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Services\YandexMap\" />
     <Folder Include="Views\Category\" />
+    <Folder Include="Views\PayConfig\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

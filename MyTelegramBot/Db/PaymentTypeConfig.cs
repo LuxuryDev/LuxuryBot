@@ -7,7 +7,7 @@ namespace MyTelegramBot
     {
         public int Id { get; set; }
         public int? PaymentId { get; set; }
-        public bool? Enable { get; set; }
+        public bool Enable { get; set; }
         public string Host { get; set; }
         public string Port { get; set; }
         public string Login { get; set; }

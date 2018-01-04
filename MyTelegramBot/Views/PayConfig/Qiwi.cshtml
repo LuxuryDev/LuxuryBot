@@ -1,0 +1,68 @@
+﻿@model MyTelegramBot.PaymentTypeConfig
+@{
+    //ViewData["Title"] = "Список смартфонов";
+    Layout = "_Layout";
+}
+<!DOCTYPE html>
+<h3>Настройка Qiwi. Что бы получить токен доступа пройдите по ссылке https://qiwi.com/api</h3> 
+
+@using (Html.BeginForm("Save", "PayConfig", FormMethod.Post))
+    {
+
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.PaymentId)
+        <p>
+        <label>
+        Номер телефона
+        </label><br />
+        @Html.TextBoxFor(m => m.Login, new { @class = "form-control" })
+        </p>
+        <p>
+        <label>
+        Токен доступа
+        </label><br />
+        @Html.TextBoxFor(m => m.Pass, new { @class = "form-control" })
+        </p>
+        <p>
+        <label>
+        Метод оплаты доступен для пользователей
+        </label><br />
+        @Html.CheckBoxFor(m=>m.Enable, new { @class = "form-control" })
+        </p>
+        <p>
+        <input type="submit" value="Сохранить" class="btn btn-success" />
+        </p>
+    
+        }
+    <input type="button" value="Тест QIWI" class="btn btn-success" onclick="ajaxTest();" />
+
+    <script type="text/javascript">
+        function ajaxTest() {
+            var Config = {
+                Host: "https://qiwi.com/api",
+                'Login': $("#Login").val(),
+                'Pass': $("#Pass").val(),
+                Port : @Model.Port,
+                Enable : true,
+                PaymentId:@Model.PaymentId
+            }
+        $.ajax({
+            type: "POST",
+            url: 'TestConnection',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            alert(data);
+
+        })
+    }
+    </script>
+
+
+
+
