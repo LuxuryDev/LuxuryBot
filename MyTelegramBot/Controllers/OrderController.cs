@@ -18,7 +18,7 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-           return View(db.Orders.Include(o => o.BotInfo).OrderByDescending(o=>o.Id).ToList());
+           return View(db.Orders.Include(o => o.BotInfo).Include(o=>o.OrderDone).OrderByDescending(o=>o.Id).ToList());
 
 
         }

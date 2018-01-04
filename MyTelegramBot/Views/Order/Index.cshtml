@@ -21,6 +21,7 @@
         <td>Комментарий</td>
         <td>Дата</td>
         <td>Бот</td>
+        <td>Выполнен</td>
     </tr>
     @foreach (var order in Model)
     {
@@ -29,6 +30,16 @@
             <td>@order.Text</td>
             <td>@order.DateAdd</td>
             <td><a href=@("https://t.me/" + order.BotInfo.Name)>@order.BotInfo.Name</a></td>
+            @if (order.OrderDone == null)
+            {
+                <td>Нет</td>
+
+            }
+            @if (order.OrderDone != null)
+            {
+                <td>Да</td>
+
+            }
         </tr>
     }
 </table>
