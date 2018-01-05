@@ -304,7 +304,7 @@ namespace MyTelegramBot.Bot.AdminModule
                     AdminKey.Enable = false;
                     db.BotInfo.Where(b => b.Id == BotInfo.Id).FirstOrDefault().OwnerChatId =Convert.ToInt32(ChatId);
                     if (db.SaveChanges() > 0)
-                         await SendMessage(new BotMessage { TextMessage = "Добро пожаловать!" });
+                         await SendMessage(new BotMessage { TextMessage = "Добро пожаловать! Нажмите сюда /admin" });
                     return OkResult;
                 }
 

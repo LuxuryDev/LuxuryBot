@@ -10,7 +10,8 @@
 
     @using (Html.BeginForm("Save", "Home", FormMethod.Post))
     {
-        @Html.HiddenFor(m => m.Id);
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m=>m.OwnerChatId)
         <p>
             <label>Название бота</label><br />
             @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
@@ -31,3 +32,9 @@
         </p>
         
     }
+
+@if (Model.OwnerChatId ==null)
+{
+    <h3>Владелец бота не подтвержден! Нажмите кнопку сохранить</h3>
+
+}

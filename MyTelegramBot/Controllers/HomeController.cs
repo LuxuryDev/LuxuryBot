@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
+using Microsoft.Extensions.Configuration;
 
 namespace MyTelegramBot.Controllers
 {
@@ -21,18 +22,25 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-            var bot = db.BotInfo.Where(b => b.Name == "MyFirstTest234Bot").FirstOrDefault();
 
-            if (bot == null)
+            string name = GetBotName();
+
+            if(name!=null)
+                BotInfo = db.BotInfo.Where(b => b.Name ==name ).FirstOrDefault();
+
+            if (name == null || name!=null && name=="")
+                ViewBag.Error = "В файле appsettings.json не указано название бота!";
+
+            if (BotInfo == null)
             {
-                bot = new BotInfo
+                BotInfo = new BotInfo
                 {
                     Name = "",
                     Token = ""
                 };
             }
 
-            return View(bot);
+            return View(BotInfo);
         }
 
         public IActionResult Add()
@@ -44,7 +52,7 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-            var bot = db.BotInfo.Where(b => b.Name == "MyFirstTest234Bot").FirstOrDefault();
+            var bot = db.BotInfo.Where(b => b.Name == GetBotName()).FirstOrDefault();
 
             if (bot != null)
             {
@@ -99,8 +107,17 @@ namespace MyTelegramBot.Controllers
                 if (bot.Id > 0) // редактируем уже сущестующие данные
                 {
                     UpdateBotInfo(bot);
- 
+                    
+                    //если по каким то причинам пользователь не подрвердил себя как владельца
+                    if(bot.OwnerChatId==null)
+                    {
+                        string key = Bot.GeneralFunction.GenerateHash();
+                        AddOwnerKey(key);
+                        return View("Own", "/owner" + key);
+                    }
+
                     return RedirectToAction("Index");
+
                 }
 
                 else
@@ -113,7 +130,6 @@ namespace MyTelegramBot.Controllers
 
 
         }
-
 
         private int UpdateBotInfo(BotInfo bot)
         {
@@ -161,6 +177,15 @@ namespace MyTelegramBot.Controllers
             db.AdminKey.Add(adminKey);
             db.SaveChanges();
             return adminKey;
+        }
+
+        private string GetBotName()
+        {
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json");
+            string name = builder.Build().GetSection("BotName").Value;
+            return name;
         }
     }
 }
