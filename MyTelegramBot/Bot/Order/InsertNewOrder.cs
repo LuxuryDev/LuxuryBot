@@ -220,7 +220,7 @@ namespace MyTelegramBot.Bot.Order
             {
                 var conf = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(Services.PaymentTypeEnum.Litecoin) && p.Enable==true).OrderByDescending(p => p.Id).FirstOrDefault();
                 if (conf != null)
-                     CryptoCurrency = new Services.BitCoinCore.Litecoin(conf.Login,conf.Pass);                               
+                     CryptoCurrency = new Services.BitCoinCore.Litecoin(conf.Login,conf.Pass,conf.Host,conf.Port);                               
             }
 
             if (type != null && Currency != null) // конвертируем из фиата в крипту

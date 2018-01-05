@@ -6,7 +6,7 @@ namespace MyTelegramBot.Services.BitCoinCore
 {
     class Litecoin:BitCoinCore.BitCoin
     {
-        public Litecoin (string UserName, string Password, string Host = "http://127.0.0.1", string Port = "9332") 
+        public Litecoin (string UserName, string Password, string Host = "127.0.0.1", string Port = "9332") 
             :base(UserName,Password,Host,Port)
         {
 

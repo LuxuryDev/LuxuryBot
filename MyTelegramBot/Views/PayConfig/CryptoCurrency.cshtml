@@ -1,11 +1,11 @@
 ﻿@model MyTelegramBot.PaymentTypeConfig
 @{
-    //ViewData["Title"] = "Список смартфонов";
+    ViewData["Title"] = ViewBag.Title;
     Layout = "_Layout";
 }
 <!DOCTYPE html>
-<h3>Настройка Qiwi. Что бы получить токен доступа пройдите по ссылке https://qiwi.com/api</h3> 
 
+<h3>@ViewBag.Text</h3>
 
 @using (Html.BeginForm("Save", "PayConfig", FormMethod.Post))
     {
@@ -14,16 +14,31 @@
         @Html.HiddenFor(m => m.PaymentId)
         <p>
         <label>
-        Номер телефона
+        Логин для подключения к RPC
         </label><br />
         @Html.TextBoxFor(m => m.Login, new { @class = "form-control" })
         </p>
         <p>
         <label>
-        Токен доступа
+        Пароль для подключения к RPC
         </label><br />
         @Html.TextBoxFor(m => m.Pass, new { @class = "form-control" })
         </p>
+
+        <p>
+            <label>
+                Адрес RPC сервера
+            </label>
+            @Html.TextBoxFor(m=>m.Host, new { @class = "form-control" })
+        </p>
+
+        <p>
+            <label>
+                Порт RPC сервера
+            </label>
+            @Html.TextBoxFor(m => m.Port, new { @class = "form-control" })
+        </p>
+
         <p>
             <label>
                 Метод оплаты доступен для пользователей
@@ -40,10 +55,10 @@
         function ajaxTest()
         {
             var Config = {
-                Host: "https://qiwi.com/api",
+                'Host': $("#Host").val(),
                 'Login': $("#Login").val(),
                 'Pass': $("#Pass").val(),
-                Port : @Model.Port,
+                'Port' : $("#Port").val(),
                 Enable: $("#Enable").val(),
                 PaymentId:@Model.PaymentId
             }
@@ -69,27 +84,27 @@
         {
             var Cgf = {
                 'Id': $("#Id").val(),
-                Host: "https://qiwi.com/api",
+                'Host': $("#Host").val(),
                 'Login': $("#Login").val(),
                 'Pass': $("#Pass").val(),
-                Port : @Model.Port,
+                'Port' : $("#Port").val(),
                 Enable: $("#Enable").prop("checked"),
                 PaymentId:@Model.PaymentId
             }
-        $.ajax({
-            type: "POST",
-            url: 'Save',
-            data: JSON.stringify(Cgf),
-            contentType: "application/json; charset=utf-8",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("XSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            dataType: "json"
-        }).done(function (data) {
-            alert(data);
+            $.ajax({
+                type: "POST",
+                url: 'Save',
+                data: JSON.stringify(Cgf),
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                dataType: "json"
+            }).done(function (data) {
+                alert(data);
 
-        })
+            })
         }
 </script>
 

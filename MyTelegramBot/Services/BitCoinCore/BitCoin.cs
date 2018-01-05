@@ -20,11 +20,11 @@ namespace MyTelegramBot.Services.BitCoinCore
         private string PortRpc { get; set; }
 
         
-        public BitCoin(string UserName, string Password, string Host="http://127.0.0.1", string Port= "8332")
+        public BitCoin(string UserName, string Password, string Host="127.0.0.1", string Port= "8332")
         {
             UserNameRpc = UserName;
             PasswordRpc = Password;
-            HostRpc = Host;
+            HostRpc = "http://"+ Host;
             PortRpc = Port;
         }
 
