@@ -67,7 +67,9 @@ namespace MyTelegramBot.Controllers
 
             ViewBag.Title = "Litecoin";
             ViewBag.Text = "В папке с установленными Litecoin Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных." +
-                "Содержимое бат файла: litecoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=9332";
+                "Содержимое бат файла:";
+            ViewBag.Bat = "litecoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=9332";
+            
             return View("CryptoCurrency", PaymentTypeConfig);
         }
 
@@ -197,11 +199,10 @@ namespace MyTelegramBot.Controllers
 
             if (PaymentTypeEnum == PaymentTypeEnum.Litecoin)
             {
-                string TxHash = "031e28733afd26153e91afd6132de1a039510597df22d00977d119da7391ea16";
                 Services.BitCoinCore.Litecoin ltc = new Services.BitCoinCore.Litecoin(config.Login, config.Pass, config.Host, config.Port);
-                var block= ltc.GetTxnInfo<Services.BitCoinCore.TransactionInfo>(TxHash);
+                var block= ltc.GetBlockInfo<Services.BitCoinCore.BlockInfo>("80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f");
 
-                if(block!=null && block.result.blockindex>0)
+                if(block!=null)
                     return new JsonResult("Успех");
 
                 else

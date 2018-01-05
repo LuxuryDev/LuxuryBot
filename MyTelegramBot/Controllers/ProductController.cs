@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Http;
 namespace MyTelegramBot.Controllers
 {
+    [Produces("application/json")]
     public class ProductController : Controller
     {
         MarketBotDbContext db;
@@ -85,22 +86,29 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Save (Product SaveProduct)
         {
             db = new MarketBotDbContext();
-            
+
+            bool Check = false;
+
             if (SaveProduct != null && SaveProduct.Id > 0)
             {
                 Product = db.Product.Where(p => p.Id == SaveProduct.Id).FirstOrDefault();
                 Product.ProductPrice = db.ProductPrice.Where(pr => pr.ProductId == Product.Id && pr.Enabled == true).
                     Include(pr => pr.Currency).OrderByDescending(pr => pr.Id).ToList();
+                Check = CheckName(SaveProduct.Name);
             }
+
+            if (Product.Name != SaveProduct.Name && Check == false)
+                return Json("Товар с таким названием уже существует");
 
             //Редактируется уже сущестуюий товар. Перед этим проверятся изменилось ли имя, если изменилось,
             //то мы проверям не занято ли оно
             if (SaveProduct != null && SaveProduct.Id>0 && SaveProduct.Name!=null && Product != null && Product.Name==SaveProduct.Name ||
                 SaveProduct != null && SaveProduct.Id > 0 && SaveProduct.Name != null && Product != null 
-                && Product.Name != SaveProduct.Name && CheckName(SaveProduct.Name))
+                && Product.Name != SaveProduct.Name && Check)
             {
                 Product.Name = SaveProduct.Name;
                 Product.CategoryId = SaveProduct.CategoryId;
@@ -121,13 +129,23 @@ namespace MyTelegramBot.Controllers
                     DisablePrice(Product.ProductPrice.FirstOrDefault());
                 }
                 db.SaveChanges();
+                return RedirectToAction("Index");
             }
 
             ///добавление нового товара
-            if ( SaveProduct != null && SaveProduct.Name!=null && SaveProduct.Id == 0 && CheckName(SaveProduct.Name))
-               ProductInsert(SaveProduct);
+            if (SaveProduct != null && SaveProduct.Name != null && SaveProduct.Id == 0 && CheckName(SaveProduct.Name))
+            {
+                if (ProductInsert(SaveProduct).Id > 0)
+                    // return Json("Товар добавлен");
+                    return RedirectToAction("Index");
 
-            return RedirectToAction("Index");
+                else
+                    return Json("Ошибка при добавлении товара");
+            }
+
+
+            else
+                return Json("Ошибка");
         }
 
         /// <summary>

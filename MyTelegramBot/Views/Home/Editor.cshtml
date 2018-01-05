@@ -5,30 +5,29 @@
 }
 <!DOCTYPE html>
 
-@using (Html.BeginForm("Save", "Home", FormMethod.Post))
-{
+<h3>Информация с сервера телеграм</h3>
+<h4><code>@ViewBag.Webhook</code></h4>
 
-    <p>
-        <label>Название бота</label><br />
-        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
-    </p>
+    @using (Html.BeginForm("Save", "Home", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id);
+        <p>
+            <label>Название бота</label><br />
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
+        </p>
 
-    <p>
-        <label>Токен</label><br />
-        @Html.TextBoxFor(m => m.Token, new { @class = "form-control", @placeholder = "Введите токен доступа который вы получили от BotFather" })
-    </p>
-    <p>
-        <label>
-            @Html.CheckBoxFor(m => m.Configuration.FirstOrDefault().VerifyTelephone)
-            Требовать от пользователей номер телефона при оформлении заказа
-        </label>
+        <p>
+            <label>Токен</label><br />
+            @Html.TextBoxFor(m => m.Token, new { @class = "form-control", @placeholder = "Введите токен доступа который вы получили от BotFather" })
+        </p>
 
-        <label>
-            @Html.CheckBoxFor(m => m.Configuration.FirstOrDefault().OwnerPrivateNotify)
-            Получать в ЛС уведомления о новых заказах /тех.заявках и изменениях в них
-        </label>
-    </p>
-<p>
-        <input type="submit" value="Отправить" />
-    </p>
-}
+        <p>
+            <label>Адрес вебхука</label><br />
+            @Html.TextBox("URL")
+        </p>
+
+        <p>
+            <input type="submit" value="Сохранить" />
+        </p>
+        
+    }
