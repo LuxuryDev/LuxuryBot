@@ -110,6 +110,8 @@ namespace MyTelegramBot.Bot.AdminModule
 
         private const string RemoveOperatorCmd = "/removeoperator";
 
+        private const string OwnerReg = "/owner";
+
 
         private int Parametr { get; set; }
         public AdminBot(Update _update) : base(_update)
@@ -269,6 +271,8 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (base.CommandName.Contains(RemoveOperatorCmd))
                     return await RemoveOperator();
 
+
+
                 else
                     return null;
             }
@@ -278,8 +282,34 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (base.CommandName.Contains("/key"))
                     return await CheckOperatorKey(CommandName.Substring(5));
 
+
+                if (base.CommandName.Contains(OwnerReg))
+                    return await OwnerRegister();
+
                 else
                     return null;
+            }
+        }
+
+        private async Task<IActionResult> OwnerRegister()
+        {
+            string key = CommandName.Substring(OwnerReg.Length);
+
+            using(MarketBotDbContext db=new MarketBotDbContext())
+            {
+                var AdminKey = db.AdminKey.Where(a => a.KeyValue == key).FirstOrDefault();
+
+                if (base.BotInfo.OwnerChatId == null && AdminKey!=null && AdminKey.Enable==true)
+                {
+                    AdminKey.Enable = false;
+                    db.BotInfo.Where(b => b.Id == BotInfo.Id).FirstOrDefault().OwnerChatId =Convert.ToInt32(ChatId);
+                    if (db.SaveChanges() > 0)
+                         await SendMessage(new BotMessage { TextMessage = "Добро пожаловать!" });
+                    return OkResult;
+                }
+
+                else
+                    return OkResult;
             }
         }
 
