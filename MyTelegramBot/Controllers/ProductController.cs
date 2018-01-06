@@ -39,7 +39,7 @@ namespace MyTelegramBot.Controllers
             product.Text = String.Empty;
             product.PhotoUrl = String.Empty;
             product.ProductPrice.Add(new ProductPrice { CurrencyId = 1, Value = 0 });
-            ViewBag.Phones = new SelectList(db.Category.ToList(), "Id", "Name", db.Category.FirstOrDefault().Id);
+            ViewBag.Category = new SelectList(db.Category.ToList(), "Id", "Name", db.Category.FirstOrDefault().Id);
             ViewBag.Currency = db.Currency.ToList();
             ViewBag.Unit = new SelectList(db.Units.ToList(), "Id", "Name", product.UnitId);
             return View("Editor", product);

@@ -1,0 +1,19 @@
+﻿@model MyTelegramBot.Configuration
+@using (Html.BeginForm("ContactUpdate", "Home", FormMethod.Post))
+{
+<h3>Настройки</h3>
+<p>
+    <label>
+        Требовать от пользователя номер телефона при офрмлении заказа
+    </label>
+    @Html.CheckBoxFor(m => m.VerifyTelephone)
+</p>
+
+<p>
+    <label>
+        Получать уведомления в ЛС от бота при добавлении новых заказов/ заявок и т.д
+    </label>
+    @Html.CheckBoxFor(m => m.OwnerPrivateNotify)
+</p>
+<input type="submit" value="Сохранить" />
+}

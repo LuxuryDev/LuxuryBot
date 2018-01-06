@@ -1,4 +1,4 @@
-﻿@model MyTelegramBot.BotInfo
+﻿@model Tuple<MyTelegramBot.BotInfo, MyTelegramBot.Company>
 @{
     //ViewData["Title"] = "Список смартфонов";
     Layout = "_Layout";
@@ -7,13 +7,13 @@
 
 <h1>@ViewBag.Error</h1>
 
-@if (Model.Id == 0)
+@if (Model.Item1.Id == 0)
 {
     @Html.ActionLink("Добавить", "Add", "Home");
 
 }
 
-@if (Model.Id > 0)
+@if (Model.Item1.Id > 0)
 {
 <h3>Бот</h3>
 <table class="table">
@@ -25,11 +25,122 @@
     </tr>
   
     <tr>
-        <td>@Model.Name</td>
-        <td>@Model.Token</td>
-        <td>@Model.Timestamp.ToString()</td>
+        <td>@Model.Item1.Name</td>
+        <td>@Model.Item1.Token</td>
+        <td>@Model.Item1.Timestamp.ToString()</td>
         <td><a href="~/Home/Editor/">Изменить</a></td>
     </tr>
     
 </table>
+
+@using (Html.BeginForm("Save", "Home", FormMethod.Post))
+{
+    <h3>Настройки</h3>
+    @Html.HiddenFor(m=>m.Item1.Configuration.FirstOrDefault().Id)
+    <p>
+        <label>
+            Требовать от пользователя номер телефона при офрмлении заказа
+        </label>
+        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().VerifyTelephone, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <label>
+            Получать уведомления в ЛС от бота при добавлении новых заказов/ заявок и т.д
+        </label>
+        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().OwnerPrivateNotify, new { @class = "form-control" })
+    </p>
 }
+
+}
+
+<input type="button" value="Сохранить изменения" class="btn btn-success" onclick="ajaxSave();" />
+
+@using (Html.BeginForm("ContactUpdate", "Home", FormMethod.Post))
+{
+    <h3>Контактные данные</h3>
+    <p>
+        @Html.HiddenFor(m=>m.Item2.Id)
+        <label>
+            Instagram
+        </label><br />
+        @Html.TextBoxFor(m => m.Item2.Instagram, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <label>
+            Vk
+        </label><br />
+        @Html.TextBoxFor(m => m.Item2.Vk, new { @class = "form-control" })
+    </p>
+
+
+    <p>
+        <label>
+            Канал в телеграм
+        </label><br />
+        @Html.TextBoxFor(m => m.Item2.Chanel, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <label>
+            Чат в телеграм
+        </label><br />
+        @Html.TextBoxFor(m => m.Item2.Chat, new { @class = "form-control" })
+    </p>
+}
+
+<input type="button" value="Сохранить изменения" class="btn btn-success" onclick="ajaxContact();" />
+
+
+
+<script type="text/javascript">
+        function ajaxSave()
+        {
+            var Config = {
+                'VerifyTelephone': $("#VerifyTelephone").prop("checked"),
+                'OwnerPrivateNotify': $("#OwnerPrivateNotify").prop("checked"),
+                'Id': $("#Id").val()
+            }
+        $.ajax({
+            type: "POST",
+            url: 'Home/save',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            alert(data);
+
+        })
+        }
+</script>
+
+<script type="text/javascript">
+        function ajaxContact() {
+            var Config = {
+                'Instagram': $("#Item2_Instagram").val(),
+                'Chanel': $("#Item2_Chanel").val(),
+                'Chat': $("#Item2_Chat").val(),
+                'Vk': $("#Item2_Vk").val(),
+                'Id': $("#Item2_Id").val()
+            }
+            $.ajax({
+                type: "POST",
+                url: 'Home/ContactUpdate',
+                data: JSON.stringify(Config),
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                dataType: "json"
+            }).done(function (data) {
+                alert(data);
+
+            })
+        }
+</script>

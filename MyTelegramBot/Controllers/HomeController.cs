@@ -10,13 +10,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace MyTelegramBot.Controllers
 {
+    [Produces("application/json")]
     public class HomeController : Controller
     {
         MarketBotDbContext db;
 
         TelegramBotClient TelegramBot;
 
-        BotInfo BotInfo;
+        BotInfo botInfo;
+
+        Company company;
 
         public IActionResult Index()
         {
@@ -25,27 +28,92 @@ namespace MyTelegramBot.Controllers
 
             string name = GetBotName();
 
-            if(name!=null)
-                BotInfo = db.BotInfo.Where(b => b.Name ==name ).FirstOrDefault();
-
+            if (name != null)
+            {
+                botInfo = db.BotInfo.Where(b => b.Name == name).Include(b=>b.Configuration).FirstOrDefault();
+                company = db.Company.FirstOrDefault();
+            }
             if (name == null || name!=null && name=="")
                 ViewBag.Error = "В файле appsettings.json не указано название бота!";
 
-            if (BotInfo == null)
+            if (botInfo == null)
             {
-                BotInfo = new BotInfo
+                botInfo = new BotInfo
                 {
                     Name = "",
                     Token = ""
                 };
+
+                company = new Company();
             }
 
-            return View(BotInfo);
+            Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
+            
+
+            return View(tuple);
         }
 
         public IActionResult Add()
         {
             return RedirectToAction("Editor");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Save ([FromBody] Configuration _configuration)
+        {
+            Configuration conf=new Configuration();
+
+            if (db == null)
+                db = new MarketBotDbContext();
+
+            if(_configuration!=null)
+            conf=db.Configuration.Where(c => c.Id == _configuration.Id).FirstOrDefault();
+
+            if (conf != null && conf.Id>0)
+            {
+                conf.OwnerPrivateNotify = _configuration.OwnerPrivateNotify;
+                conf.VerifyTelephone = _configuration.VerifyTelephone;
+
+                if (db.SaveChanges() >= 0)
+                    return Json("Сохранено");
+
+                else
+                    return Json("Ошибка");
+            }
+
+            else
+                return Json("Ошибка");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ContactUpdate([FromBody] Company _company)
+        {
+            company = new Company();
+
+            if (db == null)
+                db = new MarketBotDbContext();
+
+            if (_company != null && _company.Id > 0)
+                company = db.Company.Where(c => c.Id == _company.Id).FirstOrDefault();
+
+            if (company != null)
+            {
+                company.Instagram = _company.Instagram;
+                company.Vk = _company.Vk;
+                company.Chanel = _company.Chanel;
+                company.Chat = _company.Chat;
+
+                if (db.SaveChanges() >= 0)
+                    return Json("Сохранено");
+
+                else
+                    return Json("Ошибка");
+            }
+
+            else
+                return Json("Ошибка");
         }
 
         public async Task<IActionResult> Editor()
@@ -136,9 +204,9 @@ namespace MyTelegramBot.Controllers
             if (db == null)
                 db = new MarketBotDbContext();
 
-            BotInfo = db.BotInfo.Where(b => b.Id == bot.Id).Include(b => b.Configuration).FirstOrDefault();
-            BotInfo.Name = bot.Name;
-            BotInfo.Token = bot.Token;
+            botInfo = db.BotInfo.Where(b => b.Id == bot.Id).Include(b => b.Configuration).FirstOrDefault();
+            botInfo.Name = bot.Name;
+            botInfo.Token = bot.Token;
             return db.SaveChanges();
         }
 
