@@ -152,7 +152,7 @@ namespace MyTelegramBot.Controllers
             return View(bot);
         }
 
-        public async Task<IActionResult> Save(BotInfo bot, string URL)
+        public async Task<IActionResult> SaveInfo(BotInfo bot, string URL)
         {
             db = new MarketBotDbContext();
 
@@ -160,21 +160,25 @@ namespace MyTelegramBot.Controllers
             {
                 TelegramBot = new TelegramBotClient(bot.Token);
 
+                var reapet_bot = db.BotInfo.Where(b => b.Name == bot.Name).FirstOrDefault();
+
                 if (URL != null && TelegramBot != null) // обновляем url вебхука
                     await TelegramBot.SetWebhookAsync(URL + "/api/values/");
 
-                if (bot.Id == 0) //Бот еще не настроен. Добавляем новые данные
+                if (bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
                 {
+                    bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false });
                     bot=InsertBotInfo(bot);
-                    Configuration configuration = new Configuration { BotInfoId = bot.Id, VerifyTelephone = false, OwnerPrivateNotify = false };
                     Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
                     db.Company.Add(company);
-                    db.Configuration.Add(configuration);
                     string key= Bot.GeneralFunction.GenerateHash();
                     AddOwnerKey(key);
                     return View("Own","/owner"+key);
                     
                 }
+
+                if (bot.Id == 0 && reapet_bot != null)
+                    return Json("В базе данных уже существует бот с таким именем");
 
                 if (bot.Id > 0) // редактируем уже сущестующие данные
                 {
@@ -227,7 +231,9 @@ namespace MyTelegramBot.Controllers
                 Name = bot.Name,
                 Token = bot.Token,
                 ChatId = chat_id,
-                Timestamp = DateTime.Now
+                Timestamp = DateTime.Now,
+                Configuration=bot.Configuration
+                
             };
 
             db.BotInfo.Add(botInfo);

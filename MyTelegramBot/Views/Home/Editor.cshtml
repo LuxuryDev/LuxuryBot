@@ -8,7 +8,7 @@
 <h3>Информация с сервера телеграм</h3>
 <h4><code>@ViewBag.Webhook</code></h4>
 
-    @using (Html.BeginForm("Save", "Home", FormMethod.Post))
+    @using (Html.BeginForm("SaveInfo", "Home", FormMethod.Post))
     {
         @Html.HiddenFor(m => m.Id)
         @Html.HiddenFor(m=>m.OwnerChatId)

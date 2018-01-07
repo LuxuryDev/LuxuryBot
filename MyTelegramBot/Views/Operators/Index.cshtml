@@ -1,26 +1,26 @@
-﻿@model IEnumerable<MyTelegramBot.Follower>
+﻿@model IEnumerable<MyTelegramBot.Admin>
 @{
     //ViewData["Title"] = "Список смартфонов";
     Layout = "_Layout";
 }
 <!DOCTYPE html>
-<h3>Список пользователей</h3> 
+<h3>Список операторов</h3> 
 <table class="table">
     <tr>
         <td>Имя</td>
         <td>Фамилия</td>
         <td>Логин в телеграм</td>
         <td>Номер телефона</td>
-        <td>Дата регистрации</td>
+        <td>Время</td>
     </tr>
     @foreach (var follower in Model)
     {
-        <tr><td>@follower.FirstName</td>
-            <td>@follower.LastName</td>
-            <td>@follower.UserName</td>
-            <td>@follower.Telephone</td>
+        <tr><td>@follower.Follower.FirstName</td>
+            <td>@follower.Follower.LastName</td>
+            <td>@follower.Follower.UserName</td>
+            <td>@follower.Follower.Telephone</td>
             <td>@follower.DateAdd</td>
-            <td><a href="~/Operators/Add/@follower.Id">Дать права оператора</a></td>
+            <td><a href="~/Operators/Delete/@follower.Id">Удалить</a></td>
 
         </tr>
     }

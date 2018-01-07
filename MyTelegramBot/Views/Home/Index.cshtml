@@ -36,7 +36,7 @@
 @using (Html.BeginForm("Save", "Home", FormMethod.Post))
 {
     <h3>Настройки</h3>
-    @Html.HiddenFor(m=>m.Item1.Configuration.FirstOrDefault().Id)
+    @Html.HiddenFor(m => m.Item1.Configuration.FirstOrDefault().Id)
     <p>
         <label>
             Требовать от пользователя номер телефона при офрмлении заказа
@@ -52,7 +52,7 @@
     </p>
 }
 
-}
+
 
 <input type="button" value="Сохранить изменения" class="btn btn-success" onclick="ajaxSave();" />
 
@@ -60,7 +60,7 @@
 {
     <h3>Контактные данные</h3>
     <p>
-        @Html.HiddenFor(m=>m.Item2.Id)
+        @Html.HiddenFor(m => m.Item2.Id)
         <label>
             Instagram
         </label><br />
@@ -92,7 +92,7 @@
 
 <input type="button" value="Сохранить изменения" class="btn btn-success" onclick="ajaxContact();" />
 
-
+}
 
 <script type="text/javascript">
         function ajaxSave()
