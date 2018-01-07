@@ -9,6 +9,7 @@ namespace MyTelegramBot.Services
     {
         PaymentOnReceipt=1,
         Qiwi=2,
-        Litecoin=3
+        Litecoin=3,
+        BitcoinCash=4
     }
 }

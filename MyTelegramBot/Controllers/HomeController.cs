@@ -165,7 +165,11 @@ namespace MyTelegramBot.Controllers
 
                 if (bot.Id == 0) //Бот еще не настроен. Добавляем новые данные
                 {
-                    InsertBotInfo(bot);
+                    bot=InsertBotInfo(bot);
+                    Configuration configuration = new Configuration { BotInfoId = bot.Id, VerifyTelephone = false, OwnerPrivateNotify = false };
+                    Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
+                    db.Company.Add(company);
+                    db.Configuration.Add(configuration);
                     string key= Bot.GeneralFunction.GenerateHash();
                     AddOwnerKey(key);
                     return View("Own","/owner"+key);
@@ -210,7 +214,7 @@ namespace MyTelegramBot.Controllers
             return db.SaveChanges();
         }
 
-        private int InsertBotInfo(BotInfo bot)
+        private BotInfo InsertBotInfo(BotInfo bot)
         {
             if (db == null)
                 db = new MarketBotDbContext();
@@ -227,7 +231,8 @@ namespace MyTelegramBot.Controllers
             };
 
             db.BotInfo.Add(botInfo);
-            return db.SaveChanges();
+            db.SaveChanges();
+            return bot;
         }
 
         private AdminKey AddOwnerKey(string key)

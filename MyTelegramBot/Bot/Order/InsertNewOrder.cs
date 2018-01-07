@@ -26,6 +26,8 @@ namespace MyTelegramBot.Bot.Order
 
         private Invoice Invoice { get; set; }
 
+        private PaymentTypeConfig PaymentConfig { get; set; }
+
         public InsertNewOrder(int FollowerId, BotInfo BotInfo)
         {
             this.FollowerId = FollowerId;
@@ -68,7 +70,7 @@ namespace MyTelegramBot.Bot.Order
                 if (PaymentTypeEnum == Services.PaymentTypeEnum.Qiwi)
                     Invoice= AddQiwiInvoice(NewOrder, total);
 
-                if (PaymentTypeEnum != Services.PaymentTypeEnum.PaymentOnReceipt && PaymentTypeEnum != Services.PaymentTypeEnum.Qiwi)
+                if (PaymentTypeEnum != Services.PaymentTypeEnum.PaymentOnReceipt && PaymentTypeEnum != Services.PaymentTypeEnum.Qiwi) // создаем инвойс для оплаты в криптовалюте
                     Invoice= AddCryptoCurrencyInvoice(NewOrder, PaymentTypeEnum, total);
 
                 if(Invoice!=null)
@@ -116,7 +118,7 @@ namespace MyTelegramBot.Bot.Order
         }
 
         /// <summary>
-        /// Перенести данные из таблицы Basket в таблицу ORderProducr
+        /// Перенести данные из таблицы Basket в таблицу ORderProduct
         /// </summary>
         /// <param name="ProductId"></param>
         /// <param name="OrderId"></param>
@@ -206,9 +208,9 @@ namespace MyTelegramBot.Bot.Order
         /// Создать счет на оплату в Криптовалюте
         /// </summary>
         /// <param name="order">Заказ</param>
-        /// <param name="paymentTypeEnum">Тип платежа. Лайткоин и т.д</param>
+        /// <param name="paymentTypeEnum">Тип платежа. Лайткоин, БиткоинКэш и т.д</param>
         /// <param name="Total">Сумма в фиате.</param>
-        /// <param name="LifeTimeDuration">Время жизни счета</param>
+        /// <param name="LifeTimeDuration">Время жизни счета в минутах</param>
         /// <returns></returns>
         private Invoice AddCryptoCurrencyInvoice (Orders order, Services.PaymentTypeEnum paymentTypeEnum, double Total, int LifeTimeDuration = 60)
         {
@@ -216,19 +218,17 @@ namespace MyTelegramBot.Bot.Order
 
             var type = db.PaymentType.Where(p => p.Id == PaymentType.GetTypeId(paymentTypeEnum)).FirstOrDefault();
 
-            if (paymentTypeEnum == Services.PaymentTypeEnum.Litecoin) // Лайткоин
-            {
-                var conf = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(Services.PaymentTypeEnum.Litecoin) && p.Enable==true).OrderByDescending(p => p.Id).FirstOrDefault();
-                if (conf != null)
-                     CryptoCurrency = new Services.BitCoinCore.Litecoin(conf.Login,conf.Pass,conf.Host,conf.Port);                               
-            }
+            PaymentConfig = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(paymentTypeEnum) && p.Enable==true).OrderByDescending(p => p.Id).FirstOrDefault();
+
+            if (PaymentConfig != null)
+                    CryptoCurrency = new Services.BitCoinCore.BitCoin(PaymentConfig.Login, PaymentConfig.Pass, PaymentConfig.Host, PaymentConfig.Port);                                          
 
             if (type != null && Currency != null) // конвертируем из фиата в крипту
                 Summa = MoneyConvert(Total, type.Code, Currency.Code);
 
             string AccountNumber = CryptoCurrency.GetNewAddress(); // Генерируем адрес куда необходимо перевести деньги
 
-            if (CryptoCurrency != null && AccountNumber!=null && AccountNumber!="" && Summa>0)
+            if (type!=null && CryptoCurrency != null && AccountNumber!=null && AccountNumber!="" && Summa>0)
             {
                 Invoice invoice = new Invoice
                 {
@@ -236,7 +236,7 @@ namespace MyTelegramBot.Bot.Order
                     CreateTimestamp = DateTime.Now,
                     InvoiceNumber = GenerateInvoiceNumber(),
                     LifeTimeDuration = System.TimeSpan.FromMinutes(LifeTimeDuration),
-                    PaymentTypeId = PaymentType.GetTypeId(paymentTypeEnum),
+                    PaymentTypeId = type.Id,
                     Value = Summa,
                     Comment="-",
                     Paid=false
