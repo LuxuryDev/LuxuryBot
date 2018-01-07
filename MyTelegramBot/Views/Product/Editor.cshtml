@@ -4,47 +4,41 @@
 <img src="@ViewBag.ImageData" class="img-responsive" alt="Responsive image">
 <h3>Выберите фотографию</h3>
 
-<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js"
-        asp-fallback-src="~/lib/jquery-validation/dist/jquery.validate.min.js"
-        asp-fallback-test="window.jQuery && window.jQuery.validator">
-</script>
-<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.6/jquery.validate.unobtrusive.min.js"
-        asp-fallback-src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
-        asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive">
-</script>
-
-<form asp-controller="Product" asp-action="UploadFile" method="post"
-      enctype="multipart/form-data">
-
-    <input type="file" name="file" />
-    <button type="submit">Upload File</button>
-</form>
 
 @{
-    MyTelegramBot.ProductPrice price = new MyTelegramBot.ProductPrice();
-    price = Model.ProductPrice.FirstOrDefault();
-    }
+MyTelegramBot.ProductPrice price = new MyTelegramBot.ProductPrice();
+price = Model.ProductPrice.FirstOrDefault();
+}
 
 
-@using (Html.BeginForm("Save", "Product", FormMethod.Post)) { 
+    @using (Html.BeginForm("Save", "Product", FormMethod.Post, new { enctype = "multipart/form-data" })) {
 
-    @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.Id)
 
+        <div>
+            <p>Upload one or more files using this form:</p>
+            <input type="file" name="files" />
+        </div>
+        <p>
+    
+            <label>Название товара</label><br />
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
 
-    <p>
-        <label>Название товара</label><br />
-        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+        </p>
+    
 
-    </p>
+                <p>
+    
+                    <label>Описание</label><br />
+                    @Html.TextBoxFor(m => m.Text, new { @class = "form-control" })
+                </p>
+    
 
-            <p>
-                <label>Описание</label><br />
-                @Html.TextBoxFor(m => m.Text, new { @class = "form-control" })
-            </p>
-
-            <p>
-                <label>Стоимость</label><br />
-                <input type="text" name=ProductPrice[0].Value value=@Model.ProductPrice.FirstOrDefault().Value class="form-control" />
+                <p>
+    
+                    <label>Стоимость</label><br />
+    
+                    <input type="text" name=ProductPrice[0].Value value=@Model.ProductPrice.FirstOrDefault().Value class="form-control" />
 
             </p>
 

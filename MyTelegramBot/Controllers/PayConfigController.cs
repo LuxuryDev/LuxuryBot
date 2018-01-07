@@ -66,10 +66,41 @@ namespace MyTelegramBot.Controllers
             }
 
             ViewBag.Title = "Litecoin";
-            ViewBag.Text = "В папке с установленными Litecoin Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных." +
+            ViewBag.Text = "В папке с установленными Litecoin Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных (Размер базы данных более 10гб)." +
                 "Содержимое бат файла:";
             ViewBag.Bat = "litecoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=9332";
             
+            return View("CryptoCurrency", PaymentTypeConfig);
+        }
+
+
+        public IActionResult BitcoinCash()
+        {
+            db = new MarketBotDbContext();
+
+            PaymentTypeEnum = PaymentTypeEnum.BitcoinCash;
+
+            PaymentTypeConfig = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(PaymentTypeEnum)).OrderByDescending(p => p.Id).FirstOrDefault();
+
+            if (PaymentTypeConfig == null)
+            {
+                PaymentTypeConfig = new PaymentTypeConfig
+                {
+                    Host = "127.0.0.1",
+                    Login = "root",
+                    Pass = "toor",
+                    Port = "8332",
+                    Enable = true,
+                    PaymentId = PaymentType.GetTypeId(PaymentTypeEnum)
+                };
+
+            }
+
+            ViewBag.Title = "Bitcoin Cash";
+            ViewBag.Text = "В папке с установленными Bitcoin Cash Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных (Размер базы данных более 150гб)." +
+                "Содержимое бат файла:";
+            ViewBag.Bat = "bitcoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=8332";
+
             return View("CryptoCurrency", PaymentTypeConfig);
         }
 
@@ -184,7 +215,6 @@ namespace MyTelegramBot.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TestConnection([FromBody] PaymentTypeConfig config)
         {
-
             if (config != null)
                 PaymentTypeEnum = PaymentType.GetPaymentTypeEnum(config.PaymentId);
 
@@ -197,12 +227,20 @@ namespace MyTelegramBot.Controllers
                     return new JsonResult("Ошибка соединения");
             }
 
-            if (PaymentTypeEnum == PaymentTypeEnum.Litecoin)
+            if (PaymentTypeEnum != PaymentTypeEnum.Qiwi && config!=null)
             {
-                Services.BitCoinCore.Litecoin ltc = new Services.BitCoinCore.Litecoin(config.Login, config.Pass, config.Host, config.Port);
-                var block= ltc.GetBlockInfo<Services.BitCoinCore.BlockInfo>("80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f");
+                string FirstBlockHash = String.Empty;
 
-                if(block!=null)
+                if (PaymentTypeEnum == PaymentTypeEnum.Litecoin)
+                    FirstBlockHash = "80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f";
+
+                if (PaymentTypeEnum == PaymentTypeEnum.BitcoinCash)
+                    FirstBlockHash = "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048";
+
+                Services.BitCoinCore.BitCoin ltc = new Services.BitCoinCore.BitCoin(config.Login, config.Pass, config.Host, config.Port);
+                var block = ltc.GetBlockInfo<Services.BitCoinCore.BlockInfo>(FirstBlockHash);
+
+                if (block != null)
                     return new JsonResult("Успех");
 
                 else

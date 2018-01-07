@@ -56,7 +56,7 @@ namespace MyTelegramBot.Controllers
                 var product = db.Product.Where(p => p.Id == id).Include(p => p.Unit).Include(p=>p.Category).FirstOrDefault();
 
 
-                product.ProductPhoto = db.ProductPhoto.Where(photo => photo.ProductId == product.Id).Include(photo=>photo.AttachmentFs).ToList();
+                product.ProductPhoto.Add(db.ProductPhoto.Where(photo => photo.ProductId == product.Id).OrderByDescending(photo=>photo.AttachmentFsId).Include(photo=>photo.AttachmentFs).FirstOrDefault());
 
                 product.ProductPrice.Add(db.ProductPrice.Where(price => price.ProductId == product.Id && price.Enabled == true).OrderByDescending(price => price.Id).FirstOrDefault());
                 if (product.ProductPhoto.FirstOrDefault() != null)
@@ -68,7 +68,6 @@ namespace MyTelegramBot.Controllers
 
 
                 ViewBag.Category = new SelectList(db.Category.Where(c=>c.Enable).ToList(), "Id", "Name",product.CategoryId);
-                //ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name");
                 ViewBag.Currency = db.Currency.ToList();
                 ViewBag.Unit = new SelectList(db.Units.ToList(), "Id", "Name",product.UnitId);
 
@@ -87,7 +86,7 @@ namespace MyTelegramBot.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Save (Product SaveProduct)
+        public IActionResult Save (Product SaveProduct, IFormFile files = null)
         {
             db = new MarketBotDbContext();
 
@@ -128,6 +127,10 @@ namespace MyTelegramBot.Controllers
                     ProductPriceInsert(SaveProduct.ProductPrice.FirstOrDefault());
                     DisablePrice(Product.ProductPrice.FirstOrDefault());
                 }
+
+                if (files != null && SaveProduct!=null && SaveProduct.Id>0) // обновляем фотографию
+                    AddAttachment(files, SaveProduct.Id);
+
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -147,6 +150,7 @@ namespace MyTelegramBot.Controllers
             else
                 return Json("Ошибка");
         }
+
 
         /// <summary>
         /// Добавить новый товар в базу данных
@@ -199,6 +203,39 @@ namespace MyTelegramBot.Controllers
             }
 
             return NewPrice;
+        }
+
+        private void AddAttachment(IFormFile file , int ProductId)
+        {
+            if (db == null)
+                db = new MarketBotDbContext();
+
+            System.IO.MemoryStream s=new System.IO.MemoryStream();
+
+            file.CopyTo(s);
+           
+            AttachmentFs fs = new AttachmentFs
+            {
+                Fs = s.ToArray(),
+                GuId = Guid.NewGuid(),
+                Name = file.FileName,
+                AttachmentTypeId = 1
+            };
+
+            db.AttachmentFs.Add(fs);
+
+            db.SaveChanges();
+
+            ProductPhoto productPhoto = new ProductPhoto
+            {
+                AttachmentFsId = fs.Id,
+                ProductId = ProductId
+            };
+
+            db.ProductPhoto.Add(productPhoto);
+
+            db.SaveChanges();
+
         }
 
         /// <summary>

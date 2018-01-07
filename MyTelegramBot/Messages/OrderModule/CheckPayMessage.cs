@@ -97,14 +97,14 @@ namespace MyTelegramBot.Messages
 
         private string CheckLtc (Invoice invoice)
         {
-            var litecoin = db.PaymentTypeConfig.Where(p => p.PaymentId == invoice.PaymentTypeId).OrderByDescending(p => p.Id).FirstOrDefault();
+            var config = db.PaymentTypeConfig.Where(p => p.PaymentId == invoice.PaymentTypeId).OrderByDescending(p => p.Id).FirstOrDefault();
 
-            if (litecoin != null)
+            if (config != null)
             {
-                BitCoinCore = new Services.BitCoinCore.Litecoin(litecoin.Login, litecoin.Pass, litecoin.Host, litecoin.Port);
+                BitCoinCore = new Services.BitCoinCore.BitCoin(config.Login, config.Pass, config.Host, config.Port);
                 var TxList = BitCoinCore.GetListTransactions(invoice.AccountNumber);
 
-                //Найден платеж с нужным кол-во ltc
+                //Найден платеж с нужным кол-во монет
                 if (TxList != null && TxList.Count > 0 && TxList[TxList.Count - 1].amount >= invoice.Value)
                 {
                     DateTime pDate = (new DateTime(1970, 1, 1, 0, 0, 0, 0)).AddSeconds(TxList[TxList.Count - 1].timereceived);
@@ -130,7 +130,7 @@ namespace MyTelegramBot.Messages
             }
 
             else
-                return "Ошибка при подключении к сети Litectoin.Свяжитесь с технической поддержкой!";
+                return "Ошибка при подключении к платежной сети .Свяжитесь с технической поддержкой!";
         }
 
         private Payment AddPayment(int InvoiceId,string TxnId, double value, DateTime dateTime)
