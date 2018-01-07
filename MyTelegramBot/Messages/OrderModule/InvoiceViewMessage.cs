@@ -60,11 +60,11 @@ namespace MyTelegramBot.Messages
                                  NewLine()+"После оплаты нажмите кнопку \"Я оплатил\" (Если вы оплачивали с помощью криптовалюты нажмите эту кнопку через 5-10 минут после оплаты)";
 
 
-                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) != Services.PaymentTypeEnum.Litecoin)
+                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.Litecoin)
                     base.TextMessage += NewLine() + NewLine() +
                         HrefUrl("https://bchain.info/LTC/addr/" + Invoice.AccountNumber, "Посмотреть платеж");
 
-                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) != Services.PaymentTypeEnum.BitcoinCash)
+                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.BitcoinCash)
                     base.TextMessage += NewLine() + NewLine() +
                         HrefUrl("https://blockchair.com/bitcoin-cash/address/" + Invoice.AccountNumber, "Посмотреть платеж");
 

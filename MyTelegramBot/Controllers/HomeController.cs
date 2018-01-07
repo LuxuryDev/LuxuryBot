@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace MyTelegramBot.Controllers
 {
@@ -152,23 +153,35 @@ namespace MyTelegramBot.Controllers
             return View(bot);
         }
 
-        public async Task<IActionResult> SaveInfo(BotInfo bot, string URL)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveInfo(BotInfo _bot, IFormFile file =null)
         {
             db = new MarketBotDbContext();
 
-            if (bot != null)
+            if (_bot != null)
             {
-                TelegramBot = new TelegramBotClient(bot.Token);
+                TelegramBot = new TelegramBotClient(_bot.Token);
 
-                var reapet_bot = db.BotInfo.Where(b => b.Name == bot.Name).FirstOrDefault();
+                var reapet_bot = db.BotInfo.Where(b => b.Name == _bot.Name).FirstOrDefault();
 
-                if (URL != null && TelegramBot != null) // обновляем url вебхука
-                    await TelegramBot.SetWebhookAsync(URL + "/api/values/");
+                botInfo = db.BotInfo.Where(b => b.Id == _bot.Id).FirstOrDefault();
 
-                if (bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
+                Telegram.Bot.Types.FileToSend toSend;
+
+                if (file != null)
+                    toSend = ConvertToFileToSend(file);
+
+                if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl!=null && file!=null) // обновляем вебхук
+                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/api/values/", toSend);
+
+                if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file == null) // обновляем вебхук
+                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/api/values/");
+
+                if (_bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
                 {
-                    bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false });
-                    bot=InsertBotInfo(bot);
+                    _bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false });
+                    _bot=InsertBotInfo(_bot);
                     Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
                     db.Company.Add(company);
                     string key= Bot.GeneralFunction.GenerateHash();
@@ -177,15 +190,15 @@ namespace MyTelegramBot.Controllers
                     
                 }
 
-                if (bot.Id == 0 && reapet_bot != null)
+                if (_bot.Id == 0 && reapet_bot != null)
                     return Json("В базе данных уже существует бот с таким именем");
 
-                if (bot.Id > 0) // редактируем уже сущестующие данные
+                if (_bot.Id > 0) // редактируем уже сущестующие данные
                 {
-                    UpdateBotInfo(bot);
+                    UpdateBotInfo(_bot);
                     
                     //если по каким то причинам пользователь не подрвердил себя как владельца
-                    if(bot.OwnerChatId==null)
+                    if(_bot.OwnerChatId==null)
                     {
                         string key = Bot.GeneralFunction.GenerateHash();
                         AddOwnerKey(key);
@@ -215,6 +228,7 @@ namespace MyTelegramBot.Controllers
             botInfo = db.BotInfo.Where(b => b.Id == bot.Id).Include(b => b.Configuration).FirstOrDefault();
             botInfo.Name = bot.Name;
             botInfo.Token = bot.Token;
+            botInfo.WebHookUrl = bot.WebHookUrl;
             return db.SaveChanges();
         }
 
@@ -232,6 +246,7 @@ namespace MyTelegramBot.Controllers
                 Token = bot.Token,
                 ChatId = chat_id,
                 Timestamp = DateTime.Now,
+                WebHookUrl=bot.WebHookUrl,
                 Configuration=bot.Configuration
                 
             };
@@ -265,6 +280,24 @@ namespace MyTelegramBot.Controllers
             .AddJsonFile("appsettings.json");
             string name = builder.Build().GetSection("BotName").Value;
             return name;
+        }
+
+        private Telegram.Bot.Types.FileToSend ConvertToFileToSend (IFormFile file)
+        {
+            if (file != null)
+            {
+                System.IO.MemoryStream memory = new System.IO.MemoryStream();
+                file.CopyTo(memory);
+                Telegram.Bot.Types.FileToSend toSend = new Telegram.Bot.Types.FileToSend
+                {
+                    Content = memory,
+                    Filename = "@" + file.FileName
+                };
+
+                return toSend;
+            }
+
+            return new Telegram.Bot.Types.FileToSend { };
         }
     }
 }

@@ -8,7 +8,7 @@
 <h3>Информация с сервера телеграм</h3>
 <h4><code>@ViewBag.Webhook</code></h4>
 
-    @using (Html.BeginForm("SaveInfo", "Home", FormMethod.Post))
+    @using (Html.BeginForm("SaveInfo", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.HiddenFor(m => m.Id)
         @Html.HiddenFor(m=>m.OwnerChatId)
@@ -24,7 +24,14 @@
 
         <p>
             <label>Адрес вебхука</label><br />
-            @Html.TextBox("URL")
+            @Html.TextBoxFor(m => m.WebHookUrl, new { @class = "form-control", @placeholder = "URL адрес бота" })
+        </p>
+
+        <p>
+            <label>
+                Файл сертификата формата PEM (не нужен если используете ngrok) <a href="https://tlgrm.ru/docs/bots/self-signed">Как создать сертификат ?</a>
+            </label>
+        <input type="file" name="file" />
         </p>
 
         <p>

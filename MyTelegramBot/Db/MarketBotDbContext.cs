@@ -227,6 +227,10 @@ namespace MyTelegramBot
                 entity.Property(e => e.Token)
                     .HasMaxLength(500)
                     .IsUnicode(false);
+
+                entity.Property(e => e.WebHookUrl)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             });
 
             modelBuilder.Entity<Category>(entity =>

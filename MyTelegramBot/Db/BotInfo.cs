@@ -24,6 +24,8 @@ namespace MyTelegramBot
         public int? OwnerChatId { get; set; }
         public DateTime? Timestamp { get; set; }
 
+        public string WebHookUrl { get; set; }
+
         public ICollection<AttachmentTelegram> AttachmentTelegram { get; set; }
         public ICollection<Basket> Basket { get; set; }
         public ICollection<Configuration> Configuration { get; set; }
