@@ -49,12 +49,10 @@ namespace MyTelegramBot.Controllers
         public IActionResult Editor (int id)
         {
 
-
             if (id > 0)
             {
                 db = new MarketBotDbContext();
                 var product = db.Product.Where(p => p.Id == id).Include(p => p.Unit).Include(p=>p.Category).FirstOrDefault();
-
 
                 product.ProductPhoto.Add(db.ProductPhoto.Where(photo => photo.ProductId == product.Id).OrderByDescending(photo=>photo.AttachmentFsId).Include(photo=>photo.AttachmentFs).FirstOrDefault());
 
@@ -65,7 +63,6 @@ namespace MyTelegramBot.Controllers
                     string imageDataURL = string.Format("data:image/png;base64,{0}", imageBase64Data);
                     ViewBag.ImageData = imageDataURL;
                 }
-
 
                 ViewBag.Category = new SelectList(db.Category.Where(c=>c.Enable).ToList(), "Id", "Name",product.CategoryId);
                 ViewBag.Currency = db.Currency.ToList();
@@ -86,21 +83,23 @@ namespace MyTelegramBot.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Save (Product SaveProduct, IFormFile files = null)
+        public IActionResult Save (Product SaveProduct, IFormFile image = null)
         {
             db = new MarketBotDbContext();
 
-            bool Check = false;
+            bool Check = true;
+
+            if(SaveProduct!=null)
+                Check = CheckName(SaveProduct.Name);
 
             if (SaveProduct != null && SaveProduct.Id > 0)
             {
-                Product = db.Product.Where(p => p.Id == SaveProduct.Id).FirstOrDefault();
+                Product = db.Product.Where(p => p.Id == SaveProduct.Id).FirstOrDefault(); // находим товар в бд
                 Product.ProductPrice = db.ProductPrice.Where(pr => pr.ProductId == Product.Id && pr.Enabled == true).
                     Include(pr => pr.Currency).OrderByDescending(pr => pr.Id).ToList();
-                Check = CheckName(SaveProduct.Name);
             }
 
-            if (Product.Name != SaveProduct.Name && Check == false)
+            if (Product!=null && Product.Name != SaveProduct.Name && Check == false || Product==null && Check==false)
                 return Json("Товар с таким названием уже существует");
 
             //Редактируется уже сущестуюий товар. Перед этим проверятся изменилось ли имя, если изменилось,
@@ -128,8 +127,8 @@ namespace MyTelegramBot.Controllers
                     DisablePrice(Product.ProductPrice.FirstOrDefault());
                 }
 
-                if (files != null && SaveProduct!=null && SaveProduct.Id>0) // обновляем фотографию
-                    AddAttachment(files, SaveProduct.Id);
+                if (image != null && SaveProduct!=null && SaveProduct.Id>0) // обновляем фотографию
+                    AddAttachment(image, SaveProduct.Id);
 
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -138,8 +137,12 @@ namespace MyTelegramBot.Controllers
             ///добавление нового товара
             if (SaveProduct != null && SaveProduct.Name != null && SaveProduct.Id == 0 && CheckName(SaveProduct.Name))
             {
-                if (ProductInsert(SaveProduct).Id > 0)
-                    // return Json("Товар добавлен");
+                SaveProduct=ProductInsert(SaveProduct);
+
+                if (SaveProduct.Id > 0 && image != null)
+                    AddAttachment(image, SaveProduct.Id);
+
+                if(SaveProduct.Id>0)
                     return RedirectToAction("Index");
 
                 else

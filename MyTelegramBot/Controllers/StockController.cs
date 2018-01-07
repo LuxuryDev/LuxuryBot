@@ -37,13 +37,15 @@ namespace MyTelegramBot.Controllers
             return View(list);
         }
 
-        public IActionResult Editor(int productid)
+        [HttpGet]
+        public IActionResult Editor(int Id)
         {
             db = new MarketBotDbContext();
 
-            var product= db.Product.Include(p => p.Unit).Include(p => p.Category).Include(p => p.Stock).FirstOrDefault();
+            var product= db.Product.Where(p=>p.Id==Id).Include(p => p.Unit).Include(p => p.Category).Include(p => p.Stock).FirstOrDefault();
 
-            product.Stock=product.Stock.OrderByDescending(s => s.Id).ToList();
+            if(product!=null && product.Stock!=null)
+                product.Stock=product.Stock.OrderByDescending(s => s.Id).ToList();
 
             if (product != null)
                 return View(product);
