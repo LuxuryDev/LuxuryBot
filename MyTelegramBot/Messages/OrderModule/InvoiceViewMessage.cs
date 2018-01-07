@@ -56,17 +56,20 @@ namespace MyTelegramBot.Messages
                                  Bold("Сумма: ") + Invoice.Value.ToString() + " " + Invoice.PaymentType.Code + NewLine() +
                                  Bold("Время создания: ") + Invoice.CreateTimestamp.ToString() + NewLine() +
                                  Bold("Способо оплаты: ") + Invoice.PaymentType.Name + NewLine() + NewLine() +
-                                 "Вы должны оплатить этот счет не позднее " + Invoice.CreateTimestamp.Value.Add(Invoice.LifeTimeDuration.Value).ToString()+NewLine()+
-                                 NewLine()+"После оплаты нажмите кнопку \"Я оплатил\" (Если вы оплачивали с помощью криптовалюты нажмите эту кнопку через 5-10 минут после оплаты)";
+                                 "Вы должны оплатить этот счет не позднее " + Invoice.CreateTimestamp.Value.Add(Invoice.LifeTimeDuration.Value).ToString() + NewLine() +
+                                 NewLine() + "После оплаты нажмите кнопку \"Я оплатил\" (Если вы оплачивали с помощью криптовалюты нажмите эту кнопку через 5-10 минут после оплаты)";
 
-
-                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.Litecoin)
+                if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.Litecoin ||
+                    Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.Bitcoin ||
+                    Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.Doge)
                     base.TextMessage += NewLine() + NewLine() +
-                        HrefUrl("https://bchain.info/LTC/addr/" + Invoice.AccountNumber, "Посмотреть платеж");
+                        HrefUrl("https://live.blockcypher.com/"+Invoice.PaymentType.Code+"/address/" + Invoice.AccountNumber, "Посмотреть платеж");
+
 
                 if (Invoice.PaymentType != null && PaymentType.GetPaymentTypeEnum(Invoice.PaymentType.Id) == Services.PaymentTypeEnum.BitcoinCash)
                     base.TextMessage += NewLine() + NewLine() +
                         HrefUrl("https://blockchair.com/bitcoin-cash/address/" + Invoice.AccountNumber, "Посмотреть платеж");
+
 
                 SetButtons();
              

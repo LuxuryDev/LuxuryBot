@@ -41,7 +41,6 @@ namespace MyTelegramBot.Controllers
             return View("Qiwi", PaymentTypeConfig);
         }
 
-
         public IActionResult Litecoin()
         {
             db = new MarketBotDbContext();
@@ -73,7 +72,6 @@ namespace MyTelegramBot.Controllers
             return View("CryptoCurrency", PaymentTypeConfig);
         }
 
-
         public IActionResult BitcoinCash()
         {
             db = new MarketBotDbContext();
@@ -103,6 +101,67 @@ namespace MyTelegramBot.Controllers
 
             return View("CryptoCurrency", PaymentTypeConfig);
         }
+
+        public IActionResult Bitcoin()
+        {
+            db = new MarketBotDbContext();
+
+            PaymentTypeEnum = PaymentTypeEnum.Bitcoin;
+
+            PaymentTypeConfig = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(PaymentTypeEnum)).OrderByDescending(p => p.Id).FirstOrDefault();
+
+            if (PaymentTypeConfig == null)
+            {
+                PaymentTypeConfig = new PaymentTypeConfig
+                {
+                    Host = "127.0.0.1",
+                    Login = "root",
+                    Pass = "toor",
+                    Port = "8332",
+                    Enable = true,
+                    PaymentId = PaymentType.GetTypeId(PaymentTypeEnum)
+                };
+
+            }
+
+            ViewBag.Title = "Bitcoin Cash";
+            ViewBag.Text = "В папке с установленными Bitcoin Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных (Размер базы данных более 180гб)." +
+                "Содержимое бат файла:";
+            ViewBag.Bat = "bitcoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=8332";
+
+            return View("CryptoCurrency", PaymentTypeConfig);
+        }
+
+        public IActionResult Doge()
+        {
+            db = new MarketBotDbContext();
+
+            PaymentTypeEnum = PaymentTypeEnum.Doge;
+
+            PaymentTypeConfig = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(PaymentTypeEnum)).OrderByDescending(p => p.Id).FirstOrDefault();
+
+            if (PaymentTypeConfig == null)
+            {
+                PaymentTypeConfig = new PaymentTypeConfig
+                {
+                    Host = "127.0.0.1",
+                    Login = "root",
+                    Pass = "toor",
+                    Port = "8332",
+                    Enable = true,
+                    PaymentId = PaymentType.GetTypeId(PaymentTypeEnum)
+                };
+
+            }
+
+            ViewBag.Title = "Bitcoin Cash";
+            ViewBag.Text = "В папке с установленными Doge Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных (Размер базы данных более 20гб)." +
+                "Содержимое бат файла:";
+            ViewBag.Bat = "bitcoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=8332";
+
+            return View("CryptoCurrency", PaymentTypeConfig);
+        }
+
 
         /// <summary>
         /// Сохранить изменения
