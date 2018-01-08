@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col-md-6">
-    
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
         <h4>Заказ № @Model.Number</h4>
         <p>
             <label>Время:</label>
@@ -88,6 +88,8 @@
                         Оплачен:
                     </label>
                     @Html.DisplayFor(m => m.Invoice.Paid)
+                    @Html.TextBox("Example")
+                    <button type="button" class="btn btn-default btn-lg btn-block sp_bt disabled"  >Блочная кнопка</button>
                 </p>
             </div>
         }
@@ -114,6 +116,12 @@
     }
 </table>
 
+<button type="button" id="InWorkBtn" class="btn btn-success btn-lg btn-block" onclick="ajaxTakeOrderInWork();" value="ВЗЯТЬ">ВЗЯТЬ</button>
+<a class="btn btn-success btn-lg btn-block disabled"
+   href="#" data-toggle="modal"
+   data-target="#basicModal" id="ConfirmBtn">Заказ согласован</a>
+
+@Html.Hidden("TmpInWork","true")
 <!-- Nav tabs -->
 <ul class="nav nav-tabs">
     <li class="active"><a href="#work" data-toggle="tab">Заказ взят в обработку</a></li>
@@ -122,27 +130,31 @@
     <li><a href="#delete" data-toggle="tab">Заказ удален</a></li>
 </ul>
 
+
 <!-- Tab panes -->
 <div class="tab-content">
     <div class="tab-pane active" id="work">
-        @if (Model.OrdersInWork != null)
-        {
+
             <table class="table">
-                <tr>
-                    <td>Пользователь</td>
-                    <td>Время</td>
-                    <td>В работе</td>
-                </tr>
-                @foreach (var work in Model.OrdersInWork)
-                {
+                <thead>
                     <tr>
-                        <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
-                        <td>@work.Timestamp</td>
-                        <td>@work.InWork</td>
+                        <td>Пользователь</td>
+                        <td>Время</td>
+                        <td>В работе</td>
                     </tr>
-                }
+                </thead>
+                <tbody class="_work_table">
+                    @foreach (var work in Model.OrdersInWork)
+                    {
+                        <tr>
+                            <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
+                            <td>@work.Timestamp</td>
+                            <td>@work.InWork</td>
+                        </tr>
+                    }
+                </tbody>
             </table>
-        }
+        
     </div>
     <div class="tab-pane" id="confirm">
         @if (Model.OrderConfirm != null)
@@ -203,3 +215,112 @@
         }
     </div>
 </div>
+
+
+
+
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal">x</button>
+                <h4 class="modal-title" id="myModalLabel">Название модального окна</h4>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("", ""))
+                {
+                    <label>Введите комментарий</label>
+                    @Html.TextBox("TextConfirm")
+                    
+
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal">Сохранить изменения</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function ajaxTakeOrderInWork() {
+        var Config = {
+            'OrderId': $("#Id").val(), // как мне сюда передать айди этого заказа
+            'InWork': $("#TmpInWork").val()
+                    }
+
+        $.ajax({
+            type: "POST",
+            url: '/Order/TakeInWork',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            console.info(data);
+            if (data === "В работе" && $('#TmpInWork').val() == "true" ) { // Пользователь берет заявку в обработку
+                $('#ConfirmBtn').removeClass('disabled');
+                $('#TmpInWork').val('false'); //
+                $('#InWorkBtn').text('Освободить');
+                $("#Example").val(data);
+
+                getTakeInWork(); // запрос табличных данных
+
+                //$('._work_table')
+            }
+            if (data === "Свободна" && $('#TmpInWork').val() == "false") { // Пользователь освобождает заявку
+
+                $('#TmpInWork').val('true');
+                $("#Example").val(data);
+                $('#InWorkBtn').text('ВЗЯТЬ');
+                $('#ConfirmBtn').addClass('disabled');
+            }
+
+            //$("#Example").val(data);
+            }).error(function (data) {
+                // если с ответом сервера чтото пошло не так...
+            })
+    }
+
+    function getTakeInWork() {
+        $.ajax({
+            type: "Get",
+            url: '/Order/GetInWorkList?Id=' + $("#Id").val(), // кка айди передать
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+
+            let tableDraw = '';
+            try {
+               // let tableDataJson = JSON.parse(data);
+                data.forEach(function (elem) {
+                    tableDraw += '<tr>';
+                    tableDraw += '<td>' + elem.name + '</td>';
+                    tableDraw += '<td>' + elem.Timestamp + '</td>';
+                    tableDraw += '<td>' + elem.InWork + '</td>';
+                    tableDraw += '</tr>';
+                });
+                $('._work_table').html(tableDraw);
+                console.log(data);
+            } catch (e) {
+
+
+            }
+
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+
+
+    }
+</script>

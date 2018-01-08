@@ -162,6 +162,32 @@ namespace MyTelegramBot.Controllers
             return View("CryptoCurrency", PaymentTypeConfig);
         }
 
+        public IActionResult PaymentOnReceipt()
+        {
+            db = new MarketBotDbContext();
+
+            return View(db.PaymentType.Where(p => p.Id == 1).FirstOrDefault());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public IActionResult SavePaymentOnReceipt(PaymentType _paymentType)
+        {
+            db = new MarketBotDbContext();
+
+            var OnReceipt = db.PaymentType.Where(p => p.Id == 1).FirstOrDefault();
+
+            if (OnReceipt != null && _paymentType != null)
+            {
+                OnReceipt.Enable = _paymentType.Enable;
+                db.SaveChanges();
+                return Json("Сохранено");
+            }
+
+            else
+                return Json("Ошибка");
+        }
 
         /// <summary>
         /// Сохранить изменения
