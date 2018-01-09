@@ -10,7 +10,7 @@ namespace MyTelegramBot
         public string Text { get; set; }
         public int? FollowerId { get; set; }
         public int? OrderId { get; set; }
-        public bool? Confirmed { get; set; }
+        public bool Confirmed { get; set; }
 
         public Follower Follower { get; set; }
         public Orders Order { get; set; }

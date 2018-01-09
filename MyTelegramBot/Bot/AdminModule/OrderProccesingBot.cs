@@ -467,6 +467,8 @@ namespace MyTelegramBot.Bot.AdminModule
                         && await Processing.CheckInWork(Order) && !await Processing.CheckIsDone(Order))
                     {
                         id = Order.Id;
+                        Order.Deleted = true;
+                        Order.Confirmed = true;
                         OrderDeleted orderDeleted = new OrderDeleted
                         {
                             DateAdd = DateTime.Now,
@@ -476,7 +478,7 @@ namespace MyTelegramBot.Bot.AdminModule
                             Text = text
 
                         };
-
+                       
                         db.OrderDeleted.Add(orderDeleted);
                         db.SaveChanges();
                     }
@@ -520,6 +522,8 @@ namespace MyTelegramBot.Bot.AdminModule
                     {
                         string text = base.ReplyToMessageText;
                         id = Order.Id;
+
+                        Order.Confirmed = true;
 
                         OrderConfirm orderConfirm = new OrderConfirm
                         {
@@ -580,6 +584,10 @@ namespace MyTelegramBot.Bot.AdminModule
                 {
                     var deleted = db.OrderDeleted.Where(o => o.OrderId == OrderId);
 
+                    this.Order = db.Orders.Find(OrderId);
+
+                    this.Order.Deleted = false;
+
                     if (deleted != null && deleted.Count() > 0)
                     {
                         foreach (var value in deleted)
@@ -623,6 +631,9 @@ namespace MyTelegramBot.Bot.AdminModule
                         Done = true,
                         OrderId = OrderId
                     };
+
+                    this.Order = db.Orders.Find(this.Order.Id);
+                    this.Order.Done = true;
 
                     OrdersInWork inWork = new OrdersInWork
                     {

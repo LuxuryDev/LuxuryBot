@@ -23,6 +23,12 @@ namespace MyTelegramBot
         public int? BotInfoId { get; set; }
         public int? InvoiceId { get; set; }
 
+        public bool Done { get; set; }
+
+        public bool Confirmed { get; set; }
+
+        public bool Deleted { get; set; }
+
         public BotInfo BotInfo { get; set; }
         public Follower Follower { get; set; }
         public Invoice Invoice { get; set; }
