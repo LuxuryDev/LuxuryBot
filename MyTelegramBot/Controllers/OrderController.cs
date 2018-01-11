@@ -217,12 +217,17 @@ namespace MyTelegramBot.Controllers
                 this.Order = db.Orders.Find(confirm.OrderId);
 
             }
-            if (InsertConfirm(confirm) > 0)
+
+            if (InsertConfirm(confirm) > 0 && !this.Order.Deleted)
             {
                 this.Order.Confirmed = true;
                 db.SaveChanges();
                 return Json("Добавлено");
             }
+
+            if (this.Order.Deleted)
+                return Json("Ошибка.Заказ удален!");
+
             else
                 return Json("Ошибка");
         }
@@ -255,9 +260,8 @@ namespace MyTelegramBot.Controllers
                 
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Recovery ([FromBody] int Id)
+        [HttpGet]
+        public IActionResult Recovery (int Id)
         {
             db = new MarketBotDbContext();
 
@@ -357,7 +361,7 @@ namespace MyTelegramBot.Controllers
 
             if (orderConfirm != null && orderConfirm.OrderId > 0 && orderConfirm.FollowerId > 0)
             {
-                orderConfirm.Confirmed = orderConfirm.Confirmed;
+                orderConfirm.Confirmed = true;
                 orderConfirm.DateAdd = DateTime.Now;
                 db.OrderConfirm.Add(orderConfirm);
                 return db.SaveChanges();

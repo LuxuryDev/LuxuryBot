@@ -6,6 +6,23 @@
 }
 
 <div class="row">
+   @if (Model.Done == true && Model.OrderDone.Count>0)
+   {
+    <h3 class="bg-success">Заказ выполнен. @Model.OrderDone.FirstOrDefault().DateAdd</h3>
+
+   }
+
+    @if (Model.Deleted == true && Model.OrderDeleted.Count > 0)
+    {
+        <h3 class="bg-danger">Заказ Удален. @Model.OrderDeleted.FirstOrDefault().DateAdd</h3>
+
+    }
+
+    @if (Model.Confirmed == true && Model.OrderConfirm.Count > 0 && Model.Done==false && Model.Deleted==false)
+    {
+        <h3 class="bg-info">Заказ Согласован. @Model.OrderConfirm.FirstOrDefault().DateAdd</h3>
+
+    }
     <div class="col-md-6">
         <input type="hidden" name="Id" id="Id" value="@Model.Id" />
         <h4>Заказ № @Model.Number</h4>
@@ -97,7 +114,7 @@
 </div>
 
 <div class="row">
-
+    <!-- Кнопки обработки заказа -->
 </div>
 <div class="col-md-2"><button type="button" id="InWorkBtn" class="btn btn-success btn-block" onclick="ajaxTakeOrderInWork();">Взять в работу</button></div>
     <!-- Кнопки обработки заказа -->
@@ -118,7 +135,7 @@
 </div>
 
 <div class="col-md-2">
-    <a class="btn btn-warning  btn-block disabled" id="RecoveryBtn">Восстановить заказ</a>
+    <a class="btn btn-warning  btn-block disabled" id="RecoveryBtn" onclick="ajaxRecoveryDelete();">Восстановить заказ</a>
 </div>
 
 
@@ -312,6 +329,7 @@
             </div>
         </div>
     </div>
+
     <!--Модальное окно для добавления комментария о том что заказ Удален-->
     <!--Функция взять заказ  в обработку-->
     <script type="text/javascript">
@@ -343,13 +361,14 @@
             }).done(function (data) {
                 console.info(data);
                 if (data === "В работе" && $('#TmpInWork').val() == "false") { // Пользователь берет заявку в обработку
-                    $('#ConfirmBtn').removeClass('disabled');
+                   
                     $('#TmpInWork').val('true'); //
                     $('#InWorkBtn').text('Освободить');
                     $("#Example").val(data);
                     getTakeInWork(); // запрос табличных данных
 
-                    if ($('#Confirmed').val() == "True") // пользоветль взял заказ в обработку, но он уже согласован   значит делаем кнопку "Выполнить" актвной
+                    if ($('#Confirmed').val() == "True")
+                    // пользоветль взял заказ в обработку, но он уже согласован   значит делаем кнопку "Выполнить" актвной
                     {
                         $('#DoneBtn').removeClass('disabled');
                     }
@@ -357,12 +376,14 @@
                     if ($('#Deleted').val() == "False") {
                         // если заказ не удален то делаем кнопку удалить заказ активной
                         $('#DelBtn').removeClass('disabled');
-                        //$('#RecoveryBtn').addClass('disabled')
                     }
+
+                    if ($('#Deleted').val() == "False") //если заказ не удален то делаем кнопку Согласовать активной
+                        $('#ConfirmBtn').removeClass('disabled');
 
                     if ($('#Deleted').val() == "True") {// если заказ  удален то делаем кнопку Восстановить заказ активной
                         $('#RecoveryBtn').removeClass('disabled')
-                      //  $('#DelBtn').addBack('disabled');
+                        $('#ConfirmBtn').addClass('disabled');
                     }
 
                 }
@@ -373,9 +394,9 @@
                     $('#InWorkBtn').text('Взять в работу');
                     $('#ConfirmBtn').addClass('disabled');
                     $('#DoneBtn').addClass('disabled');
-                    $('#DelBtn').addBack('disabled');
+                    $('#DelBtn').addClass('disabled');
+                    $('#RecoveryBtn').addClass('disabled');
                     getTakeInWork(); // запрос табличных данных
-
                 }
 
                 //$("#Example").val(data);
@@ -430,6 +451,7 @@
             var Config = {
                 'OrderId': $("#Id").val(),
                 'Text': $("#TextConfirm").val()
+                
             }
 
             $.ajax({
@@ -452,7 +474,7 @@
                 }
                 else {
                     console.log(data);
-
+                    alert(data);
                 }
                 //$("#Example").val(data);
             }).error(function (data) {
@@ -520,11 +542,11 @@
                 dataType: "json"
             }).done(function (data) {
                 console.info(data);
-                if (data === "Удалено") { // Пользователь добавляет запись о том что заказ согласован
-                    //alert(data);
+                if (data === "Удалено!") { // Пользователь добавляет запись о том что заказ согласован
                     $('#DoneBtn').addClass('disabled');
                     $('#ConfirmBtn').addClass('disabled');
                     $('#RecoveryBtn').removeClass('disabled');
+                    $('#DelBtn').addClass('disabled');
                     //getСonfirm(); // запрос табличных данных
                     console.log(data);
                     
@@ -575,3 +597,49 @@
 
         }
     </script>
+
+<!--Функция восстановления заказа-->
+<script type="text/javascript">
+
+        function ajaxRecoveryDelete() {
+            $.ajax({
+                type: "Get",
+                url: '/Order/Recovery?Id=' + $("#Id").val(),
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                dataType: "json"
+            }).done(function (data) {
+                console.info(data);
+                if (data === "Восстановлено")
+                {                   
+                    $('#ConfirmBtn').removeClass('disabled');
+                    $('#RecoveryBtn').addClass('disabled');
+                    $('#DelBtn').removeClass('disabled')
+
+                    if ($('#Confirmed').val() == "True")
+                        $('#DoneBtn').removeClass('disabled');
+
+                    //getСonfirm(); // запрос табличных данных
+                    console.log(data);
+                   // ClearTable(); нужна функция очистки таблицы
+                }
+                else {
+                    console.log(data);
+                    alert(data);
+                }
+                //$("#Example").val(data);
+            }).error(function (data) {
+                // если с ответом сервера чтото пошло не так...
+            })
+        }
+
+        var table = document.getElementsByTagName("delete");
+        function ClearTable() {
+            for (i = 0; i < alles_td.length; i++) {
+                alles_td[i].innerHTML = "";
+            }
+        }
+</script>
