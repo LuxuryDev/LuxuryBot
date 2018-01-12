@@ -123,13 +123,14 @@ namespace MyTelegramBot.Bot.AdminModule
             {
                 if (base.Argumetns.Count > 0)
                 {
+
                     OrderId = Argumetns[0];
                     OrderAdminMsg = new AdminOrderMessage(this.OrderId,FollowerId);
                     OrderPositionListMsg = new OrderPositionListMessage(this.OrderId);
                     FeedBackOfferMsg = new FeedBackOfferMessage(this.OrderId);
                     using (MarketBotDbContext db = new MarketBotDbContext())
-                        Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.OrderConfirm).
-                            Include(o => o.OrderDone).Include(o => o.OrderDeleted).Include(o => o.OrderProduct).
+                        Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
+                            Include(o => o.DoneNavigation).Include(o => o.Delete).Include(o => o.OrderProduct).
                             Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.OrderAddress).Include(o=>o.Invoice).Include(o=>o.OrdersInWork).FirstOrDefault();
 
                     InvoiceViewMsg = new InvoiceViewMessage(Order.Invoice, Order.Id);
@@ -137,7 +138,7 @@ namespace MyTelegramBot.Bot.AdminModule
 
             }
 
-            catch
+            catch (Exception e)
             {
 
             }
@@ -463,7 +464,7 @@ namespace MyTelegramBot.Bot.AdminModule
                     Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderDeleted).Include(o=>o.OrdersInWork).FirstOrDefault();
 
                     string text = base.ReplyToMessageText;
-                    if (Order != null && Order.DeleteId==0
+                    if (Order != null && Order.Delete==null
                         && await Processing.CheckInWork(Order) && !await Processing.CheckIsDone(Order))
                     {
                         id = Order.Id;
@@ -518,9 +519,9 @@ namespace MyTelegramBot.Bot.AdminModule
 
                 using (MarketBotDbContext db = new MarketBotDbContext())
                 {
-                    Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderConfirm).Include(o=>o.OrdersInWork).FirstOrDefault();
+                    Order = db.Orders.Where(o => o.Number == number).Include(o => o.Confirm).Include(o=>o.OrdersInWork).FirstOrDefault();
 
-                    if (Order != null && Order.ConfirmId==0
+                    if (Order != null && Order.Confirm==null
                         && await Processing.CheckInWork(Order) && await Processing.CheckIsDone(Order) ==false) // Если уже есть записи о том что заказ соглосован, то больще записей не делаем
                     {
                         string text = base.ReplyToMessageText;
@@ -587,7 +588,9 @@ namespace MyTelegramBot.Bot.AdminModule
                 try
                 {
 
-                    this.Order = db.Orders.Find(OrderId);
+                    Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
+                        Include(o => o.DoneNavigation).Include(o => o.Delete).Include(o => o.OrderProduct).
+                        Include(o => o.Follower).Include(o => o.FeedBack).Include(o => o.OrderAddress).Include(o => o.Invoice).Include(o => o.OrdersInWork).FirstOrDefault();
 
                     this.Order.Delete = null;
 
@@ -629,7 +632,7 @@ namespace MyTelegramBot.Bot.AdminModule
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 //Проверяем согласован ли заказ и не удален ли он и не был ли выполнен ранее
-                if (this.Order != null && this.Order.OrderDeleted.Count == 0 && this.Order.OrderConfirm.Count > 0 && this.Order.OrderDone.Count == 0
+                if (this.Order != null && this.Order.Delete==null && this.Order.Confirm!=null && this.Order.DoneNavigation==null
                    && await Processing.CheckInWork(this.Order) && !await Processing.CheckIsDone(this.Order))
                 {
                     OrderHistory orderDone = new OrderHistory
@@ -645,8 +648,8 @@ namespace MyTelegramBot.Bot.AdminModule
 
                     db.SaveChanges();
 
-                    this.Order = db.Orders.Find(this.Order.Id);
-                    this.Order.DoneId =orderDone.Id;
+                    var order = db.Orders.Find(this.Order.Id);
+                    order.DoneId =orderDone.Id;
 
                     OrdersInWork inWork = new OrdersInWork
                     {

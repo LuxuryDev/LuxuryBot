@@ -147,13 +147,13 @@ namespace MyTelegramBot.Messages.Admin
                         + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Confirm.FollowerId));
 
                 ///Детали удаления заказа
-                if (Order != null && Order.OrderDeleted != null)
+                if (Order != null && Order.Delete != null)
                     base.TextMessage += NewLine() + NewLine() + Bold("Заказ удален:") + NewLine() + Italic("Комментарий: " + Order.Delete.Text
                         + " |Время: " + Order.Delete.Timestamp.ToString()
                         + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Delete.FollowerId));
 
                 ///Детали выполнения заказа
-                if (Order != null && Order.OrderDone != null)
+                if (Order != null && Order.DoneNavigation != null)
                     base.TextMessage += NewLine() + NewLine() + Bold("Заказ выполнен:") + Italic(Order.DoneNavigation.Timestamp.ToString())
                         + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.DoneNavigation.FollowerId);
 
@@ -224,7 +224,7 @@ namespace MyTelegramBot.Messages.Admin
                 });
 
             ///Заявка взята в обработку пользователем. Рисуем основные кнопки
-            if (Order.DeleteId==0&& Order.ConfirmId==0 && FollowerId==InWorkFollowerId && InWorkFollowerId!=0)
+            if (Order.Delete==null&& Order.Confirm==null && FollowerId==InWorkFollowerId && InWorkFollowerId!=0)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
@@ -248,7 +248,7 @@ namespace MyTelegramBot.Messages.Admin
                  });
 
             ///Заявка взять в обработку пользователем. Но заказ удален.
-            if (Order.DeleteId > 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
+            if (Order.Delete!=null&& FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
@@ -271,7 +271,7 @@ namespace MyTelegramBot.Messages.Admin
 
                 });
             ///Заявка взять в обработку пользователем. Зазакз уже согласован
-            if (Order.ConfirmId > 0 && Order.OrderDeleted.Count == 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
+            if (Order.Confirm!=null && Order.Delete==null&& FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
                     base.MessageReplyMarkup = new InlineKeyboardMarkup(
                     new[]{
                  new[]
@@ -295,7 +295,7 @@ namespace MyTelegramBot.Messages.Admin
                     });
 
             ///Заявка взять в обработку пользователем или может быть просто открыта любым т.к она уже выполнена
-            if (Order.DoneId>0)
+            if (Order.DoneNavigation!=null)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]

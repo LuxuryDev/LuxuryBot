@@ -90,8 +90,13 @@ namespace MyTelegramBot.Bot
         {
             var message = ProductViewMsg.BuildMessage();
 
-            if (await SendPhoto(message) != null)
+            //
+            if (message.TextMessage!=null && await SendPhoto(message) != null)
                 return base.OkResult;
+
+            if(message.TextMessage==null && await AnswerCallback("Данные отсутсвуют"))
+                return base.OkResult;
+            
 
             else
                 return base.NotFoundResult;

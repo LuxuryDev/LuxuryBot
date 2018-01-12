@@ -523,7 +523,7 @@ namespace MyTelegramBot.Bot
                     && message.MediaFile.FileTo.FileId==null)
                     mess= await Telegram.SendTextMessageAsync(ChatId, message.TextMessage, ParseMode.Html, false, false, 0, message.MessageReplyMarkup);
 
-                if(message.MediaFile ==null)
+                if(message.MediaFile ==null && message.TextMessage!=null)
                     mess = await Telegram.SendTextMessageAsync(ChatId, message.TextMessage, ParseMode.Html, false, false, 0, message.MessageReplyMarkup);
 
                 //Если мы отрпавляем файл для этого бота первый раз, то Записываем FileId в базу для этог бота, что бы в следующий раз не отслылать целый файл
@@ -607,8 +607,8 @@ namespace MyTelegramBot.Bot
 
             catch
             {
-                if (text != null)
-                    await Telegram.SendTextMessageAsync(this.ChatId, text);
+                //if (text != null)
+                //    await Telegram.SendTextMessageAsync(this.ChatId, text);
 
                 return true;
             }

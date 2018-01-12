@@ -24,7 +24,7 @@ namespace MyTelegramBot.Messages.Admin
             List<Orders> orders = new List<Orders>();
             using (MarketBotDbContext db=new MarketBotDbContext())
             {
-                orders = db.Orders.FromSql("SELECT Orders.* FROM Orders LEFT JOIN OrderConfirm ON Orders.Id=OrderConfirm.OrderId LEFT JOIN OrderDeleted ON OrderDeleted.OrderId=Orders.Id WHERE OrderConfirm.OrderId IS NULL and OrderDeleted.OrderId is NULL").ToList();
+                orders = db.Orders.Where(o=>o.ConfirmId==null && o.Delete==null).ToList();
 
             }
 

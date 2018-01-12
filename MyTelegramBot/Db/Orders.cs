@@ -25,9 +25,9 @@ namespace MyTelegramBot
         public bool Done { get; set; }
         public bool Confirmed { get; set; }
         public bool Deleted { get; set; }
-        public int ConfirmId { get; set; }
-        public int DeleteId { get; set; }
-        public int DoneId { get; set; }
+        public int? ConfirmId { get; set; }
+        public int? DeleteId { get; set; }
+        public int? DoneId { get; set; }
 
         public BotInfo BotInfo { get; set; }
         public OrderHistory Confirm { get; set; }
