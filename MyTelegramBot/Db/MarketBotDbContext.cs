@@ -38,10 +38,12 @@ namespace MyTelegramBot
         public virtual DbSet<House> House { get; set; }
         public virtual DbSet<Invoice> Invoice { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
+        public virtual DbSet<OrderAction> OrderAction { get; set; }
         public virtual DbSet<OrderAddress> OrderAddress { get; set; }
         public virtual DbSet<OrderConfirm> OrderConfirm { get; set; }
         public virtual DbSet<OrderDeleted> OrderDeleted { get; set; }
         public virtual DbSet<OrderDone> OrderDone { get; set; }
+        public virtual DbSet<OrderHistory> OrderHistory { get; set; }
         public virtual DbSet<OrderProduct> OrderProduct { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<OrdersInWork> OrdersInWork { get; set; }
@@ -229,8 +231,8 @@ namespace MyTelegramBot
                     .IsUnicode(false);
 
                 entity.Property(e => e.WebHookUrl)
-                .HasMaxLength(100)
-                .IsUnicode(false);
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -552,6 +554,13 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_Notification_Product");
             });
 
+            modelBuilder.Entity<OrderAction>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<OrderAddress>(entity =>
             {
                 entity.HasKey(e => new { e.AdressId, e.OrderId });
@@ -630,6 +639,13 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_OrderDone_Orders");
             });
 
+            modelBuilder.Entity<OrderHistory>(entity =>
+            {
+                entity.Property(e => e.Text)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<OrderProduct>(entity =>
             {
                 entity.HasIndex(e => e.OrderId)
@@ -667,8 +683,6 @@ namespace MyTelegramBot
 
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
-                entity.Property(e => e.Number).HasColumnType("decimal(18, 0)");
-
                 entity.Property(e => e.Text)
                     .HasMaxLength(500)
                     .IsUnicode(false);
@@ -677,6 +691,21 @@ namespace MyTelegramBot
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.BotInfoId)
                     .HasConstraintName("FK_Orders_BotInfo");
+
+                entity.HasOne(d => d.Confirm)
+                    .WithMany(p => p.OrdersConfirm)
+                    .HasForeignKey(d => d.ConfirmId)
+                    .HasConstraintName("FK_Orders_OrderHistory_Confirm");
+
+                entity.HasOne(d => d.Delete)
+                    .WithMany(p => p.OrdersDelete)
+                    .HasForeignKey(d => d.DeleteId)
+                    .HasConstraintName("FK_Orders_Orders_Delete");
+
+                entity.HasOne(d => d.DoneNavigation)
+                    .WithMany(p => p.OrdersDoneNavigation)
+                    .HasForeignKey(d => d.DoneId)
+                    .HasConstraintName("FK_Orders_OrderHistory_Done");
 
                 entity.HasOne(d => d.Follower)
                     .WithMany(p => p.Orders)
