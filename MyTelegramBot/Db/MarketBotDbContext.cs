@@ -644,6 +644,13 @@ namespace MyTelegramBot
                 entity.Property(e => e.Text)
                     .HasMaxLength(500)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Timestamp).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Follower)
+                    .WithMany(p => p.OrderHistory)
+                    .HasForeignKey(d => d.FollowerId)
+                    .HasConstraintName("FK_OrderHistory_Follower");
             });
 
             modelBuilder.Entity<OrderProduct>(entity =>

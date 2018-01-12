@@ -18,9 +18,12 @@ namespace MyTelegramBot
         public int? OrderId { get; set; }
         public int? FollowerId { get; set; }
         public int? ActionId { get; set; }
+        public DateTime? Timestamp { get; set; }
 
+        public Follower Follower { get; set; }
         public ICollection<Orders> OrdersConfirm { get; set; }
         public ICollection<Orders> OrdersDelete { get; set; }
         public ICollection<Orders> OrdersDoneNavigation { get; set; }
+
     }
 }

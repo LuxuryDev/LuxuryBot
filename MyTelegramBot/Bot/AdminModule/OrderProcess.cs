@@ -69,7 +69,7 @@ namespace MyTelegramBot.Bot.AdminModule
         {
 
             //заявка уже закрыта
-            if ((t as Orders) != null && (t as Orders).OrderDone.Count>0)
+            if ((t as Orders) != null && (t as Orders).DoneId!=null)
             {
                 await SendMessage(new BotMessage { TextMessage = "Заказ уже выполнен" });
                 return true;

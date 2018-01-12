@@ -517,24 +517,22 @@ namespace MyTelegramBot.Bot.AdminModule
                 {
                     Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderConfirm).Include(o=>o.OrdersInWork).FirstOrDefault();
 
-                    if (Order != null && Order.OrderConfirm != null && Order.OrderConfirm.Count == 0
+                    if (Order != null && Order.ConfirmId>0
                         && await Processing.CheckInWork(Order) && await Processing.CheckIsDone(Order) ==false) // Если уже есть записи о том что заказ соглосован, то больще записей не делаем
                     {
                         string text = base.ReplyToMessageText;
                         id = Order.Id;
 
-                        Order.Confirmed = true;
-
-                        OrderConfirm orderConfirm = new OrderConfirm
+                        OrderHistory history = new OrderHistory
                         {
-                            DateAdd = DateTime.Now,
-                            Confirmed = true,
+                            Timestamp = DateTime.Now,
+                            Value = true,
                             FollowerId = FollowerId,
                             OrderId = id,
                             Text = text
                         };
 
-                        db.OrderConfirm.Add(orderConfirm);
+                        db.OrderHistory.Add(history);
                         db.SaveChanges();
 
                     }
