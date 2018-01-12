@@ -80,14 +80,14 @@ namespace MyTelegramBot.Messages.Admin
             {
                 if(this.Order==null && this.OrderId>0)
                 Order = db.Orders.Where(o => o.Id == OrderId).
-                    Include(o => o.OrderConfirm).
-                    Include(o => o.OrderDeleted).
-                    Include(o => o.OrderDone).
                     Include(o=>o.FeedBack).
                     Include(o => o.OrderProduct).
                     Include(o => o.OrderAddress).
                     Include(o=>o.OrdersInWork).
                     Include(o=>o.Invoice).
+                    Include(o=>o.Confirm).
+                    Include(o => o.Delete).
+                    Include(o => o.DoneNavigation).
                     FirstOrDefault();
 
                 ///////////Провереряем какой метод оплаты и наличие платежей////////////
@@ -104,9 +104,6 @@ namespace MyTelegramBot.Messages.Admin
                 string Position = "";
                 int counter = 0;
                 string Paid = "";
-
-
-
 
                 if (Order.BotInfo == null)
                     Order.BotInfo = db.BotInfo.Where(b => b.Id == Order.BotInfoId).FirstOrDefault();
@@ -144,22 +141,21 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Статус платежа: ") + Paid;
 
                 //Детали согласования заказа
-                if (Order != null && Order.OrderConfirm != null && Order.OrderConfirm.Count > 0
-                    && Order.OrderDeleted.Count == 0)
-                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ согласован:") + NewLine() + Italic("Комментарий: " + Order.OrderConfirm.OrderByDescending(o => o.Id).FirstOrDefault().Text
-                        + " |Время: " + Order.OrderConfirm.OrderByDescending(o => o.Id).FirstOrDefault().DateAdd.ToString() 
-                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.OrderConfirm.OrderByDescending(o => o.Id).FirstOrDefault().FollowerId));
+                if (Order != null && Order.Confirm != null && Order.OrderDeleted.Count == 0)
+                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ согласован:") + NewLine() + Italic("Комментарий: " + Order.Confirm.Text
+                        + " |Время: " + Order.Confirm.Timestamp.ToString() 
+                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Confirm.FollowerId));
 
                 ///Детали удаления заказа
-                if (Order != null && Order.OrderDeleted != null && Order.OrderDeleted.Count > 0)
-                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ удален:") + NewLine() + Italic("Комментарий: " + Order.OrderDeleted.OrderByDescending(o => o.Id).FirstOrDefault().Text
-                        + " |Время: " + Order.OrderDeleted.OrderByDescending(o => o.Id).FirstOrDefault().DateAdd.ToString()
-                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.OrderDeleted.OrderByDescending(o => o.Id).FirstOrDefault().FollowerId));
+                if (Order != null && Order.OrderDeleted != null)
+                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ удален:") + NewLine() + Italic("Комментарий: " + Order.Delete.Text
+                        + " |Время: " + Order.Delete.Timestamp.ToString()
+                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Delete.FollowerId));
 
                 ///Детали выполнения заказа
-                if (Order != null && Order.OrderDone != null && Order.OrderDone.Count > 0)
-                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ выполнен:") + Italic(Order.OrderDone.OrderByDescending(o => o.Id).FirstOrDefault().DateAdd.ToString())
-                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.OrderDone.OrderByDescending(o => o.Id).FirstOrDefault().FollowerId);
+                if (Order != null && Order.OrderDone != null)
+                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ выполнен:") + Italic(Order.DoneNavigation.Timestamp.ToString())
+                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.DoneNavigation.FollowerId);
 
                 //Детали Отзыва к заказу
                 if (Order != null && Order.FeedBack != null && Order.FeedBack.Text != null && Order.FeedBack.Text != "")
@@ -227,8 +223,8 @@ namespace MyTelegramBot.Messages.Admin
                     }
                 });
 
-            ///Заявка взять в обработку пользователем. Рисуем основные кнопки
-            if (Order.OrderDeleted.Count == 0 && Order.OrderConfirm.Count == 0 && FollowerId==InWorkFollowerId && InWorkFollowerId!=0)
+            ///Заявка взята в обработку пользователем. Рисуем основные кнопки
+            if (Order.DeleteId==0&& Order.ConfirmId==0 && FollowerId==InWorkFollowerId && InWorkFollowerId!=0)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
@@ -252,7 +248,7 @@ namespace MyTelegramBot.Messages.Admin
                  });
 
             ///Заявка взять в обработку пользователем. Но заказ удален.
-            if (Order.OrderDeleted.Count > 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
+            if (Order.DeleteId > 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
@@ -275,7 +271,7 @@ namespace MyTelegramBot.Messages.Admin
 
                 });
             ///Заявка взять в обработку пользователем. Зазакз уже согласован
-            if (Order.OrderConfirm.Count > 0 && Order.OrderDeleted.Count == 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
+            if (Order.ConfirmId > 0 && Order.OrderDeleted.Count == 0 && FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
                     base.MessageReplyMarkup = new InlineKeyboardMarkup(
                     new[]{
                  new[]
@@ -299,7 +295,7 @@ namespace MyTelegramBot.Messages.Admin
                     });
 
             ///Заявка взять в обработку пользователем или может быть просто открыта любым т.к она уже выполнена
-            if (Order.OrderDone.Count > 0)
+            if (Order.DoneId>0)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
