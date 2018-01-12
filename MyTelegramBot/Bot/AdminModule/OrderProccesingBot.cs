@@ -463,23 +463,26 @@ namespace MyTelegramBot.Bot.AdminModule
                     Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderDeleted).Include(o=>o.OrdersInWork).FirstOrDefault();
 
                     string text = base.ReplyToMessageText;
-                    if (Order != null && Order.OrderDeleted != null && Order.OrderDeleted.Count == 0 
+                    if (Order != null && Order.DeleteId==0
                         && await Processing.CheckInWork(Order) && !await Processing.CheckIsDone(Order))
                     {
                         id = Order.Id;
-                        Order.Deleted = true;
-                        Order.Confirmed = true;
-                        OrderDeleted orderDeleted = new OrderDeleted
+
+                        OrderHistory orderDeleted = new OrderHistory
                         {
-                            DateAdd = DateTime.Now,
-                            Deleted = true,
+                            Timestamp = DateTime.Now,
+                            Value = true,
                             FollowerId = FollowerId,
                             OrderId = id,
-                            Text = text
+                            Text = text,
+                            ActionId=3
 
                         };
                        
-                        db.OrderDeleted.Add(orderDeleted);
+                        db.OrderHistory.Add(orderDeleted);
+                        db.SaveChanges();
+
+                        Order.DeleteId = orderDeleted.Id;
                         db.SaveChanges();
                     }
                 }
@@ -517,7 +520,7 @@ namespace MyTelegramBot.Bot.AdminModule
                 {
                     Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderConfirm).Include(o=>o.OrdersInWork).FirstOrDefault();
 
-                    if (Order != null && Order.ConfirmId>0
+                    if (Order != null && Order.ConfirmId==0
                         && await Processing.CheckInWork(Order) && await Processing.CheckIsDone(Order) ==false) // Если уже есть записи о том что заказ соглосован, то больще записей не делаем
                     {
                         string text = base.ReplyToMessageText;
@@ -529,12 +532,15 @@ namespace MyTelegramBot.Bot.AdminModule
                             Value = true,
                             FollowerId = FollowerId,
                             OrderId = id,
-                            Text = text
+                            Text = text,
+                            ActionId=1
                         };
 
                         db.OrderHistory.Add(history);
                         db.SaveChanges();
 
+                        Order.ConfirmId = history.Id;
+                        db.SaveChanges();
                     }
                 }
                 
@@ -580,19 +586,23 @@ namespace MyTelegramBot.Bot.AdminModule
             {
                 try
                 {
-                    var deleted = db.OrderDeleted.Where(o => o.OrderId == OrderId);
 
                     this.Order = db.Orders.Find(OrderId);
 
-                    this.Order.Deleted = false;
+                    this.Order.Delete = null;
 
-                    if (deleted != null && deleted.Count() > 0)
+                    OrderHistory history = new OrderHistory
                     {
-                        foreach (var value in deleted)
-                            db.OrderDeleted.Remove(value);
+                        Timestamp = DateTime.Now,
+                        ActionId = 4,
+                        FollowerId = FollowerId,
+                        OrderId = OrderId,
+                        Value = true
+                    };
 
-                        db.SaveChanges();
-                    }
+                    db.OrderHistory.Add(history);
+
+                    db.SaveChanges();
 
                     OrderAdminMsg = new AdminOrderMessage(OrderId, FollowerId);
                     await EditMessage(OrderAdminMsg.BuildMessage());
@@ -622,16 +632,21 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (this.Order != null && this.Order.OrderDeleted.Count == 0 && this.Order.OrderConfirm.Count > 0 && this.Order.OrderDone.Count == 0
                    && await Processing.CheckInWork(this.Order) && !await Processing.CheckIsDone(this.Order))
                 {
-                    OrderDone orderDone = new OrderDone
+                    OrderHistory orderDone = new OrderHistory
                     {
-                        DateAdd = DateTime.Now,
+                        Timestamp = DateTime.Now,
                         FollowerId = FollowerId,
-                        Done = true,
-                        OrderId = OrderId
+                        Value = true,
+                        OrderId = OrderId,
+                        ActionId=2
                     };
 
+                    db.OrderHistory.Add(orderDone);
+
+                    db.SaveChanges();
+
                     this.Order = db.Orders.Find(this.Order.Id);
-                    this.Order.Done = true;
+                    this.Order.DoneId =orderDone.Id;
 
                     OrdersInWork inWork = new OrdersInWork
                     {
@@ -643,7 +658,6 @@ namespace MyTelegramBot.Bot.AdminModule
 
 
                     db.OrdersInWork.Add(inWork);
-                    db.OrderDone.Add(orderDone);
                     db.SaveChanges();
                     StockChangesMsg=new StockChangesMessage(UpdateStock(this.Order));
 
