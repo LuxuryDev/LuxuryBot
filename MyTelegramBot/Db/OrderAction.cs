@@ -5,9 +5,16 @@ namespace MyTelegramBot
 {
     public partial class OrderAction
     {
+        public OrderAction()
+        {
+            OrderHistory = new HashSet<OrderHistory>();
+        }
+
         public int Id { get; set; }
         public string Name { get; set; }
         public bool? Enable { get; set; }
+
+        public ICollection<OrderHistory> OrderHistory { get; set; }
     }
 
 

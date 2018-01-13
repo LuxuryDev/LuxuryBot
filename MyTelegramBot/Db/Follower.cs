@@ -15,9 +15,6 @@ namespace MyTelegramBot
             HelpDeskAnswer = new HashSet<HelpDeskAnswer>();
             HelpDeskInWork = new HashSet<HelpDeskInWork>();
             Notification = new HashSet<Notification>();
-            OrderConfirm = new HashSet<OrderConfirm>();
-            OrderDeleted = new HashSet<OrderDeleted>();
-            OrderDone = new HashSet<OrderDone>();
             OrderTemp = new HashSet<OrderTemp>();
             Orders = new HashSet<Orders>();
             OrdersInWork = new HashSet<OrdersInWork>();
@@ -41,9 +38,6 @@ namespace MyTelegramBot
         public ICollection<Basket> Basket { get; set; }
         public ICollection<BlackList> BlackList { get; set; }
         public ICollection<Notification> Notification { get; set; }
-        public ICollection<OrderConfirm> OrderConfirm { get; set; }
-        public ICollection<OrderDeleted> OrderDeleted { get; set; }
-        public ICollection<OrderDone> OrderDone { get; set; }
         public ICollection<OrderTemp> OrderTemp { get; set; }
         public ICollection<Orders> Orders { get; set; }
         public ICollection<ReportsRequestLog> ReportsRequestLog { get; set; }

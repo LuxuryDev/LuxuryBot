@@ -7,9 +7,6 @@ namespace MyTelegramBot
     {
         public Orders()
         {
-            OrderConfirm = new HashSet<OrderConfirm>();
-            OrderDeleted = new HashSet<OrderDeleted>();
-            OrderDone = new HashSet<OrderDone>();
             OrderProduct = new HashSet<OrderProduct>();
             OrdersInWork = new HashSet<OrdersInWork>();
         }
@@ -22,9 +19,6 @@ namespace MyTelegramBot
         public bool? Paid { get; set; }
         public int? BotInfoId { get; set; }
         public int? InvoiceId { get; set; }
-        public bool Done { get; set; }
-        public bool Confirmed { get; set; }
-        public bool Deleted { get; set; }
         public int? ConfirmId { get; set; }
         public int? DeleteId { get; set; }
         public int? DoneId { get; set; }
@@ -37,9 +31,6 @@ namespace MyTelegramBot
         public Invoice Invoice { get; set; }
         public FeedBack FeedBack { get; set; }
         public OrderAddress OrderAddress { get; set; }
-        public ICollection<OrderConfirm> OrderConfirm { get; set; }
-        public ICollection<OrderDeleted> OrderDeleted { get; set; }
-        public ICollection<OrderDone> OrderDone { get; set; }
         public ICollection<OrderProduct> OrderProduct { get; set; }
         public ICollection<OrdersInWork> OrdersInWork { get; set; }
     }

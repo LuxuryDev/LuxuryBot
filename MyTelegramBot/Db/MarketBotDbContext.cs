@@ -40,9 +40,6 @@ namespace MyTelegramBot
         public virtual DbSet<Notification> Notification { get; set; }
         public virtual DbSet<OrderAction> OrderAction { get; set; }
         public virtual DbSet<OrderAddress> OrderAddress { get; set; }
-        public virtual DbSet<OrderConfirm> OrderConfirm { get; set; }
-        public virtual DbSet<OrderDeleted> OrderDeleted { get; set; }
-        public virtual DbSet<OrderDone> OrderDone { get; set; }
         public virtual DbSet<OrderHistory> OrderHistory { get; set; }
         public virtual DbSet<OrderProduct> OrderProduct { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
@@ -65,16 +62,10 @@ namespace MyTelegramBot
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var builder = new ConfigurationBuilder()
-            .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json");
-            string sql = builder.Build().GetSection("Database").Value;
-
-            //@"Server=DESKTOP-93GE9VD;Database=MarketBotDb;Integrated Security = True; Trusted_Connection = True;"
-
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(sql);
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer(@"Server=DESKTOP-93GE9VD;Database=MarketBotDb;Integrated Security = True; Trusted_Connection = True;");
             }
         }
 
@@ -586,59 +577,6 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_OrdersAdress_ShipPrice");
             });
 
-            modelBuilder.Entity<OrderConfirm>(entity =>
-            {
-                entity.Property(e => e.DateAdd).HasColumnType("datetime");
-
-                entity.Property(e => e.Text)
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
-
-                entity.HasOne(d => d.Follower)
-                    .WithMany(p => p.OrderConfirm)
-                    .HasForeignKey(d => d.FollowerId)
-                    .HasConstraintName("FK_OrderConfirm_Follower");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderConfirm)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_OrderConfirm_Orders");
-            });
-
-            modelBuilder.Entity<OrderDeleted>(entity =>
-            {
-                entity.Property(e => e.DateAdd).HasColumnType("datetime");
-
-                entity.Property(e => e.Text)
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
-
-                entity.HasOne(d => d.Follower)
-                    .WithMany(p => p.OrderDeleted)
-                    .HasForeignKey(d => d.FollowerId)
-                    .HasConstraintName("FK_OrderDeleted_Follower");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderDeleted)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_OrderDeleted_Orders");
-            });
-
-            modelBuilder.Entity<OrderDone>(entity =>
-            {
-                entity.Property(e => e.DateAdd).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Follower)
-                    .WithMany(p => p.OrderDone)
-                    .HasForeignKey(d => d.FollowerId)
-                    .HasConstraintName("FK_OrderDone_Follower");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderDone)
-                    .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK_OrderDone_Orders");
-            });
-
             modelBuilder.Entity<OrderHistory>(entity =>
             {
                 entity.Property(e => e.Text)
@@ -646,6 +584,11 @@ namespace MyTelegramBot
                     .IsUnicode(false);
 
                 entity.Property(e => e.Timestamp).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Action)
+                    .WithMany(p => p.OrderHistory)
+                    .HasForeignKey(d => d.ActionId)
+                    .HasConstraintName("FK_OrderHistory_OrderAction");
 
                 entity.HasOne(d => d.Follower)
                     .WithMany(p => p.OrderHistory)
