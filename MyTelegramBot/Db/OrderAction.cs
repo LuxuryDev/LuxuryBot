@@ -9,4 +9,13 @@ namespace MyTelegramBot
         public string Name { get; set; }
         public bool? Enable { get; set; }
     }
+
+
+    public enum OrderActionEnum
+    {
+        Confirm=1,
+        Done=2,
+        Delete=3,
+        Recovery=4
+    }
 }

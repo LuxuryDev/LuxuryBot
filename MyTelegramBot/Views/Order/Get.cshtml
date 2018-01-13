@@ -1,220 +1,210 @@
-﻿@model MyTelegramBot.Orders
+﻿@model Tuple<MyTelegramBot.Orders,List<MyTelegramBot.OrderHistory>> 
 
 @{
     ViewData["Title"] = "Get";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="row">
-   @if (Model.Done == true && Model.OrderDone.Count>0)
-   {
-    <h3 class="bg-success">Заказ выполнен. @Model.OrderDone.FirstOrDefault().DateAdd</h3>
 
-   }
-
-    @if (Model.Deleted == true && Model.OrderDeleted.Count > 0)
-    {
-        <h3 class="bg-danger">Заказ Удален. @Model.OrderDeleted.FirstOrDefault().DateAdd</h3>
-
-    }
-
-    @if (Model.Confirmed == true && Model.OrderConfirm.Count > 0 && Model.Done==false && Model.Deleted==false)
-    {
-        <h3 class="bg-info">Заказ Согласован. @Model.OrderConfirm.FirstOrDefault().DateAdd</h3>
-
-    }
-    <div class="col-md-6">
-        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
-        <h4>Заказ № @Model.Number</h4>
-        <p>
-            <label>Время:</label>
-            @Html.DisplayFor(m=>m.DateAdd)
-        </p>
-        <p>
-            <label>
-                Комментарий к заказу:
-            </label>
-            @Html.DisplayFor(m=>m.Text)
-        </p>
-        <p>
-            <label>
-                Адрес доставки:
-            </label>
-            @Html.DisplayName(Model.OrderAddress.Adress.House.Street.City.Name + ", " + Model.OrderAddress.Adress.House.Street.Name + ", " + Model.OrderAddress.Adress.House.Number)
-        </p>
-        <p>
-            <label>
-                Пользователь:
-            </label>
-            <a href=@("https://t.me/"+ Model.Follower.UserName)>@(@Model.Follower.FirstName+" "+ @Model.Follower.LastName)</a>
-        </p>
-
-        <p>
-            <label>
-                Выполнен:
-            </label>
-
-            @if (Model.OrderDone != null)
-        {
-                @Html.DisplayFor(m => m.OrderDone.OrderByDescending(d=>d.Id).FirstOrDefault().DateAdd)
-
-        }
-
-        </p>
-        <p>
-            <label>
-                Отзыв:
-            </label>
-
-            @if (Model.FeedBack != null)
-        {
-                @Html.DisplayFor(m => m.FeedBack.Text)
-
-        }
-        </p>
-    </div>
-    <div class="col-md-6">
-        @if (Model.Invoice != null)
-        {
-            <div>
-                <h4>Счет на оплату № @Model.Invoice.InvoiceNumber</h4>
-                <p>
-                    <label>Сумма:</label>
-                    @Html.DisplayName(Model.Invoice.Value.ToString())
-                </p>
-                <p>
-                    <label>
-                        Способ оплаты
-                    </label>
-                    @Html.DisplayFor(m => m.Invoice.PaymentType.Name)
-                </p>
-                <p>
-                    <label>
-                        Адрес счета получателя:
-                    </label>
-                    @Html.DisplayFor(m => m.Invoice.AccountNumber)
-                </p>
-                <p>
-                    <label>
-                        Комментарий к платежу
-                    </label>
-                    @Html.DisplayFor(m => m.Invoice.Comment)
-                </p>
-                <p>
-                    <label>
-                        Оплачен:
-                    </label>
-                    @Html.DisplayFor(m => m.Invoice.Paid)
-                    @Html.TextBox("Example")
-                </p>
-            </div>
-        }
-    </div>
-
-</div>
-
-<div class="row">
-    <!-- Кнопки обработки заказа -->
-</div>
-<div class="col-md-2"><button type="button" id="InWorkBtn" class="btn btn-success btn-block" onclick="ajaxTakeOrderInWork();">Взять в работу</button></div>
-    <!-- Кнопки обработки заказа -->
-<div class="col-md-2">
-    <a class="btn btn-success btn-block disabled"
-       href="#" data-toggle="modal"
-       data-target="#basicModal" id="ConfirmBtn">Заказ согласован</a>
- </div>
-
-<div class="col-md-2">
-    <a class="btn btn-success btn-block disabled" id="DoneBtn">Заказ выполнен</a>
-</div>
-
-<div class="col-md-2">
-    <a class="btn btn-danger btn-block disabled"
-       href="#" data-toggle="modal"
-       data-target="#DeleteModal" id="DelBtn">Удалить</a>
-</div>
-
-<div class="col-md-2">
-    <a class="btn btn-warning  btn-block disabled" id="RecoveryBtn" onclick="ajaxRecoveryDelete();">Восстановить заказ</a>
-</div>
-
-
+<!-- Nav tabs -->
 <div>
-    <hr />
-    <h2>Состав заказа</h2>
-    <table class="table">
-        <tr>
-            <td>Товар</td>
-            <td>Цена</td>
-            <td>Количество</td>
-            <td>Общая стоимость</td>
-        </tr>
-        @foreach (var item in Model.OrderProduct)
-        {
-            <tr>
-                <td><a href="~/Product/Editor/@item.ProductId">@item.Product.Name</a></td>
-                <td>@(@item.Price.Value.ToString() + " " + @item.Price.Currency.ShortName)</td>
-                <td>@item.Count</td>
-                <td>@((@item.Count * @item.Price.Value).ToString() + " " + item.Price.Currency.ShortName)</td>
-            </tr>
-        }
-    </table>
-</div>
-
-    @Html.Hidden("TmpInWork", "false") <!--В работе у тек. пользователя - TRUE, нет - False -->
-
-    <input type="hidden" name="Confirmed" id="Confirmed" value="@Model.Confirmed.ToString()" /> <!--заказ согласован -->
-
-   <input type="hidden" name="Deleted" id="Deleted" value="@Model.Deleted.ToString()" /> <!--заказ удален -->
-
-   <input type="hidden" name="Done" id="Done" value="@Model.Done.ToString()" /> <!--выполнен-->
-    <!-- Nav tabs -->
-<div>
-    <h2>История изменений</h2>
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#work" data-toggle="tab">Заказ взят в обработку</a></li>
-        <li><a href="#confirm" data-toggle="tab">Заказ согласован</a></li>
-        <li><a href="#done" data-toggle="tab">Заказ выполнен</a></li>
-        <li><a href="#delete" data-toggle="tab">Заказ удален</a></li>
+        <li class="active"><a href="#main" data-toggle="tab">Основная информация</a></li>
+        <li><a href="#history" data-toggle="tab">История обработки заказа</a></li>
+        <li><a href="#work" data-toggle="tab">История перемещений между пользователями</a></li>
+        @if (Model.Item1.FeedBack != null)
+        {
+            <li><a href="#feedback" data-toggle="tab">Отзыв</a></li>
+
+        }
+
     </ul>
 
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane active" id="work">
+        <div class="tab-pane active" id="main">
+            <div class="row">
+                @if (Model.Item1.DoneNavigation != null)
+                {
+                    <h3 class="bg-success">Заказ выполнен. @Model.Item1.DoneNavigation.Timestamp</h3>
 
-            <table class="table">
-                <thead>
+                }
+
+                @if ( Model.Item1.Delete != null)
+                {
+                    <h3 class="bg-danger">Заказ Удален</h3>
+                    <h3 class="bg-danger">Комментарий : @Model.Item1.Delete.Text</h3>
+                    <h3 class="bg-danger">Время: @Model.Item1.Delete.Timestamp</h3>
+
+                }
+
+                @if (Model.Item1.Confirm != null && Model.Item1.DoneNavigation == null && Model.Item1.Delete == null)
+                {
+                    <h3 class="bg-info">Заказ согласован</h3>
+                    <h3 class="bg-info">Комментарий : @Model.Item1.Confirm.Text </h3>
+                    <h3 class="bg-info">Время @Model.Item1.Confirm.Timestamp</h3>
+
+                }
+                <div class="col-md-6">
+                    <input type="hidden" name="Id" id="Id" value="@Model.Item1.Id" />
+                    <h4>Заказ № @Model.Item1.Number</h4>
+                    <p>
+                        <label>Время:</label>
+                        @Html.DisplayFor(m => m.Item1.DateAdd)
+                    </p>
+                    <p>
+                        <label>
+                            Комментарий к заказу:
+                        </label>
+                        @Html.DisplayFor(m => m.Item1.Text)
+                    </p>
+                    <p>
+                        <label>
+                            Адрес доставки:
+                        </label>
+                        @Html.DisplayName(Model.Item1.OrderAddress.Adress.House.Street.City.Name + ", " + Model.Item1.OrderAddress.Adress.House.Street.Name + ", " + Model.Item1.OrderAddress.Adress.House.Number)
+                    </p>
+                    <p>
+                        <label>
+                            Пользователь:
+                        </label>
+                        <a href=@("https://t.me/"+ Model.Item1.Follower.UserName)>@(@Model.Item1.Follower.FirstName + " " + @Model.Item1.Follower.LastName)</a>
+                    </p>
+
+                </div>
+                <div class="col-md-6">
+                    @if (Model.Item1.Invoice != null)
+                    {
+                        <div>
+                            <h4>Счет на оплату № @Model.Item1.Invoice.InvoiceNumber</h4>
+                            <p>
+                                <label>Сумма:</label>
+                                @Html.DisplayName(Model.Item1.Invoice.Value.ToString())
+                            </p>
+                            <p>
+                                <label>
+                                    Способ оплаты
+                                </label>
+                                @Html.DisplayFor(m => m.Item1.Invoice.PaymentType.Name)
+                            </p>
+                            <p>
+                                <label>
+                                    Адрес счета получателя:
+                                </label>
+                                @Html.DisplayFor(m => m.Item1.Invoice.AccountNumber)
+                            </p>
+                            <p>
+                                <label>
+                                    Комментарий к платежу
+                                </label>
+                                @Html.DisplayFor(m => m.Item1.Invoice.Comment)
+                            </p>
+                            <p>
+                                <label>
+                                    Оплачен:
+                                </label>
+                                @Html.DisplayFor(m => m.Item1.Invoice.Paid)
+                                @Html.TextBox("Example")
+                            </p>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="row">
+            </div>
+            <div class="col-md-2"><button type="button" id="InWorkBtn" class="btn btn-success btn-block" onclick="ajaxTakeOrderInWork();">Взять в работу</button></div>
+
+            <!-- Кнопки обработки заказа -->
+
+            <div class="col-md-2">
+                <a class="btn btn-success btn-block disabled"
+                   href="#" data-toggle="modal"
+                   data-target="#basicModal" id="ConfirmBtn">Заказ согласован</a>
+            </div>
+
+            <div class="col-md-2">
+                <a class="btn btn-success btn-block disabled" id="DoneBtn" onclick="ajaxAddHistory('2');">Заказ выполнен</a>
+            </div>
+
+            <div class="col-md-2">
+                <a class="btn btn-danger btn-block disabled"
+                   href="#" data-toggle="modal"
+                   data-target="#DeleteModal" id="DelBtn">Удалить</a>
+            </div>
+
+            <div class="col-md-2">
+                <a class="btn btn-warning  btn-block disabled" id="RecoveryBtn" onclick="ajaxAddHistory('4');">Восстановить заказ</a>
+            </div>
+            <!-- Кнопки обработки заказа -->
+
+            <div>
+                <hr />
+                <h2>Состав заказа</h2>
+                <table class="table">
                     <tr>
-                        <td>Пользователь</td>
-                        <td>Время</td>
-                        <td>В работе</td>
+                        <td>Товар</td>
+                        <td>Цена</td>
+                        <td>Количество</td>
+                        <td>Общая стоимость</td>
                     </tr>
-                </thead>
-                <tbody class="_work_table">
-                    @foreach (var work in Model.OrdersInWork)
+                    @foreach (var item in Model.Item1.OrderProduct)
                     {
                         <tr>
-                            <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
-                            <td>@work.Timestamp</td>
-                            @if (work.InWork == true)
-                            {
-                                <td>Взял</td>
-                            }
-                            @if (work.InWork == false)
-                            {
-                                <td>Освободил</td>
-                            }
+                            <td><a href="~/Product/Editor/@item.ProductId">@item.Product.Name</a></td>
+                            <td>@(@item.Price.Value.ToString() + " " + @item.Price.Currency.ShortName)</td>
+                            <td>@item.Count</td>
+                            <td>@((@item.Count * @item.Price.Value).ToString() + " " + item.Price.Currency.ShortName)</td>
                         </tr>
                     }
-                </tbody>
-            </table>
+                </table>
+            </div>
+
+            @Html.Hidden("TmpInWork", "false") <!--В работе у тек. пользователя - TRUE, нет - False -->
+
+            @if (Model.Item1.Confirm != null)
+            {
+                <input type="hidden" name="Confirmed" id="Confirmed" value="true" /> <!--заказ согласован -->
+
+            }
+
+            @if (Model.Item1.Confirm == null)
+            {
+                <input type="hidden" name="Confirmed" id="Confirmed" value="false" /> <!--заказ не согласован -->
+
+            }
+
+            @if (Model.Item1.Delete != null)
+            {
+                <input type="hidden" name="Deleted" id="Deleted" value="true" /> <!--заказ удален -->
+
+            }
+
+            @if (Model.Item1.Delete == null)
+            {
+                <input type="hidden" name="Deleted" id="Deleted" value="false" /> <!--заказ не удален -->
+
+            }
+
+            @if (Model.Item1.DoneNavigation != null)
+            {
+                <input type="hidden" name="Done" id="Done" value="true" /> <!--выполнен-->
+
+            }
+
+            @if (Model.Item1.DoneNavigation == null)
+            {
+                <input type="hidden" name="Done" id="Done" value="false" /> <!--не  выполнен-->
+
+            }
+
 
         </div>
-        <div class="tab-pane" id="confirm">
-            @if (Model.OrderConfirm != null)
-            {
 
+
+        <div class="tab-pane" id="history">
                 <table class="table">
                     <thead>
                         <tr>
@@ -224,422 +214,347 @@
                         </tr>
                     </thead>
                     <tbody class="_confirm_table">
-                        @foreach (var confirm in Model.OrderConfirm)
-                {
-                            <tr>
-                                <td><a href=@("https://t.me/"+ confirm.Follower.UserName)>@(@confirm.Follower.FirstName + " " + @confirm.Follower.LastName)</a></td>
-                                <td>@confirm.DateAdd</td>
-                                <td>@confirm.Text</td>
-                            </tr>
-                        }
+
+                            @foreach (var history in Model.Item2)
+                            {
+                                <tr>
+                                    <td><a href=@("https://t.me/"+ history.Follower.UserName)>@(@history.Follower.FirstName + " " + @history.Follower.LastName)</a></td>
+                                    <td>@history.Timestamp</td>
+                                    <td>@history.Text</td>
+                                </tr>
+                            }
+                        
+
                     </tbody>
-                </table>
-            }
+                </table>            
         </div>
-        <div class="tab-pane" id="done">
-            @if (Model.OrderDone != null)
+
+        <div class="tab-pane" id="work">
+            @if (Model.Item1.OrdersInWork != null)
             {
                 <table class="table">
                     <tr>
                         <td>Пользователь</td>
                         <td>Время</td>
+                        <td>Действие</td>
                     </tr>
-                    @foreach (var done in Model.OrderDone)
+                    @foreach (var work in Model.Item1.OrdersInWork)
                 {
                         <tr>
-                            <td><a href=@("https://t.me/"+ done.Follower.UserName)>@(@done.Follower.FirstName + " " + @done.Follower.LastName)</a></td>
-                            <td>@done.DateAdd</td>
+                            <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
+                            <td>@work.Timestamp</td>
+                            @if (work.InWork == true)
+                            {
+                                <td>Взял</td>
+
+                            }
+                            @if (work.InWork == false)
+                            {
+                                <td>Освободил</td>
+
+                            }
                         </tr>
                     }
                 </table>
             }
         </div>
-        <div class="tab-pane" id="delete">
-            @if (Model.OrderDeleted != null)
+
+        <div class="tab-pane" id="feedback">
+            @if (Model.Item1.FeedBack != null)
             {
-                <table class="table">
-                    <tr>
-                        <td>Пользователь</td>
-                        <td>Время</td>
-                        <td>Комментарий</td>
-                    </tr>
-                    @foreach (var deleted in Model.OrderDeleted)
-                {
-                        <tr>
-                            <td><a href=@("https://t.me/"+ deleted.Follower.UserName)>@(@deleted.Follower.FirstName + " " + @deleted.Follower.LastName)</a></td>
-                            <td>@deleted.DateAdd</td>
-                            <td>@deleted.Text</td>
-                        </tr>
-                    }
-                </table>
+                <h3>@Model.Item1.FeedBack.DateAdd</h3>
+                <blockquote>@Model.Item1.FeedBack.Text </blockquote>
+
+
             }
         </div>
+
     </div>
 </div>
-    <!-- Tab panes -->
-
-
-    <!--Модальное окно для добавления комментария о том что заказ согласован-->
-    <div class="modal fade" id="basicModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close" type="button" data-dismiss="modal">x</button>
-                    <h4 class="modal-title" id="myModalLabel">Согласование заказа</h4>
-                </div>
-                <div class="modal-body">
-                    @using (Html.BeginForm("", ""))
-                    {
-                        <label>Введите комментарий</label> <br />
+<!-- Tab panes -->
+<!--Модальное окно для добавления комментария о том что заказ согласован-->
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal">x</button>
+                <h4 class="modal-title" id="myModalLabel">Согласование заказа</h4>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("", ""))
+                {
+                    <label>Введите комментарий</label> <br />
                         @Html.TextArea("TextConfirm")
 
 
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
-                    <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="ajaxOrderConfirm();">Сохранить изменения</button>
-                </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="ajaxAddHistory('1', $('#TextConfirm').val());">Сохранить изменения</button>
             </div>
         </div>
     </div>
-    <!--Модальное окно для добавления комментария о том что заказ согласован-->
-
-    <!--Модальное окно для добавления комментария о том что заказ Удален-->
-    <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close" type="button" data-dismiss="modal">x</button>
-                    <h4 class="modal-title" id="myModalLabel">Удаление заказа</h4>
-                </div>
-                <div class="modal-body">
-                    @using (Html.BeginForm("", ""))
-                    {
-                        <label>Причина удаления</label> <br />
+</div>
+<!--Модальное окно для добавления комментария о том что заказ согласован-->
+<!--Модальное окно для добавления комментария о том что заказ Удален-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" type="button" data-dismiss="modal">x</button>
+                <h4 class="modal-title" id="myModalLabel">Удаление заказа</h4>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("", ""))
+                {
+                    <label>Причина удаления</label> <br />
                         @Html.TextArea("TextDelete")
 
 
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
-                    <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="ajaxOrderDelete();">Удалить</button>
-                </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal" onclick="ajaxAddHistory('3', $('#TextDelete').val());">Удалить</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!--Модальное окно для добавления комментария о том что заказ Удален-->
-    <!--Функция взять заказ  в обработку-->
-    <script type="text/javascript">
-
-        function ajaxTakeOrderInWork() {
-            var work = false;
-
-            if ($('#TmpInWork').val() == "false")
-                work = true;
-
-            else
-                work = false;
-
-            var Config = {
-                'OrderId': $("#Id").val(),
-                'InWork': work
-            }
-
-            $.ajax({
-                type: "POST",
-                url: '/Order/TakeInWork',
-                data: JSON.stringify(Config),
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-                console.info(data);
-                if (data === "В работе" && $('#TmpInWork').val() == "false") { // Пользователь берет заявку в обработку
-                   
-                    $('#TmpInWork').val('true'); //
-                    $('#InWorkBtn').text('Освободить');
-                    $("#Example").val(data);
-                    getTakeInWork(); // запрос табличных данных
-
-                    if ($('#Confirmed').val() == "True")
-                    // пользоветль взял заказ в обработку, но он уже согласован   значит делаем кнопку "Выполнить" актвной
-                    {
-                        $('#DoneBtn').removeClass('disabled');
-                    }
-
-                    if ($('#Deleted').val() == "False") {
-                        // если заказ не удален то делаем кнопку удалить заказ активной
-                        $('#DelBtn').removeClass('disabled');
-                    }
-
-                    if ($('#Deleted').val() == "False") //если заказ не удален то делаем кнопку Согласовать активной
-                        $('#ConfirmBtn').removeClass('disabled');
-
-                    if ($('#Deleted').val() == "True") {// если заказ  удален то делаем кнопку Восстановить заказ активной
-                        $('#RecoveryBtn').removeClass('disabled')
-                        $('#ConfirmBtn').addClass('disabled');
-                    }
-
-                }
-                if (data === "Свободна" && $('#TmpInWork').val() == "true") { // Пользователь освобождает заявку
-
-                    $('#TmpInWork').val('false');
-                    $("#Example").val(data);
-                    $('#InWorkBtn').text('Взять в работу');
-                    $('#ConfirmBtn').addClass('disabled');
-                    $('#DoneBtn').addClass('disabled');
-                    $('#DelBtn').addClass('disabled');
-                    $('#RecoveryBtn').addClass('disabled');
-                    getTakeInWork(); // запрос табличных данных
-                }
-
-                //$("#Example").val(data);
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-        }
-
-        function getTakeInWork() {
-            $.ajax({
-                type: "Get",
-                url: '/Order/GetInWorkList?Id=' + $("#Id").val(), //
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-
-                let tableDraw = '';
-                try {
-                    // let tableDataJson = JSON.parse(data);
-                    data.forEach(function (elem) {
-                        tableDraw += '<tr>';
-                        tableDraw += '<td>' + elem.name + '</td>';
-                        tableDraw += '<td>' + elem.Timestamp + '</td>';
-                        tableDraw += '<td>' + elem.InWork + '</td>';
-                        tableDraw += '</tr>';
-                    });
-                    $('._work_table').html(tableDraw);
-                    console.log(data);
-                } catch (e) {
-
-
-                }
-
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-
-
-        }
-    </script>
-
-
-    <!--Функция "Заказ согласован"-->
-    <script type="text/javascript">
-
-        function ajaxOrderConfirm() {
-
-            var Config = {
-                'OrderId': $("#Id").val(),
-                'Text': $("#TextConfirm").val()
-                
-            }
-
-            $.ajax({
-                type: "POST",
-                url: '/Order/Confirm',
-                data: JSON.stringify(Config),
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-                console.info(data);
-                if (data === "Добавлено") { // Пользователь добавляет запись о том что заказ согласован
-                    $('#DoneBtn').removeClass('disabled');
-                    $('#TmpConfirm').val('true'); //
-                    $("#Example").val(data);
-                    getСonfirm(); // запрос табличных данных
-                }
-                else {
-                    console.log(data);
-                    alert(data);
-                }
-                //$("#Example").val(data);
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-        }
-
-        function getСonfirm() {
-            $.ajax({
-                type: "Get",
-                url: '/Order/GetConfirmList?Id=' + $("#Id").val(), //
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-
-                let tableDraw = '';
-                try {
-                    // let tableDataJson = JSON.parse(data);
-                    data.forEach(function (elem) {
-                        tableDraw += '<tr>';
-                        tableDraw += '<td>' + elem.name + '</td>';
-                        tableDraw += '<td>' + elem.Timestamp + '</td>';
-                        tableDraw += '<td>' + elem.Text + '</td>';
-                        tableDraw += '</tr>';
-                    });
-                    $('._confirm_table').html(tableDraw);
-                    console.log(data);
-                } catch (e) {
-
-
-                }
-
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-
-
-        }
-    </script>
-
-
-    <!--Функция "Удалить заказ"-->
-    <script type="text/javascript">
-
-        function ajaxOrderDelete() {
-
-            var Config = {
-                'OrderId': $("#Id").val(),
-                'Text': $("#TextDelete").val()
-            }
-
-            $.ajax({
-                type: "POST",
-                url: '/Order/Delete',
-                data: JSON.stringify(Config),
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-                console.info(data);
-                if (data === "Удалено!") { // Пользователь добавляет запись о том что заказ согласован
-                    $('#DoneBtn').addClass('disabled');
-                    $('#ConfirmBtn').addClass('disabled');
-                    $('#RecoveryBtn').removeClass('disabled');
-                    $('#DelBtn').addClass('disabled');
-                    //getСonfirm(); // запрос табличных данных
-                    console.log(data);
-                    
-                }
-                else {
-                    console.log(data);
-                    alert(data);
-                }
-                //$("#Example").val(data);
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-        }
-
-        function getDelete() {
-            $.ajax({
-                type: "Get",
-                url: '/Order/GetDeleteList?Id=' + $("#Id").val(), //
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-
-                let tableDraw = '';
-                try {
-                    // let tableDataJson = JSON.parse(data);
-                    data.forEach(function (elem) {
-                        tableDraw += '<tr>';
-                        tableDraw += '<td>' + elem.name + '</td>';
-                        tableDraw += '<td>' + elem.Timestamp + '</td>';
-                        tableDraw += '<td>' + elem.Text + '</td>';
-                        tableDraw += '</tr>';
-                    });
-                    $('._delete_table').html(tableDraw);
-                    console.log(data);
-                } catch (e) {
-
-
-                }
-
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-
-
-        }
-    </script>
-
-<!--Функция восстановления заказа-->
+<!--Модальное окно для добавления комментария о том что заказ Удален-->
+<!--Функция взять заказ  в обработку-->
 <script type="text/javascript">
 
-        function ajaxRecoveryDelete() {
-            $.ajax({
-                type: "Get",
-                url: '/Order/Recovery?Id=' + $("#Id").val(),
-                contentType: "application/json; charset=utf-8",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN",
-                        $('input:hidden[name="__RequestVerificationToken"]').val());
-                },
-                dataType: "json"
-            }).done(function (data) {
-                console.info(data);
-                if (data === "Восстановлено")
-                {                   
+    function ajaxTakeOrderInWork() {
+        var work = false;
+
+        if ($('#TmpInWork').val() == "false")
+            work = true;
+
+        else
+            work = false;
+
+        var Config = {
+            'OrderId': $("#Id").val(),
+            'InWork': work
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '/Order/TakeInWork',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            console.info(data);
+            if (data === "В работе" && $('#TmpInWork').val() == "false") { // Пользователь берет заявку в обработку
+
+                $('#TmpInWork').val('true'); //
+                $('#InWorkBtn').text('Освободить');
+                getTakeInWork(); // запрос табличных данных
+
+                if ($('#Confirmed').val() == "false") {
+
                     $('#ConfirmBtn').removeClass('disabled');
+                }
+
+                if ($('#Confirmed').val() == "true")
+                // пользоветль взял заказ в обработку, но он уже согласован   значит делаем кнопку "Выполнить" актвной
+                {
+                    $('#DoneBtn').removeClass('disabled');
+                }
+
+                if ($('#Deleted').val() == "false") {
+                    // если заказ не удален то делаем кнопку удалить заказ активной
+                    $('#DelBtn').removeClass('disabled');
+                }
+
+                if ($('#Deleted').val() == "true" && $('#Done').val() == "false") //если заказ не удален то делаем кнопку Согласовать активной
+                    $('#ConfirmBtn').removeClass('disabled');
+                    $('#DoneBtn').addClass('disabled');
+
+                if ($('#Deleted').val() == "true") {// если заказ  удален то делаем кнопку Восстановить заказ активной
+                    $('#RecoveryBtn').removeClass('disabled')
+                    $('#ConfirmBtn').addClass('disabled');
+
+                }
+
+                if ($('#Done').val() == "true") {
+                    $('#DoneBtn').addClass('disabled');
+                    $('#ConfirmBtn').addClass('disabled');
                     $('#RecoveryBtn').addClass('disabled');
-                    $('#DelBtn').removeClass('disabled')
-
-                    if ($('#Confirmed').val() == "True")
-                        $('#DoneBtn').removeClass('disabled');
-
-                    //getСonfirm(); // запрос табличных данных
-                    console.log(data);
-                   // ClearTable(); нужна функция очистки таблицы
+                    $('#DelBtn').addClass('disabled')
                 }
-                else {
-                    console.log(data);
-                    alert(data);
-                }
-                //$("#Example").val(data);
-            }).error(function (data) {
-                // если с ответом сервера чтото пошло не так...
-            })
-        }
 
-        var table = document.getElementsByTagName("delete");
-        function ClearTable() {
-            for (i = 0; i < alles_td.length; i++) {
-                alles_td[i].innerHTML = "";
             }
+            if (data === "Свободна" && $('#TmpInWork').val() == "true") { // Пользователь освобождает заявку
+
+                $('#TmpInWork').val('false');
+                $("#Example").val(data);
+                $('#InWorkBtn').text('Взять в работу');
+                $('#ConfirmBtn').addClass('disabled');
+                $('#DoneBtn').addClass('disabled');
+                $('#DelBtn').addClass('disabled');
+                $('#RecoveryBtn').addClass('disabled');
+                getTakeInWork(); // запрос табличных данных
+            }
+
+            //$("#Example").val(data);
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+    }
+
+    function getTakeInWork() {
+        $.ajax({
+            type: "Get",
+            url: '/Order/GetInWorkList?Id=' + $("#Id").val(), //
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+
+            let tableDraw = '';
+            try {
+                // let tableDataJson = JSON.parse(data);
+                data.forEach(function (elem) {
+                    tableDraw += '<tr>';
+                    tableDraw += '<td>' + elem.name + '</td>';
+                    tableDraw += '<td>' + elem.Timestamp + '</td>';
+                    tableDraw += '<td>' + elem.InWork + '</td>';
+                    tableDraw += '</tr>';
+                });
+                $('._work_table').html(tableDraw);
+                console.log(data);
+            } catch (e) {
+
+
+            }
+
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+
+
+    }
+</script>
+
+
+    <!--Функция "AddHistory"-->
+<script type="text/javascript">
+
+    function ajaxAddHistory(ActionId, Text) {
+
+        var Config = {
+            'OrderId': $("#Id").val(),
+            'Text': Text,
+            'ActionId': ActionId,
         }
+
+        $.ajax({
+            type: "POST",
+            url: '/Order/AddHistory',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            console.info(data);
+
+            if (data === "Согласовано" && ActionId == '1') { // Пользователь добавляет запись о том что заказ согласован
+                $('#DoneBtn').removeClass('disabled');
+                $('#Confirmed').val('true'); //
+                $("#Example").val(data);
+                //getСonfirm(); // запрос табличных данных
+            }
+
+            if (data == "Выполнено" && ActionId == '2') {
+
+                $('#DelBtn').addClass('disabled');
+                $('#ConfirmBtn').addClass('disabled');
+                $('#RecoveryBtn').addClass('disabled');
+                $('#DoneBtn').addClass('disabled');
+                $('Done').val('true');
+            }
+
+            if (data === "Удалено" && ActionId == '3') { // Пользователь добавляет запись о том что заказ согласован
+                $('#DoneBtn').addClass('disabled');
+                $('#ConfirmBtn').addClass('disabled');
+                $('#RecoveryBtn').removeClass('disabled');
+                $('#DelBtn').addClass('disabled');
+                $('Deleted').val('true');
+                //getСonfirm(); // запрос табличных данных
+                console.log(data);
+
+            }
+            if (data === "Восстановлено" && ActionId == '4') {
+                $('#ConfirmBtn').removeClass('disabled');
+                $('#RecoveryBtn').addClass('disabled');
+                $('#DelBtn').removeClass('disabled')
+                $('Deleted').val('false');
+
+                if ($('#Confirmed').val() == "True")
+                    $('#DoneBtn').removeClass('disabled');
+                //getСonfirm(); // запрос табличных данных
+                console.log(data);
+            }
+
+
+
+            else {
+                console.log(data);
+                alert(data);
+            }
+            //$("#Example").val(data);
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+    }
+
+    function getСonfirm() {
+        $.ajax({
+            type: "Get",
+            url: '/Order/GetConfirmList?Id=' + $("#Id").val(), //
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+
+            let tableDraw = '';
+            try {
+                // let tableDataJson = JSON.parse(data);
+                data.forEach(function (elem) {
+                    tableDraw += '<tr>';
+                    tableDraw += '<td>' + elem.name + '</td>';
+                    tableDraw += '<td>' + elem.Timestamp + '</td>';
+                    tableDraw += '<td>' + elem.Text + '</td>';
+                    tableDraw += '</tr>';
+                });
+                $('._confirm_table').html(tableDraw);
+                console.log(data);
+            } catch (e) {
+
+
+            }
+
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+
+
+    }
 </script>

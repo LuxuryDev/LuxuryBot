@@ -24,31 +24,30 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetConfirmList(int Id)
+        public IActionResult GetHistoryList(int Id)
         {
             if (db == null)
                 db = new MarketBotDbContext();
 
-            if (Id > 0)
-                Order = db.Orders.Where(o => o.Id == Id).Include(o => o.OrderConfirm).FirstOrDefault();
 
-            if (Order.OrdersInWork != null)
-                foreach (OrderConfirm confirm in Order.OrderConfirm)
-                    confirm.Follower = db.Follower.Where(f => f.Id == confirm.FollowerId).FirstOrDefault();
+
+            var HistoryList = db.OrderHistory.Where(h => h.OrderId == Id).Include(h => h.Follower).OrderByDescending(h => h.Id).ToList();
+                
 
             List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
 
-            foreach (OrderConfirm confirm in Order.OrderConfirm)
+            foreach (OrderHistory history in HistoryList)
             {
                 Dictionary<string, string> value = new Dictionary<string, string>();
-                value.Add("name", confirm.Follower.FirstName + confirm.Follower.LastName);
-                value.Add("Timestamp", confirm.DateAdd.ToString());
-                value.Add("Text", confirm.Text.ToString());
+                value.Add("name", history.Follower.FirstName + history.Follower.LastName);
+                value.Add("Timestamp", history.Timestamp.ToString());
+                value.Add("Text", history.Text.ToString());
                 list.Add(value);
             }
 
             return Json(list);
         }
+
 
         [HttpGet]
         public IActionResult GetInWorkList(int Id)
@@ -83,68 +82,14 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetDoneList(int Id)
-        {
-            if (db == null)
-                db = new MarketBotDbContext();
-
-            if (Id > 0)
-                Order = db.Orders.Where(o => o.Id == Id).Include(o => o.OrderDone).FirstOrDefault();
-
-            if (Order.OrderDone != null)
-                foreach (OrderDone done in Order.OrderDone)
-                    done.Follower = db.Follower.Where(f => f.Id == done.FollowerId).FirstOrDefault();
-
-            List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
-
-            foreach (OrderDone done in Order.OrderDone)
-            {
-                Dictionary<string, string> value = new Dictionary<string, string>();
-                value.Add("name", done.Follower.FirstName + done.Follower.LastName);
-                value.Add("Timestamp", done.DateAdd.ToString());
-                value.Add("Text", done.ToString());
-                list.Add(value);
-            }
-
-            return Json(list);
-        }
-
-        [HttpGet]
-        public IActionResult GetDeleteList(int Id)
-        {
-            if (db == null)
-                db = new MarketBotDbContext();
-
-            if (Id > 0)
-                Order = db.Orders.Where(o => o.Id == Id).Include(o => o.OrderDeleted).FirstOrDefault();
-
-            if (Order.OrderDeleted != null)
-                foreach (OrderDeleted del in Order.OrderDeleted)
-                    del.Follower = db.Follower.Where(f => f.Id == del.FollowerId).FirstOrDefault();
-
-            List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
-
-            foreach (OrderDeleted del in Order.OrderDeleted)
-            {
-                Dictionary<string, string> value = new Dictionary<string, string>();
-                value.Add("name", del.Follower.FirstName + del.Follower.LastName);
-                value.Add("Timestamp", del.DateAdd.ToString());
-                value.Add("Text", del.Text.ToString());
-                list.Add(value);
-            }
-
-            return Json(list);
-        }
-
-        [HttpGet]
         public IActionResult Get(int id)
         {
             if (db == null)
                 db = new MarketBotDbContext();
 
             if(id>0)
-            Order = db.Orders.Where(o => o.Number == id).Include(o=>o.Invoice).Include(o => o.OrderConfirm).
-                Include(o => o.OrderDeleted).Include(o => o.OrderDone).Include(o => o.OrderProduct).Include(o=>o.FeedBack).Include(o => o.OrderAddress).Include(o => o.FeedBack).Include(o=>o.OrdersInWork).Include(o => o.Follower).FirstOrDefault();
+            Order = db.Orders.Where(o => o.Number == id).Include(o=>o.Invoice).Include(o => o.Confirm).
+                Include(o => o.Delete).Include(o => o.DoneNavigation).Include(o => o.OrderProduct).Include(o=>o.FeedBack).Include(o => o.OrderAddress).Include(o => o.FeedBack).Include(o=>o.OrdersInWork).Include(o => o.Follower).FirstOrDefault();
 
             if (Order != null)
             {
@@ -152,14 +97,6 @@ namespace MyTelegramBot.Controllers
 
                 if (Order.Invoice != null)
                     Order.Invoice.PaymentType = db.PaymentType.Where(payment => payment.Id == Order.Invoice.PaymentTypeId).FirstOrDefault();
-
-                if (Order.OrderConfirm != null)
-                    foreach (OrderConfirm confirm in Order.OrderConfirm)
-                        confirm.Follower = db.Follower.Where(f => f.Id == confirm.FollowerId).FirstOrDefault();
-
-                if (Order.OrderDeleted != null)
-                    foreach (OrderDeleted delete in Order.OrderDeleted)
-                        delete.Follower = db.Follower.Where(f => f.Id == delete.FollowerId).FirstOrDefault();
 
                 if (Order.OrdersInWork != null)
                     foreach (OrdersInWork work in Order.OrdersInWork)
@@ -172,123 +109,88 @@ namespace MyTelegramBot.Controllers
 
                 }
 
+                var HistoryList = db.OrderHistory.Where(h => h.OrderId == Order.Id).Include(h => h.Follower).Include(h=>h.Ac).ToList();
+
+                Tuple<Orders,List<OrderHistory>> model = new Tuple<Orders,List<OrderHistory>>(Order, HistoryList);
 
 
-                return View(Order);
+
+                return View(model);
             }
 
             else
                 return NotFound();
         }
 
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete([FromBody] OrderDeleted deleted)
+        public IActionResult AddHistory ([FromBody] OrderHistory history)
         {
             db = new MarketBotDbContext();
 
-            if (deleted != null && deleted.FollowerId == null)
-                deleted.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
+            var inwork = CheckInWork(history.OrderId);
 
-            if (deleted != null && deleted.OrderId > 0)
-                this.Order = db.Orders.Find(deleted.OrderId);
 
-            if (this.Order!=null && !this.Order.Deleted && InsertDelete(deleted)>0)
+            if (history != null)
             {
-                this.Order.Deleted = true;
-                db.SaveChanges();
-                return Json("Удалено!");
+                history.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
+                Order = db.Orders.Where(o => o.Id == history.OrderId).Include(o=>o.DoneNavigation).Include(o => o.Delete).Include(o => o.Confirm).FirstOrDefault();
             }
 
-            else
+            if (inwork.FollowerId != history.FollowerId)
+                return Json("Ошибка! Заказ в обработке у " + inwork.Follower.FirstName + " " + inwork.Follower.LastName);
+
+            //Заказ согласован
+            if (Order!=null && history.ActionId==1 && inwork.FollowerId==history.FollowerId)
+            {
+                Order.ConfirmId = InsertHistory(history);
+                db.SaveChanges();
+                return Json("Согласовано");
+            }
+
+            //Заказ выполнен
+            if (Order!=null && history.ActionId == 2 && Order.ConfirmId>0 && inwork.FollowerId == history.FollowerId && Order.Delete==null) // проверяем согласован ли заявка и не удален ли он
+            {
+                Order.DoneId = InsertHistory(history);
+                db.SaveChanges();
+                return Json("Выполнено");
+            }
+
+            //Заказ еще согласован, поэтому ошибка
+            if (Order != null && history.ActionId == 2 && Order.ConfirmId == null)
+                return Json("Заказ еще не соласован");
+
+            //Удаление заказа
+            if (Order != null && history.ActionId == 3 && inwork.FollowerId == history.FollowerId && Order.Delete==null) 
+            {
+                Order.DeleteId = InsertHistory(history);
+                db.SaveChanges();
+                return Json("Удалено");
+            }
+
+            ///Заказ уже удален. Ошибка
+            if (Order != null && history.ActionId == 3 && inwork.FollowerId == history.FollowerId && Order.Delete != null)
                 return Json("Заказ уже удален");
- 
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Confirm ([FromBody] OrderConfirm confirm)
-        {
-            db = new MarketBotDbContext();
-
-            if (confirm != null && confirm.FollowerId == null)
+            
+            //Восстановление заказа
+            if(Order!=null && history.ActionId == 4 && inwork.FollowerId == history.FollowerId && Order.Delete !=null)
             {
-                confirm.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
-                this.Order = db.Orders.Find(confirm.OrderId);
-
-            }
-
-            if (InsertConfirm(confirm) > 0 && !this.Order.Deleted)
-            {
-                this.Order.Confirmed = true;
+                InsertHistory(history);
+                Order.Delete = null;
                 db.SaveChanges();
-                return Json("Добавлено");
-            }
-
-            if (this.Order.Deleted)
-                return Json("Ошибка.Заказ удален!");
-
-            else
-                return Json("Ошибка");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Done ([FromBody] OrderDone done)
-        {
-            if (db == null)
-                db = new MarketBotDbContext();
-
-            if (done != null && done.OrderId > 0)
-                this.Order = db.Orders.Find(done.OrderId);
-
-            if (done != null && done.FollowerId == null)
-                done.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
-
-            if (this.Order.Confirmed && done != null && InsertDone(done)>0)
-            {
-                this.Order.Done = true;
-                db.SaveChanges();
-                return Json("Сохранено");
-            }
-
-            if (!this.Order.Confirmed)
-                return Json("Ошибка! Заказ еще не согласован");
-
-            else
-                return Json("Неизвестная ошибка!");
-                
-        }
-
-        [HttpGet]
-        public IActionResult Recovery (int Id)
-        {
-            db = new MarketBotDbContext();
-
-            if (Id > 0)
-                this.Order = db.Orders.Find(Id);
-
-            if(this.Order!=null && this.Order.Deleted)
-            {
-                var list = db.OrderDeleted.Where(d => d.OrderId == Id).ToList();
-
-                this.Order.Deleted = false;
-
-                foreach (OrderDeleted del in list)
-                    db.Remove(del);
-
-              
-                db.SaveChanges();
-
                 return Json("Восстановлено");
             }
 
-            if (this.Order != null && this.Order.Deleted)
-                return Json("Заказ еще не удален");
+            //Заказ еще удален, ошибка
+            if (Order != null && history.ActionId == 4 && inwork.FollowerId == history.FollowerId && Order.Delete ==null)
+                return Json("Заказ не удален");
 
             else
                 return Json("Ошибка");
         }
+
 
         /// <summary>
         /// Взять заказ в обработку
@@ -337,34 +239,19 @@ namespace MyTelegramBot.Controllers
 
         }
 
-        private int InsertDone (OrderDone done)
+
+        private int InsertHistory(OrderHistory history)
         {
             if (db == null)
                 db = new MarketBotDbContext();
 
-            if (done != null && done.OrderId > 0 && done.FollowerId > 0)
+            if (history != null && history.OrderId > 0 && history.FollowerId > 0)
             {
-                done.DateAdd = DateTime.Now;
-                done.Done = true;
-                db.OrderDone.Add(done);
-                return db.SaveChanges();
-            }
-
-            else
-                return -1;
-        }
-
-        private int InsertConfirm (OrderConfirm orderConfirm)
-        {
-            if (db == null)
-                db = new MarketBotDbContext();
-
-            if (orderConfirm != null && orderConfirm.OrderId > 0 && orderConfirm.FollowerId > 0)
-            {
-                orderConfirm.Confirmed = true;
-                orderConfirm.DateAdd = DateTime.Now;
-                db.OrderConfirm.Add(orderConfirm);
-                return db.SaveChanges();
+                history.Value = true;
+                history.Timestamp = DateTime.Now;
+                db.OrderHistory.Add(history);
+                db.SaveChanges();
+                return history.Id;
             }
 
             else
@@ -395,24 +282,8 @@ namespace MyTelegramBot.Controllers
                 return -1;
         }
 
-        private int InsertDelete(OrderDeleted deleted)
-        {
-            if (db == null)
-                db = new MarketBotDbContext();
 
-            if (deleted != null && deleted.OrderId > 0 && deleted.FollowerId > 0)
-            {
-                deleted.DateAdd = DateTime.Now;
-                deleted.Deleted = true;
-                db.OrderDeleted.Add(deleted);
-                return db.SaveChanges();
-            }
-
-            else
-                return -1;
-        }
-
-        private OrdersInWork CheckInWork(int OrderId)
+        private OrdersInWork CheckInWork(int? OrderId)
         {
             if (db == null)
                 db = new MarketBotDbContext();
@@ -428,7 +299,6 @@ namespace MyTelegramBot.Controllers
             else
                 return null;
         }
-
         
 
 

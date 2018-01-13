@@ -461,29 +461,14 @@ namespace MyTelegramBot.Bot.AdminModule
 
                 using (MarketBotDbContext db = new MarketBotDbContext())
                 {
-                    Order = db.Orders.Where(o => o.Number == number).Include(o => o.OrderDeleted).Include(o=>o.OrdersInWork).FirstOrDefault();
+                    Order = db.Orders.Where(o => o.Number == number).Include(o => o.Delete).Include(o=>o.OrdersInWork).FirstOrDefault();
 
                     string text = base.ReplyToMessageText;
                     if (Order != null && Order.Delete==null
                         && await Processing.CheckInWork(Order) && !await Processing.CheckIsDone(Order))
                     {
                         id = Order.Id;
-
-                        OrderHistory orderDeleted = new OrderHistory
-                        {
-                            Timestamp = DateTime.Now,
-                            Value = true,
-                            FollowerId = FollowerId,
-                            OrderId = id,
-                            Text = text,
-                            ActionId=3
-
-                        };
-                       
-                        db.OrderHistory.Add(orderDeleted);
-                        db.SaveChanges();
-
-                        Order.DeleteId = orderDeleted.Id;
+                        Order.DeleteId = InsertHistory(id,FollowerId, OrderActionEnum.Delete,text).Id;
                         db.SaveChanges();
                     }
                 }
@@ -524,23 +509,9 @@ namespace MyTelegramBot.Bot.AdminModule
                     if (Order != null && Order.Confirm==null
                         && await Processing.CheckInWork(Order) && await Processing.CheckIsDone(Order) ==false) // Если уже есть записи о том что заказ соглосован, то больще записей не делаем
                     {
-                        string text = base.ReplyToMessageText;
                         id = Order.Id;
-
-                        OrderHistory history = new OrderHistory
-                        {
-                            Timestamp = DateTime.Now,
-                            Value = true,
-                            FollowerId = FollowerId,
-                            OrderId = id,
-                            Text = text,
-                            ActionId=1
-                        };
-
-                        db.OrderHistory.Add(history);
-                        db.SaveChanges();
-
-                        Order.ConfirmId = history.Id;
+                        string text = base.ReplyToMessageText;
+                        Order.ConfirmId =InsertHistory(id,FollowerId, OrderActionEnum.Confirm,text).Id;
                         db.SaveChanges();
                     }
                 }
@@ -593,21 +564,8 @@ namespace MyTelegramBot.Bot.AdminModule
                         Include(o => o.Follower).Include(o => o.FeedBack).Include(o => o.OrderAddress).Include(o => o.Invoice).Include(o => o.OrdersInWork).FirstOrDefault();
 
                     this.Order.Delete = null;
-
-                    OrderHistory history = new OrderHistory
-                    {
-                        Timestamp = DateTime.Now,
-                        ActionId = 4,
-                        FollowerId = FollowerId,
-                        OrderId = OrderId,
-                        Value = true
-                    };
-
-                    db.OrderHistory.Add(history);
-
-                    db.SaveChanges();
-
-                    OrderAdminMsg = new AdminOrderMessage(OrderId, FollowerId);
+                    InsertHistory(OrderId, FollowerId, OrderActionEnum.Recovery);
+                    OrderAdminMsg = new AdminOrderMessage(Order.Id, FollowerId);
                     await EditMessage(OrderAdminMsg.BuildMessage());
                     string notify = "Заказ №" + Order.Number.ToString() + " восстановлен. Пользователь " + GeneralFunction.FollowerFullName(FollowerId);
                     await Processing.NotifyChanges(notify, Order.Id);
@@ -635,21 +593,8 @@ namespace MyTelegramBot.Bot.AdminModule
                 if (this.Order != null && this.Order.Delete==null && this.Order.Confirm!=null && this.Order.DoneNavigation==null
                    && await Processing.CheckInWork(this.Order) && !await Processing.CheckIsDone(this.Order))
                 {
-                    OrderHistory orderDone = new OrderHistory
-                    {
-                        Timestamp = DateTime.Now,
-                        FollowerId = FollowerId,
-                        Value = true,
-                        OrderId = OrderId,
-                        ActionId=2
-                    };
-
-                    db.OrderHistory.Add(orderDone);
-
-                    db.SaveChanges();
-
                     var order = db.Orders.Find(this.Order.Id);
-                    order.DoneId =orderDone.Id;
+                    order.DoneId =InsertHistory(OrderId,FollowerId, OrderActionEnum.Done).Id;
 
                     OrdersInWork inWork = new OrdersInWork
                     {
@@ -659,7 +604,6 @@ namespace MyTelegramBot.Bot.AdminModule
                         OrderId = this.Order.Id
                     };
 
-
                     db.OrdersInWork.Add(inWork);
                     db.SaveChanges();
                     StockChangesMsg=new StockChangesMessage(UpdateStock(this.Order));
@@ -667,7 +611,7 @@ namespace MyTelegramBot.Bot.AdminModule
                 }
             }
 
-            if (OrderAdminMsg!= null)
+            if (this.Order!=null && OrderAdminMsg!= null)
             {
      
                 var message = OrderAdminMsg.BuildMessage();
@@ -679,6 +623,44 @@ namespace MyTelegramBot.Bot.AdminModule
             }
             else
                 return base.NotFoundResult;
+        }
+
+        private OrderHistory InsertHistory (int OrderId, int FollowerId, OrderActionEnum orderAction, string Text=null, bool value = true)
+        {
+            int ActionId = 0;
+
+            if (orderAction == OrderActionEnum.Confirm)
+                ActionId = 1;
+
+            if (orderAction == OrderActionEnum.Done)
+                ActionId = 2;
+
+            if (orderAction == OrderActionEnum.Delete)
+                ActionId = 3;
+
+            if (orderAction == OrderActionEnum.Recovery)
+                ActionId = 4;
+
+
+            if (OrderId > 0 && FollowerId > 0 && ActionId>0)
+                using (MarketBotDbContext db = new MarketBotDbContext())
+                {
+                    OrderHistory orderHistory = new OrderHistory
+                    {
+                        FollowerId = FollowerId,
+                        Timestamp = DateTime.Now,
+                        Text = Text,
+                        Value = value
+
+                    };
+
+                    db.OrderHistory.Add(orderHistory);
+                    db.SaveChanges();
+                    return orderHistory;
+                }
+
+            else
+                return null;
         }
 
         /// <summary>
