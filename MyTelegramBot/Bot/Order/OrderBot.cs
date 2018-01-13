@@ -145,8 +145,8 @@ namespace MyTelegramBot.Bot
                     OrderViewMsg = new OrderViewMessage(this.OrderId);
                     MyOrdersMsg = new MyOrdersMessage(base.FollowerId,BotInfo.Id);
                     using (MarketBotDbContext db = new MarketBotDbContext())
-                        Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.OrderConfirm).
-                            Include(o => o.OrderDone).Include(o => o.OrderDeleted).
+                        Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
+                            Include(o => o.DoneNavigation).Include(o => o.Delete).
                             Include(o => o.OrderProduct).Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.Invoice).FirstOrDefault();
                     CheckPayMsg = new CheckPayMessage(Order);
 

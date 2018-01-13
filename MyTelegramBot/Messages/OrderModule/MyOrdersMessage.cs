@@ -34,7 +34,7 @@ namespace MyTelegramBot.Messages
             {
                 List<Orders> orders = new List<Orders>();
 
-                orders = db.Orders.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.OrderProduct).Include(o=>o.OrderDone).Include(o=>o.OrderConfirm).Include(o=>o.OrderDeleted).OrderBy(o=>o.Id).ToList();
+                orders = db.Orders.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.OrderProduct).Include(o=>o.DoneNavigation).Include(o=>o.Confirm).Include(o=>o.Delete).OrderBy(o=>o.Id).ToList();
 
                 if (orders != null && orders.Count>0)
                 {
@@ -44,7 +44,7 @@ namespace MyTelegramBot.Messages
 
                     foreach (Orders order in orders)
                     {
-                        if (order.OrderDeleted != null && order.OrderDeleted.Count == 0)
+                        if (order.Delete != null)
                         {
                             base.TextMessage += Counter.ToString() + ") Заказ №" + order.Number.ToString() + " от " + order.DateAdd.ToString() +
                                     NewLine() + "открыть /myorder" + order.Number.ToString() + NewLine();

@@ -141,7 +141,7 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Статус платежа: ") + Paid;
 
                 //Детали согласования заказа
-                if (Order != null && Order.Confirm != null && Order.OrderDeleted.Count == 0)
+                if (Order != null && Order.Confirm != null && Order.Delete==null)
                     base.TextMessage += NewLine() + NewLine() + Bold("Заказ согласован:") + NewLine() + Italic("Комментарий: " + Order.Confirm.Text
                         + " |Время: " + Order.Confirm.Timestamp.ToString() 
                         + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Confirm.FollowerId));

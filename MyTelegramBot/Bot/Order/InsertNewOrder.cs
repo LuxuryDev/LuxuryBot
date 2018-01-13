@@ -65,9 +65,6 @@ namespace MyTelegramBot.Bot.Order
                     Number = Number + 1,
                     Paid = false,
                     BotInfoId = BotInfo.Id,
-                    Confirmed=false,
-                    Done=false,
-                    Deleted=false
                 };
 
                 if (PaymentTypeEnum == Services.PaymentTypeEnum.Qiwi)

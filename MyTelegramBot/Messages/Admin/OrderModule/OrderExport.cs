@@ -17,7 +17,7 @@ namespace MyTelegramBot.Messages.Admin
         {
             using (MarketBotDbContext db=new MarketBotDbContext())
             {
-                var Orders = db.Orders.Include(o => o.OrderConfirm).Include(o => o.OrderDone).Include(o => o.OrderDeleted).Include(o => o.OrderProduct).Include(o => o.OrderAddress).Include(o => o.Follower).Include(o=>o.FeedBack).ToList();
+                var Orders = db.Orders.Include(o => o.Confirm).Include(o => o.DoneNavigation).Include(o => o.Delete).Include(o => o.OrderProduct).Include(o => o.OrderAddress).Include(o => o.Follower).Include(o=>o.FeedBack).ToList();
 
                 string data = "Номер заказа;"+ 
                               "Время;"+
@@ -61,9 +61,9 @@ namespace MyTelegramBot.Messages.Admin
                                                     Address.House.Street.City.Name,  // Город 4
                                                     Address.House.Street.Name, // УЛица 5
                                                     Address.House.Number, // Дом 6
-                                                    order.OrderConfirm.FirstOrDefault().Text, // 7 Комментарий к согласованному заказу
-                                                    order.OrderConfirm.FirstOrDefault().DateAdd.ToString(),// Дата согласования 8
-                                                    order.OrderDone.FirstOrDefault().DateAdd.ToString(), // Время выполнения 9
+                                                    order.Confirm.Text, // 7 Комментарий к согласованному заказу
+                                                    order.Confirm.Timestamp.ToString(),// Дата согласования 8
+                                                    order.DoneNavigation.Timestamp.ToString(), // Время выполнения 9
                                                     counter.ToString(), // Позиция 10
                                                     db.Product.Where(p=>p.Id==position.ProductId).FirstOrDefault().Name, // Название товара 11
                                                     db.ProductPrice.Where(p=>p.Id==position.PriceId).FirstOrDefault().Value.ToString(), // Стоистомть 12

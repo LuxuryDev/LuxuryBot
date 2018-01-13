@@ -53,8 +53,8 @@ namespace MyTelegramBot.Bot
                     Orders order = new Orders();
 
                     // Пользователь будет видеть заказы оформелнные через других ботов
-                    order = db.Orders.Where(o => o.Number == number && o.FollowerId == FollowerId).Include(o => o.OrderConfirm)
-                       .Include(o => o.OrderDeleted).Include(o => o.OrderDone).Include(o => o.FeedBack).
+                    order = db.Orders.Where(o => o.Number == number && o.FollowerId == FollowerId).Include(o => o.Confirm)
+                       .Include(o => o.Delete).Include(o => o.DoneNavigation).Include(o => o.FeedBack).
                         Include(o => o.OrderProduct).Include(o => o.OrderAddress).Include(o=>o.BotInfo).Include(o=>o.Invoice).FirstOrDefault();
 
 
