@@ -13,28 +13,36 @@ namespace MyTelegramBot.Controllers
 
         public IActionResult Index()
         {
-
-            db = new MarketBotDbContext();
-
-            List<Product> list = db.Product.Include(p=>p.Unit).Include(p=>p.Category).ToList();
-
-            foreach (Product prod in list)
+            try
             {
-                var stock = db.Stock.Where(s => s.ProductId == prod.Id).OrderByDescending(s => s.Id).FirstOrDefault();
+                db = new MarketBotDbContext();
 
-                if(stock!=null)
-                prod.Stock.Add(stock);
+                List<Product> list = db.Product.Include(p => p.Unit).Include(p => p.Category).ToList();
 
-                else
+                foreach (Product prod in list)
                 {
-                    prod.Stock.Add(new Stock
+                    var stock = db.Stock.Where(s => s.ProductId == prod.Id).OrderByDescending(s => s.Id).FirstOrDefault();
+
+                    if (stock != null)
+                        prod.Stock.Add(stock);
+
+                    else
                     {
-                        Balance = 0
-                    });
+                        prod.Stock.Add(new Stock
+                        {
+                            Balance = 0
+                        });
+                    }
                 }
+
+                return View(list);
             }
 
-            return View(list);
+            catch
+            {
+                return Json("Ошибка подключения к базе данных");
+            }
+
         }
 
         [HttpGet]

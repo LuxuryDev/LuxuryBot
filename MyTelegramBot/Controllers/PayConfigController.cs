@@ -172,7 +172,7 @@ namespace MyTelegramBot.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public IActionResult SavePaymentOnReceipt(PaymentType _paymentType)
+        public IActionResult SavePaymentOnReceipt([FromBody] PaymentType _paymentType)
         {
             db = new MarketBotDbContext();
 

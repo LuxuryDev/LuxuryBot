@@ -30,12 +30,12 @@
             <td>@order.Text</td>
             <td>@order.DateAdd</td>
             <td><a href=@("https://t.me/" + order.BotInfo.Name)>@order.BotInfo.Name</a></td>
-            @if (order.OrderDone == null)
+            @if (order.DoneNavigation == null)
             {
                 <td>Нет</td>
 
             }
-            @if (order.OrderDone != null)
+            @if (order.DoneNavigation != null)
             {
                 <td>Да</td>
 

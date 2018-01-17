@@ -21,7 +21,7 @@
     </ul>
 
 
-    <!-- Tab panes -->
+<!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane active" id="main">
             <div class="row">
@@ -203,24 +203,26 @@
 
         </div>
 
-
         <div class="tab-pane" id="history">
                 <table class="table">
                     <thead>
-                        <tr>
+                        <tr>   
+                            <td>Действие</td>
+                            <td>Комментарий</td>
                             <td>Пользователь</td>
                             <td>Время</td>
-                            <td>Комментарий</td>
+                            
                         </tr>
                     </thead>
-                    <tbody class="_confirm_table">
+                    <tbody class="_history_table">
 
                             @foreach (var history in Model.Item2)
                             {
                                 <tr>
+                                    <td>@history.Action.Name</td>
+                                    <td>@history.Text</td>
                                     <td><a href=@("https://t.me/"+ history.Follower.UserName)>@(@history.Follower.FirstName + " " + @history.Follower.LastName)</a></td>
                                     <td>@history.Timestamp</td>
-                                    <td>@history.Text</td>
                                 </tr>
                             }
                         
@@ -233,28 +235,23 @@
             @if (Model.Item1.OrdersInWork != null)
             {
                 <table class="table">
-                    <tr>
-                        <td>Пользователь</td>
-                        <td>Время</td>
-                        <td>Действие</td>
-                    </tr>
-                    @foreach (var work in Model.Item1.OrdersInWork)
-                {
+                    <thead>
                         <tr>
-                            <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
-                            <td>@work.Timestamp</td>
-                            @if (work.InWork == true)
-                            {
-                                <td>Взял</td>
-
-                            }
-                            @if (work.InWork == false)
-                            {
-                                <td>Освободил</td>
-
-                            }
+                            <td>Пользователь</td>
+                            <td>Время</td>
+                            <td>В работе</td>
                         </tr>
-                    }
+                    </thead>
+                    <tbody class="_work_table">
+                        @foreach (var work in Model.Item1.OrdersInWork)
+                        {
+                            <tr>
+                                <td><a href=@("https://t.me/"+ work.Follower.UserName)>@(@work.Follower.FirstName + " " + @work.Follower.LastName)</a></td>
+                                <td>@work.Timestamp</td>
+                                <td>@work.InWork</td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
             }
         </div>
@@ -272,6 +269,8 @@
     </div>
 </div>
 <!-- Tab panes -->
+
+
 <!--Модальное окно для добавления комментария о том что заказ согласован-->
 <div class="modal fade" id="basicModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -284,7 +283,7 @@
                 @using (Html.BeginForm("", ""))
                 {
                     <label>Введите комментарий</label> <br />
-                        @Html.TextArea("TextConfirm")
+                        @Html.TextArea("TextConfirm", new { style = "min-width: 100%" })
 
 
                 }
@@ -297,6 +296,8 @@
     </div>
 </div>
 <!--Модальное окно для добавления комментария о том что заказ согласован-->
+
+
 <!--Модальное окно для добавления комментария о том что заказ Удален-->
 <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -309,7 +310,7 @@
                 @using (Html.BeginForm("", ""))
                 {
                     <label>Причина удаления</label> <br />
-                        @Html.TextArea("TextDelete")
+                        @Html.TextArea("TextDelete", new { style = "min-width: 100%" })
 
 
                 }
@@ -321,8 +322,8 @@
         </div>
     </div>
 </div>
-
 <!--Модальное окно для добавления комментария о том что заказ Удален-->
+
 <!--Функция взять заказ  в обработку-->
 <script type="text/javascript">
 
@@ -358,36 +359,36 @@
                 $('#InWorkBtn').text('Освободить');
                 getTakeInWork(); // запрос табличных данных
 
-                if ($('#Confirmed').val() == "false") {
-
+                if ($('#Confirmed').val() == "false")
+                {
                     $('#ConfirmBtn').removeClass('disabled');
                 }
 
-                if ($('#Confirmed').val() == "true")
                 // пользоветль взял заказ в обработку, но он уже согласован   значит делаем кнопку "Выполнить" актвной
+                if ($('#Confirmed').val() == "true")
                 {
                     $('#DoneBtn').removeClass('disabled');
                 }
 
-                if ($('#Deleted').val() == "false") {
-                    // если заказ не удален то делаем кнопку удалить заказ активной
+                //// если заказ не удален то делаем кнопку удалить заказ активной
+                if ($('#Deleted').val() == "false")
+                {        
                     $('#DelBtn').removeClass('disabled');
                 }
 
-                if ($('#Deleted').val() == "true" && $('#Done').val() == "false") //если заказ не удален то делаем кнопку Согласовать активной
-                    $('#ConfirmBtn').removeClass('disabled');
-                    $('#DoneBtn').addClass('disabled');
 
-                if ($('#Deleted').val() == "true") {// если заказ  удален то делаем кнопку Восстановить заказ активной
+                //// если заказ  удален то делаем кнопку Восстановить заказ активной
+                if ($('#Deleted').val() == "true")
+                {
                     $('#RecoveryBtn').removeClass('disabled')
                     $('#ConfirmBtn').addClass('disabled');
-
                 }
 
-                if ($('#Done').val() == "true") {
+                if ($('#Done').val() == "true")
+                {
                     $('#DoneBtn').addClass('disabled');
                     $('#ConfirmBtn').addClass('disabled');
-                    $('#RecoveryBtn').addClass('disabled');
+                   $('#RecoveryBtn').addClass('disabled');
                     $('#DelBtn').addClass('disabled')
                 }
 
@@ -401,8 +402,10 @@
                 $('#DoneBtn').addClass('disabled');
                 $('#DelBtn').addClass('disabled');
                 $('#RecoveryBtn').addClass('disabled');
-                getTakeInWork(); // запрос табличных данных
+                // запрос табличных данных
             }
+
+            getTakeInWork();
 
             //$("#Example").val(data);
         }).error(function (data) {
@@ -476,7 +479,7 @@
                 $('#DoneBtn').removeClass('disabled');
                 $('#Confirmed').val('true'); //
                 $("#Example").val(data);
-                //getСonfirm(); // запрос табличных данных
+                getHistory();
             }
 
             if (data == "Выполнено" && ActionId == '2') {
@@ -486,6 +489,7 @@
                 $('#RecoveryBtn').addClass('disabled');
                 $('#DoneBtn').addClass('disabled');
                 $('Done').val('true');
+                getHistory();
             }
 
             if (data === "Удалено" && ActionId == '3') { // Пользователь добавляет запись о том что заказ согласован
@@ -494,7 +498,7 @@
                 $('#RecoveryBtn').removeClass('disabled');
                 $('#DelBtn').addClass('disabled');
                 $('Deleted').val('true');
-                //getСonfirm(); // запрос табличных данных
+                getHistory();
                 console.log(data);
 
             }
@@ -506,11 +510,11 @@
 
                 if ($('#Confirmed').val() == "True")
                     $('#DoneBtn').removeClass('disabled');
-                //getСonfirm(); // запрос табличных данных
+                getHistory();
                 console.log(data);
             }
 
-
+            
 
             else {
                 console.log(data);
@@ -522,10 +526,10 @@
         })
     }
 
-    function getСonfirm() {
+    function getHistory() {
         $.ajax({
             type: "Get",
-            url: '/Order/GetConfirmList?Id=' + $("#Id").val(), //
+            url: '/Order/GetHistoryList?Id=' + $("#Id").val(), //
             contentType: "application/json; charset=utf-8",
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("XSRF-TOKEN",
@@ -539,9 +543,10 @@
                 // let tableDataJson = JSON.parse(data);
                 data.forEach(function (elem) {
                     tableDraw += '<tr>';
-                    tableDraw += '<td>' + elem.name + '</td>';
-                    tableDraw += '<td>' + elem.Timestamp + '</td>';
+                    tableDraw += '<td>' + elem.ActionName + '</td>';
                     tableDraw += '<td>' + elem.Text + '</td>';
+                    tableDraw += '<td>' + elem.UserName + '</td>';
+                    tableDraw += '<td>' + elem.Timestamp + '</td>';                    
                     tableDraw += '</tr>';
                 });
                 $('._confirm_table').html(tableDraw);

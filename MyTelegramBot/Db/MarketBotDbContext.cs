@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-
+using System.IO;
 
 namespace MyTelegramBot
 {
@@ -64,8 +64,36 @@ namespace MyTelegramBot
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer(@"Server=DESKTOP-93GE9VD;Database=MarketBotDb;Integrated Security = True; Trusted_Connection = True;");
+                //var builder = new ConfigurationBuilder()
+                //.SetBasePath(System.IO.Directory.GetCurrentDirectory())
+                //.AddJsonFile("appsettings.json");
+                //string sql= builder.Build().GetSection("Database").Value;
+
+                ////optionsBuilder.UseSqlServer(@"Server=DESKTOP-93GE9VD;Database=MarketBotDb;Integrated Security = True; Trusted_Connection = True;");
+
+                //if(sql!="")
+                //    optionsBuilder.UseSqlServer(sql);
+
+                string connection = String.Empty;
+
+                try
+                {
+                    using(StreamReader sr=new StreamReader("connection.json"))
+                    {
+                        connection=sr.ReadLine();
+                    }
+                }
+
+                catch
+                {
+
+                }
+
+                finally
+                {
+                    if(connection!="")
+                    optionsBuilder.UseSqlServer(connection);
+                }
             }
         }
 

@@ -24,34 +24,40 @@ namespace MyTelegramBot.Controllers
 
         public IActionResult Index()
         {
-            db = new MarketBotDbContext();
-
-
-            string name = GetBotName();
-
-            if (name != null)
+            try
             {
-                botInfo = db.BotInfo.Where(b => b.Name == name).Include(b=>b.Configuration).FirstOrDefault();
-                company = db.Company.FirstOrDefault();
-            }
-            if (name == null || name!=null && name=="")
-                ViewBag.Error = "В файле appsettings.json не указано название бота!";
+                db = new MarketBotDbContext();
 
-            if (botInfo == null)
-            {
-                botInfo = new BotInfo
+                string name = GetBotName();
+
+                if (name != null)
                 {
-                    Name = "",
-                    Token = ""
-                };
+                    botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
+                    company = db.Company.FirstOrDefault();
+                }
 
-                company = new Company();
+                if (botInfo == null)
+                {
+                    botInfo = new BotInfo
+                    {
+                        Name = "",
+                        Token = ""
+                    };
+
+                    company = new Company();
+                }
+
+                Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
+
+
+                return View(tuple);
             }
 
-            Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
-            
+            catch
+            {
+                return Json("Ошибка подключелния к базе данных");
+            }
 
-            return View(tuple);
         }
 
         public IActionResult Add()

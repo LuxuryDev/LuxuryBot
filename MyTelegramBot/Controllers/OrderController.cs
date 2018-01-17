@@ -18,7 +18,7 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-           return View(db.Orders.Include(o => o.BotInfo).OrderByDescending(o=>o.Id).ToList());
+           return View(db.Orders.Include(o => o.BotInfo).Include(o=>o.DoneNavigation).OrderByDescending(o=>o.Id).ToList());
 
 
         }
@@ -31,7 +31,7 @@ namespace MyTelegramBot.Controllers
 
 
 
-            var HistoryList = db.OrderHistory.Where(h => h.OrderId == Id).Include(h => h.Follower).OrderByDescending(h => h.Id).ToList();
+            var HistoryList = db.OrderHistory.Where(h => h.OrderId == Id).Include(h => h.Follower).Include(h=>h.Action).OrderByDescending(h => h.Id).ToList();
                 
 
             List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
@@ -39,9 +39,16 @@ namespace MyTelegramBot.Controllers
             foreach (OrderHistory history in HistoryList)
             {
                 Dictionary<string, string> value = new Dictionary<string, string>();
-                value.Add("name", history.Follower.FirstName + history.Follower.LastName);
+                value.Add("ActionName", history.Action.Name);
+
+                if(history.Text!=null)
+                    value.Add("Text", history.Text);
+
+                else
+                    value.Add("Text", String.Empty);
+
+                value.Add("UserName", history.Follower.FirstName + history.Follower.LastName);
                 value.Add("Timestamp", history.Timestamp.ToString());
-                value.Add("Text", history.Text.ToString());
                 list.Add(value);
             }
 
@@ -109,7 +116,7 @@ namespace MyTelegramBot.Controllers
 
                 }
 
-                var HistoryList = db.OrderHistory.Where(h => h.OrderId == Order.Id).Include(h => h.Follower).ToList();
+                var HistoryList = db.OrderHistory.Where(h => h.OrderId == Order.Id).Include(h => h.Follower).Include(h=>h.Action).ToList();
 
                 Tuple<Orders,List<OrderHistory>> model = new Tuple<Orders,List<OrderHistory>>(Order, HistoryList);
 
