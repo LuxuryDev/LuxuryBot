@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using MyTelegramBot.Model;
 
 namespace MyTelegramBot.Controllers
 {
@@ -22,42 +23,43 @@ namespace MyTelegramBot.Controllers
 
         Company company;
 
+
         public IActionResult Index()
         {
-            try
+
+            db = new MarketBotDbContext();
+
+            string name = GetBotName();
+
+            if (name != null)
             {
-                db = new MarketBotDbContext();
-
-                string name = GetBotName();
-
-                if (name != null)
-                {
-                    botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
-                    company = db.Company.FirstOrDefault();
-                }
-
-                if (botInfo == null)
-                {
-                    botInfo = new BotInfo
-                    {
-                        Name = "",
-                        Token = ""
-                    };
-
-                    company = new Company();
-                }
-
-                Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
-
-
-                return View(tuple);
+                botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
+                company = db.Company.FirstOrDefault();
             }
 
-            catch
+            if (botInfo == null)
             {
-                return Json("Ошибка подключелния к базе данных");
+                botInfo = new BotInfo
+                {
+                    Name = "",
+                    Token = ""
+                };
+
+                company = new Company();
             }
 
+            Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
+
+
+            return View(tuple);
+            
+
+        }
+
+        [HttpGet]
+        public IActionResult Error()
+        {
+            return View();
         }
 
         public IActionResult Add()

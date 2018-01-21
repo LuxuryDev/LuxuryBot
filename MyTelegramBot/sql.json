@@ -1,1 +1,7 @@
-{"Host":"localhost","Port":null,"UserName":null,"Password":null,"DbName":"MarketBotDb"}
+{
+  "Host": "localhost",
+  "Port": null,
+  "UserName": null,
+  "Password": null,
+  "DbName": "MarketPlaceBotDb"
+}

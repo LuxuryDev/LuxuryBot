@@ -9,24 +9,20 @@ using Newtonsoft.Json;
 namespace MyTelegramBot.Controllers
 {
     [Produces("application/json")]
-    public class SettingsController : Controller
+    public class DbController : Controller
     {
         public IActionResult Index()
         {
             //"Server=localhost;Database=MarketBotDb;Integrated Security = FALSE;USER ID=bot;PASSWORD=bot;Trusted_Connection = True;"
 
-            var builder = new ConfigurationBuilder()
-               .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-               .AddJsonFile("appsettings.json");
-            string sql = builder.Build().GetSection("Database").Value;
+            string sql = ReadFile("sql.json");
 
-            if (sql == "")
+            if (sql==null || sql!=null && sql == "")
             {
                 Model.SettingsDbConnection settingsDb = new Model.SettingsDbConnection
                 {
                     DbName = "MarketBotDb",
                     Host = "localhost",
-                    Port = "1433",
                     UserName = "",
                     Password = ""
                 };
@@ -36,7 +32,8 @@ namespace MyTelegramBot.Controllers
 
             else
             {
-                return View();
+                var dbconnection = JsonConvert.DeserializeObject<Model.SettingsDbConnection>(sql);
+                return View(dbconnection);
             }
 
             
@@ -48,25 +45,16 @@ namespace MyTelegramBot.Controllers
         {
             if (settings != null && settings.DbName!=null && settings.Host!=null)
             {
-                //открываем файл sql.json и сохраняем изменения
+                //открываем файл sql.json и сохраняем изменени
 
-                using (StreamWriter sw=new StreamWriter("sql.json"))
-                {
-                    sw.Write(JsonConvert.SerializeObject(settings));
-                    sw.Flush();
-                    sw.Dispose();
-                }
+                WriteFile("sql.json", JsonConvert.SerializeObject(settings));
 
                 //"Server=localhost;Database=MarketBotDb;Integrated Security = FALSE;USER ID=bot;PASSWORD=bot;Trusted_Connection = True;"
 
                 string SqlConnection = "Server=" + settings.Host+ ";Database=" + settings.DbName + ";Integrated Security = FALSE;Trusted_Connection = True;";
 
-                using (StreamWriter sw = new StreamWriter("connection.json"))
-                {
-                    sw.Write(SqlConnection);
-                    sw.Flush();
-                    sw.Dispose();
-                }
+                WriteFile("connection.json", SqlConnection);
+
 
                 if (TestConnection())
                   return  Json("Успех!");
@@ -97,11 +85,42 @@ namespace MyTelegramBot.Controllers
                 return false;
             }
         }
+
+
+        private string ReadFile (string path)
+        {
+            try
+            {
+                using(StreamReader sr =new StreamReader(path))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void WriteFile(string path, string value)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.Write(value);
+                    sw.Flush();
+                    sw.Dispose();
+                }
+            }
+            catch
+            {
+
+            }
+        }
     }
 
 
-
-    
-    
     
 }

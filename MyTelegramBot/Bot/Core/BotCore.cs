@@ -268,8 +268,8 @@ namespace MyTelegramBot.Bot
             {
                 var builder = new ConfigurationBuilder()
                 .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-                string name = builder.Build().GetSection("BotName").Value;
+                .AddJsonFile("name.json");
+                string name = builder.Build().GetSection("name").Value;
 
                 BotInfo bot = new BotInfo();
                 using (MarketBotDbContext db = new MarketBotDbContext())

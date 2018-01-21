@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\CustomExceptionFilterAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="connection.json" />
+    <Content Remove="sql.json" />
     <Content Remove="Views\Home\Owner.cshtml" />
   </ItemGroup>
 
@@ -35,6 +41,15 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="connection.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="sql.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

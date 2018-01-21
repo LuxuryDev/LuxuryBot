@@ -15,8 +15,8 @@ namespace MyTelegramBot.Bot
         {
             var builder = new ConfigurationBuilder()
             .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json");
-            return builder.Build().GetSection("BotName").Value;
+            .AddJsonFile("name.json");
+            return builder.Build().GetSection("name").Value;
         }
 
         public static string BuildPaymentComment(string BotName, string OrderNumber)

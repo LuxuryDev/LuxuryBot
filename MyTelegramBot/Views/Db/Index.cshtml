@@ -43,7 +43,7 @@
         }
         $.ajax({
             type: "POST",
-            url: 'Settings/Update',
+            url: 'db/Update',
             data: JSON.stringify(Config),
             contentType: "application/json; charset=utf-8",
             beforeSend: function (xhr) {

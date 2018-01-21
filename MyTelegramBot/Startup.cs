@@ -42,12 +42,21 @@ namespace MyTelegramBot
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Home/Error");
             }
-           
+
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
             app.UseMvc();
 
             app.UseStaticFiles();
+
+            // обработка ошибок HTTP
+            app.UseStatusCodePages();
 
             app.UseMvc(routes =>
             {
