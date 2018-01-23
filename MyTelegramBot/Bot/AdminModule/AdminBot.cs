@@ -125,7 +125,7 @@ namespace MyTelegramBot.Bot.AdminModule
             {
                 AdminQiwiSettingsMsg = new AdminQiwiSettingsMessage();
                 AdminCmdListMsg = new AdminPanelCmdMessage(base.FollowerId);
-                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd);
+                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd,ModuleName,true);
                 ContactEditMsg = new ContactEditMessage();
                 AdminAllProductsViewMsg = new AdminAllProductsViewMessage();
                 AdminCurrentStockMsg = new AdminCurrentStockMessage();
@@ -1061,7 +1061,7 @@ namespace MyTelegramBot.Bot.AdminModule
         /// <returns></returns>
         private async Task<IActionResult> EditProduct()
         {
-
+            CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd, ProductEditBot.ModuleName);
             if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
                 return base.OkResult;
 

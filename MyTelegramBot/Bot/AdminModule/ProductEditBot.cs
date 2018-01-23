@@ -90,7 +90,7 @@ namespace MyTelegramBot.Bot
         /// <summary>
         /// Обновить категоию в которой находится товар
         /// </summary>
-        private const string UpdateCategoryCmd = "UpdateCategory";
+        public const string ProductUpdateCategoryCmd = "ProductUpdateCategory";
 
         /// <summary>
         /// ForceReply сообщение с просьбой указать новое название для товара
@@ -174,7 +174,7 @@ namespace MyTelegramBot.Bot
         {
             try
             {
-                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd);
+                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd,ModuleName,false);
 
                 if (base.Argumetns != null && base.Argumetns.Count > 0)
                     ProductId = base.Argumetns[0];
@@ -275,7 +275,7 @@ namespace MyTelegramBot.Bot
 
                     ///пользваотель выбрал новую категорию для товара. 
                     //Данные обновляются в БД. Сообщение редактируется на Описание товара и кнопки с функциями
-                    case UpdateCategoryCmd:
+                    case ProductUpdateCategoryCmd:
                         return await UpdateProductCategory();
 
                         //Пользователь нажана на кнопку Inline Фотография.
@@ -490,7 +490,7 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> ProductEditCategory()
         {
-            CategoryListMsg = new CategoryListMessage(this.ProductId,UpdateCategoryCmd);
+            CategoryListMsg = new CategoryListMessage(this.ProductId);
             if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
                 return OkResult;
 

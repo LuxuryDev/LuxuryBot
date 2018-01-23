@@ -24,6 +24,8 @@ namespace MyTelegramBot.Messages
     {
         private string Cmd { get; set; }
 
+        private string ModuleName { get; set; }
+
         private string BackCmd { get; set; }
 
         /// <summary>
@@ -37,11 +39,15 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton ViewAllBtn { get; set; }
 
+        //флаг который показывает отображать ли кнопку "Показать все все товары"
+        private bool VisableAllProductBtn { get; set; }
+
         /// <summary>
-        /// Для меню
+        /// Для меню. Показывает кнопки всех категорий и кнопку "Показать весь ассортимент"
         /// </summary>
         public CategoryListMessage()
         {
+            VisableAllProductBtn = true;
             Cmd = "ProductInCategory";
             BackCmd = "MainMenu";
             BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.MainMenuBot.ModuleName));
@@ -49,26 +55,29 @@ namespace MyTelegramBot.Messages
         }
 
         /// <summary>
-        /// Другое действие. Например для панели администратора
+        /// Другое действие
         /// </summary>
-        /// <param name="Cmd"></param>
-        public CategoryListMessage(string Cmd)
+        /// <param name="Cmd">Название команды</param>
+        /// <param name="VisableAllProductBtn">Отображать ли кнопку "Показать все товары"</param>
+        public CategoryListMessage(string Cmd, string ModuleName ,bool VisableAllProductBtn=false)
         {
             this.Cmd = Cmd;
+            this.ModuleName = ModuleName;
             this.BackCmd =AdminBot.BackToAdminPanelCmd;
             BackBtn= new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd, AdminBot.ModuleName));
         }
 
         /// <summary>
-        /// редактируем категорию в которой находится товар
+        /// Выбираем новое значение категории в которой будет находится товар
         /// </summary>
         /// <param name="EditProductId"></param>
         /// <param name="Cmd"></param>
-        public CategoryListMessage (int EditProductId, string Cmd = "UpdateCategory")
+        public CategoryListMessage (int EditProductId, string Cmd = Bot.ProductEditBot.ProductUpdateCategoryCmd, string ModuleName= Bot.ProductEditBot.ModuleName)
         {
-            //
+            this.VisableAllProductBtn = false;
             this.EditProductId = EditProductId;
             this.Cmd = Cmd;
+            this.ModuleName = ModuleName;
             this.BackCmd = "SelectProduct";
             BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.ProductEditBot.ModuleName,this.EditProductId));
         }
@@ -77,10 +86,25 @@ namespace MyTelegramBot.Messages
         {           
             using (MarketBotDbContext db=new MarketBotDbContext())
                 Categorys=db.Category.ToList();
-            
-            CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count+2][];
 
-            ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент", BuildCallData("ViewAllProduct",Bot.CategoryBot.ModuleName));
+            if (VisableAllProductBtn)
+            {
+
+                ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент",
+                        BuildCallData("ViewAllProduct", Bot.CategoryBot.ModuleName));
+
+                CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count + 2][];
+
+                CategoryListBtn[Categorys.Count] = new InlineKeyboardCallbackButton[1];
+
+                CategoryListBtn[Categorys.Count][0] = ViewAllBtn;
+
+
+            }
+
+            else
+                CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count + 1][];
+         
 
             int count = 0;
             if (Categorys.Count > 0)
@@ -89,14 +113,16 @@ namespace MyTelegramBot.Messages
                 {
                     if (EditProductId > 0) // Если меняем категорию в которой находится товар. Для админа
                     {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd, Bot.CategoryEditBot.ModuleName,EditProductId,cat.Id));
+                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
+                            base.BuildCallData(Cmd, ModuleName,EditProductId,cat.Id));
                         CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
                         CategoryListBtn[count][0] = button;
                     }
 
-                    else // Для меню
+                    else 
                     {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, base.BuildCallData(Cmd,Bot.CategoryBot.ModuleName ,cat.Id));
+                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
+                            base.BuildCallData(Cmd,ModuleName ,cat.Id));
                         CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
                         CategoryListBtn[count][0] = button;
                     }
@@ -105,12 +131,8 @@ namespace MyTelegramBot.Messages
                 }
 
                 base.TextMessage = "Выберите категорию";
-                CategoryListBtn[Categorys.Count+1] = new InlineKeyboardCallbackButton[1];
-                CategoryListBtn[Categorys.Count+1][0] = BackBtn;
-
-
-                CategoryListBtn[Categorys.Count] = new InlineKeyboardCallbackButton[1];
-                CategoryListBtn[Categorys.Count][0] = ViewAllBtn;
+                CategoryListBtn[CategoryListBtn.Length-1] = new InlineKeyboardCallbackButton[1];
+                CategoryListBtn[CategoryListBtn.Length-1][0] = BackBtn;
 
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(CategoryListBtn);
             }

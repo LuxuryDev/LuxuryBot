@@ -42,7 +42,6 @@ namespace MyTelegramBot.Bot
             {
                 try
                 {
-                    CategoryListMsg = new CategoryListMessage(SelectCategoryCmd);
 
                     if (Argumetns.Count > 0)
                     {
@@ -123,6 +122,7 @@ namespace MyTelegramBot.Bot
 
         private async Task<IActionResult> GetCategoryList()
         {
+            CategoryListMsg = new CategoryListMessage(SelectCategoryCmd, ModuleName);
             if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
                 return OkResult;
 
