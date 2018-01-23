@@ -40,6 +40,7 @@ namespace MyTelegramBot.Bot.AdminModule
 
         private AvailableCitiesMessage AvailableCitiesMsg { get; set; }
 
+
         public const string ProductCreateCmd = "ProductCreate";
 
         public const string ProductEditCmd = "ProductEdit";
@@ -133,6 +134,7 @@ namespace MyTelegramBot.Bot.AdminModule
                 AdminControlMsg = new AdminControlMessage();
                 StatisticMsg = new StatisticMessage();
                 AvailableCitiesMsg = new AvailableCitiesMessage();
+                
                 if (base.Argumetns.Count > 0)
                 {
                     Parametr = base.Argumetns[0];
