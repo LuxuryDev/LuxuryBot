@@ -44,7 +44,7 @@ namespace MyTelegramBot.Messages
 
                     foreach (Orders order in orders)
                     {
-                        if (order.Delete != null)
+                        if (order.Delete == null)
                         {
                             base.TextMessage += Counter.ToString() + ") Заказ №" + order.Number.ToString() + " от " + order.DateAdd.ToString() +
                                     NewLine() + "открыть /myorder" + order.Number.ToString() + NewLine();

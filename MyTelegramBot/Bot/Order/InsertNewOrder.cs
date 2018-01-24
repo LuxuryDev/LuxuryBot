@@ -65,7 +65,12 @@ namespace MyTelegramBot.Bot.Order
                     Number = Number + 1,
                     Paid = false,
                     BotInfoId = BotInfo.Id,
+
+
                 };
+
+                if (OrderTmp.PickupPointId != null)// самовывоз
+                    NewOrder.PickupPointId = OrderTmp.PickupPointId;
 
                 if (PaymentTypeEnum == Services.PaymentTypeEnum.Qiwi)
                     Invoice= AddQiwiInvoice(NewOrder, total);
@@ -79,7 +84,8 @@ namespace MyTelegramBot.Bot.Order
                 db.Orders.Add(NewOrder);
                 db.SaveChanges();
 
-                AddAddressToOrder(NewOrder.Id, OrderTmp.AddressId);
+                if(OrderTmp.AddressId!=null) // доставка
+                    AddAddressToOrder(NewOrder.Id, OrderTmp.AddressId);
 
                 foreach (var group in Basket) // переносим в корзины в Состав заказа
                     NewOrder.OrderProduct.Add(FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group));
@@ -276,6 +282,7 @@ namespace MyTelegramBot.Bot.Order
             else
                 return -1;
         }
+
 
         /// <summary>
         /// Удалить заказ из временной таблицы OrderTemp

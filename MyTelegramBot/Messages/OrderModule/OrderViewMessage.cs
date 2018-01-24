@@ -30,6 +30,8 @@ namespace MyTelegramBot.Messages
 
         private const int PaymentOnReceiptId = 1;
 
+        private Address Address { get; set; }
+
         public OrderViewMessage (int OrderId)
         {
             this.OrderId = OrderId;
@@ -51,12 +53,17 @@ namespace MyTelegramBot.Messages
                         Include(o => o.Done).
                         Include(o => o.FeedBack).
                         Include(o => o.OrderProduct).
+                        Include(o=>o.PickupPoint).
                         Include(o => o.OrderAddress).Include(o=>o.BotInfo)
                         .Include(o=>o.Invoice)
                         .Include(o=>o.OrderProduct).FirstOrDefault();
 
                 if(Order!=null && Order.OrderProduct.Count==0)
                     Order.OrderProduct = db.OrderProduct.Where(op => op.OrderId == Order.Id).ToList();
+
+
+                if (Order != null && Order.PickupPoint == null && Order.PickupPointId > 0)
+                    Order.PickupPoint = db.PickupPoint.Find(Order.PickupPointId);
 
                 if (Order != null && Order.OrderAddress==null)
                     Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).FirstOrDefault();
@@ -73,7 +80,8 @@ namespace MyTelegramBot.Messages
 
                     double total = 0.0; // общая строисоить заказа
 
-                    var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).
+                    if(Order.OrderAddress!=null) // способо получения - Доставка
+                        Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).
                         Include(a => a.House).
                         Include(a => a.House.Street).
                         Include(a => a.House.Street.City).
@@ -112,12 +120,26 @@ namespace MyTelegramBot.Messages
                         if (Order.Done != null && Order.FeedBack == null) // Отзыва нет, Добавляем кнопку
                             feedback = "Нет";
 
-
-                        base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
+                        if(Order.OrderAddress!=null)
+                            base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                                     + Position + NewLine()
                                     + Bold("Общая стоимость: ") + total.ToString() + Order.OrderProduct.FirstOrDefault().Price.Currency.ShortName + NewLine()
                                     + Bold("Комментарий: ") + Order.Text + NewLine()
+                                    + Bold("Способо получения закза: ") + " Доставка" + NewLine()
                                     + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number + NewLine()
+                                    + Bold("Время: ") + Order.DateAdd.ToString() + NewLine()
+                                    + Bold("Оплачено: ") + paid
+                                    + NewLine() + Bold("Выполнено: ") + done
+                                    + NewLine() + Bold("Оформлен через:") + "@" + Order.BotInfo.Name
+                                    + NewLine() + Bold("Отзыв: ") + feedback;
+
+                        if (Order.PickupPoint != null)
+                            base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
+                                    + Position + NewLine()
+                                    + Bold("Общая стоимость: ") + total.ToString() + Order.OrderProduct.FirstOrDefault().Price.Currency.ShortName + NewLine()
+                                    + Bold("Комментарий: ") + Order.Text + NewLine()
+                                    + Bold("Способо получения закза: ")+" Самовывоз" + NewLine()
+                                    + Bold("Пункт самовывоза: ") + Order.PickupPoint.Name + NewLine()
                                     + Bold("Время: ") + Order.DateAdd.ToString() + NewLine()
                                     + Bold("Оплачено: ") + paid
                                     + NewLine() + Bold("Выполнено: ") + done

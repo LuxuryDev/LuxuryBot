@@ -62,6 +62,9 @@ namespace MyTelegramBot.Messages.Admin
         /// </summary>
         private int InWorkFollowerId { get; set; }
 
+
+        private Address Address { get; set; }
+
         public AdminOrderMessage(int OrderId, int FollowerId = 0)
         {
             this.OrderId = OrderId;
@@ -98,7 +101,8 @@ namespace MyTelegramBot.Messages.Admin
                 if (Order != null && Order.OrderAddress == null)
                     Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).FirstOrDefault();
 
-                var Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+                if(Order != null && Order.OrderAddress!=null)
+                    Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
                 double total = 0.0;
                 string Position = "";
@@ -129,15 +133,30 @@ namespace MyTelegramBot.Messages.Admin
                     total += p.Price.Value * p.Count;
                 }
 
-                /////////Формируем основную часть сообщения
-                base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
+                /////////Формируем основную часть сообщения - Доставка
+                if(Order != null && Order.OrderAddress!=null)
+                    base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                             + Position + NewLine()
                             + Bold("Общая стоимость: ") + total.ToString() + NewLine()
                             + Bold("Комментарий: ") + Order.Text + NewLine()
+                            + Bold("Способ получения заказа: ") + " Доставка" + NewLine()
                             + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number + NewLine()
                             + Bold("Время: ") + Order.DateAdd.ToString() +NewLine()
                             + Bold("Способ оплаты: ") + PaymentMethodName + NewLine() 
                             +Bold("Оформлено через: ")+"@" + Order.BotInfo.Name +NewLine()
+                            + Bold("Статус платежа: ") + Paid;
+
+                /////////Формируем основную часть сообщения - Самовывоз
+                if (Order != null && Order.OrderAddress != null)
+                    base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
+                            + Position + NewLine()
+                            + Bold("Общая стоимость: ") + total.ToString() + NewLine()
+                            + Bold("Комментарий: ") + Order.Text + NewLine()
+                            + Bold("Способ получения заказа: ") + " Самовывоз" + NewLine()
+                            + Bold("Адрес доставки: ") + Order.PickupPoint.Name + NewLine()
+                            + Bold("Время: ") + Order.DateAdd.ToString() + NewLine()
+                            + Bold("Способ оплаты: ") + PaymentMethodName + NewLine()
+                            + Bold("Оформлено через: ") + "@" + Order.BotInfo.Name + NewLine()
                             + Bold("Статус платежа: ") + Paid;
 
                 //Детали согласования заказа
