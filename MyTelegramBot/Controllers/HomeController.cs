@@ -188,7 +188,7 @@ namespace MyTelegramBot.Controllers
 
                 if (_bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
                 {
-                    _bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false });
+                    _bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery=true, Pickup=false });
                     _bot=InsertBotInfo(_bot);
                     Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
                     db.Company.Add(company);

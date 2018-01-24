@@ -34,7 +34,7 @@ namespace MyTelegramBot.Messages
             {
                 List<Orders> orders = new List<Orders>();
 
-                orders = db.Orders.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.OrderProduct).Include(o=>o.DoneNavigation).Include(o=>o.Confirm).Include(o=>o.Delete).OrderBy(o=>o.Id).ToList();
+                orders = db.Orders.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.OrderProduct).Include(o=>o.Done).Include(o=>o.Confirm).Include(o=>o.Delete).OrderBy(o=>o.Id).ToList();
 
                 if (orders != null && orders.Count>0)
                 {

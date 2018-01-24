@@ -22,13 +22,15 @@ namespace MyTelegramBot
         public int? ConfirmId { get; set; }
         public int? DeleteId { get; set; }
         public int? DoneId { get; set; }
+        public int? PickupPointId { get; set; }
 
         public BotInfo BotInfo { get; set; }
         public OrderHistory Confirm { get; set; }
         public OrderHistory Delete { get; set; }
-        public OrderHistory DoneNavigation { get; set; }
+        public OrderHistory Done { get; set; }
         public Follower Follower { get; set; }
         public Invoice Invoice { get; set; }
+        public PickupPoint PickupPoint { get; set; }
         public FeedBack FeedBack { get; set; }
         public OrderAddress OrderAddress { get; set; }
         public ICollection<OrderProduct> OrderProduct { get; set; }

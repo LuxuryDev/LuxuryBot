@@ -130,7 +130,7 @@ namespace MyTelegramBot.Bot.AdminModule
                     FeedBackOfferMsg = new FeedBackOfferMessage(this.OrderId);
                     using (MarketBotDbContext db = new MarketBotDbContext())
                         Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
-                            Include(o => o.DoneNavigation).Include(o => o.Delete).Include(o => o.OrderProduct).
+                            Include(o => o.Done).Include(o => o.Delete).Include(o => o.OrderProduct).
                             Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.OrderAddress).Include(o=>o.Invoice).Include(o=>o.OrdersInWork).FirstOrDefault();
 
                     InvoiceViewMsg = new InvoiceViewMessage(Order.Invoice, Order.Id);
@@ -560,7 +560,7 @@ namespace MyTelegramBot.Bot.AdminModule
                 {
 
                     Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
-                        Include(o => o.DoneNavigation).Include(o => o.Delete).Include(o => o.OrderProduct).
+                        Include(o => o.Done).Include(o => o.Delete).Include(o => o.OrderProduct).
                         Include(o => o.Follower).Include(o => o.FeedBack).Include(o => o.OrderAddress).Include(o => o.Invoice).Include(o => o.OrdersInWork).FirstOrDefault();
 
                     this.Order.Delete = null;
@@ -590,7 +590,7 @@ namespace MyTelegramBot.Bot.AdminModule
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 //Проверяем согласован ли заказ и не удален ли он и не был ли выполнен ранее
-                if (this.Order != null && this.Order.Delete==null && this.Order.Confirm!=null && this.Order.DoneNavigation==null
+                if (this.Order != null && this.Order.Delete==null && this.Order.Confirm!=null && this.Order.Done==null
                    && await Processing.CheckInWork(this.Order) && !await Processing.CheckIsDone(this.Order))
                 {
                     var order = db.Orders.Find(this.Order.Id);

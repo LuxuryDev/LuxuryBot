@@ -34,6 +34,18 @@ namespace MyTelegramBot
         /// FileId картиники с подсказкой, как указать никнейм (юзернейм)
         /// </summary>
         public string UserNameFaqFileId { get; set; }
+
+        /// <summary>
+        /// Способ получения заказа: Доствка. true - доступен для пользовталей
+        /// </summary>
+        public bool Delivery { get; set; }
+
+        /// <summary>
+        /// Способ получения заказа: Самовывоз. true - доступен для пользователей
+        /// </summary>
+        public bool Pickup { get; set; }
         public BotInfo BotInfo { get; set; }
+
+
     }
 }

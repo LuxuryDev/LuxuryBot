@@ -11,10 +11,13 @@ namespace MyTelegramBot
         public int? FollowerId { get; set; }
         public int? PaymentTypeId { get; set; }
         public int? BotInfoId { get; set; }
+        public int? PickupPointId { get; set; }
 
         public Address Address { get; set; }
         public BotInfo BotInfo { get; set; }
         public Follower Follower { get; set; }
         public PaymentType PaymentType { get; set; }
+        public PickupPoint PickupPoint { get; set; }
     }
+
 }

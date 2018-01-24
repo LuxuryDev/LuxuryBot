@@ -119,6 +119,14 @@ namespace MyTelegramBot.Bot
 
         private const int PaymentOnReceipt = 1;
 
+        public const int IsDeliveryId = 1;
+
+        public const string IsDeliveryName = "Доставка";
+
+        public const int IsPickupId= 2;
+
+        public const string IsPickupName = "Самовывоз";
+
         int AddressId { get; set; }
 
         /// <summary>
@@ -146,7 +154,7 @@ namespace MyTelegramBot.Bot
                     MyOrdersMsg = new MyOrdersMessage(base.FollowerId,BotInfo.Id);
                     using (MarketBotDbContext db = new MarketBotDbContext())
                         Order = db.Orders.Where(o => o.Id == this.OrderId).Include(o => o.Confirm).
-                            Include(o => o.DoneNavigation).Include(o => o.Delete).
+                            Include(o => o.Done).Include(o => o.Delete).
                             Include(o => o.OrderProduct).Include(o => o.Follower).Include(o => o.FeedBack).Include(o=>o.Invoice).FirstOrDefault();
                     CheckPayMsg = new CheckPayMessage(Order);
 

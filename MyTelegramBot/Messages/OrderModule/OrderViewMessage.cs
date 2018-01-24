@@ -48,7 +48,7 @@ namespace MyTelegramBot.Messages
                     Order = db.Orders.Where(o => o.Id == OrderId).
                         Include(o => o.Confirm).
                         Include(o => o.Delete).
-                        Include(o => o.DoneNavigation).
+                        Include(o => o.Done).
                         Include(o => o.FeedBack).
                         Include(o => o.OrderProduct).
                         Include(o => o.OrderAddress).Include(o=>o.BotInfo)
@@ -97,19 +97,19 @@ namespace MyTelegramBot.Messages
                         if (Order.BotInfo == null)
                             Order.BotInfo = db.BotInfo.Where(o => o.Id == Order.BotInfoId).FirstOrDefault();
 
-                        if (Order.DoneNavigation != null ) //Заказ выполнен
+                        if (Order.Done != null ) //Заказ выполнен
                             done = "Да";
 
                         else // ЗАказ не выполен
                             done = "Нет";
 
-                        if (Order.DoneNavigation != null  && Order.FeedBack != null && Order.FeedBack.Text != null) // Есть отзыв к заказ
+                        if (Order.Done != null  && Order.FeedBack != null && Order.FeedBack.Text != null) // Есть отзыв к заказ
                             feedback = Order.FeedBack.Text + " | " + Order.FeedBack.DateAdd.ToString();
                         
                         if (Order.Paid == true) // Заказ оплачен
                             paid = "Да";
 
-                        if (Order.DoneNavigation != null && Order.FeedBack == null) // Отзыва нет, Добавляем кнопку
+                        if (Order.Done != null && Order.FeedBack == null) // Отзыва нет, Добавляем кнопку
                             feedback = "Нет";
 
 
@@ -143,7 +143,7 @@ namespace MyTelegramBot.Messages
         private void SetButton()
         {
 
-            if (Order.FeedBack==null && Order.DoneNavigation != null) // Отзыва нет, заказ выполнен
+            if (Order.FeedBack==null && Order.Done != null) // Отзыва нет, заказ выполнен
                 base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     new[]{
                                 new[]
@@ -169,7 +169,7 @@ namespace MyTelegramBot.Messages
                     });
 
 
-            if (Order.FeedBack == null && Order.DoneNavigation != null  && Order.InvoiceId==null) // Отзыва нет, заказ выполнен (Тип оплаты - при получении)
+            if (Order.FeedBack == null && Order.Done != null  && Order.InvoiceId==null) // Отзыва нет, заказ выполнен (Тип оплаты - при получении)
                 base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     new[]{
                                 new[]
@@ -178,7 +178,7 @@ namespace MyTelegramBot.Messages
                                     },
                     });
 
-            if (Order.InvoiceId == null && Order.DoneNavigation==null) // Метод оплаты при получении, заказ не выполнен
+            if (Order.InvoiceId == null && Order.Done==null) // Метод оплаты при получении, заказ не выполнен
                 base.MessageReplyMarkup = null;
 
 

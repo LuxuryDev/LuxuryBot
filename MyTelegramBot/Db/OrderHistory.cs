@@ -9,7 +9,7 @@ namespace MyTelegramBot
         {
             OrdersConfirm = new HashSet<Orders>();
             OrdersDelete = new HashSet<Orders>();
-            OrdersDoneNavigation = new HashSet<Orders>();
+            OrdersDone = new HashSet<Orders>();
         }
 
         public int Id { get; set; }
@@ -24,6 +24,6 @@ namespace MyTelegramBot
         public Follower Follower { get; set; }
         public ICollection<Orders> OrdersConfirm { get; set; }
         public ICollection<Orders> OrdersDelete { get; set; }
-        public ICollection<Orders> OrdersDoneNavigation { get; set; }
+        public ICollection<Orders> OrdersDone { get; set; }
     }
 }

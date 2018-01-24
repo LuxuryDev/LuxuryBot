@@ -87,7 +87,7 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o=>o.Invoice).
                     Include(o=>o.Confirm).
                     Include(o => o.Delete).
-                    Include(o => o.DoneNavigation).
+                    Include(o => o.Done).
                     FirstOrDefault();
 
                 ///////////Провереряем какой метод оплаты и наличие платежей////////////
@@ -153,9 +153,9 @@ namespace MyTelegramBot.Messages.Admin
                         + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Delete.FollowerId));
 
                 ///Детали выполнения заказа
-                if (Order != null && Order.DoneNavigation != null)
-                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ выполнен:") + Italic(Order.DoneNavigation.Timestamp.ToString())
-                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.DoneNavigation.FollowerId);
+                if (Order != null && Order.Done != null)
+                    base.TextMessage += NewLine() + NewLine() + Bold("Заказ выполнен:") + Italic(Order.Done.Timestamp.ToString())
+                        + " |Пользователь: " + Bot.GeneralFunction.FollowerFullName(Order.Done.FollowerId);
 
                 //Детали Отзыва к заказу
                 if (Order != null && Order.FeedBack != null && Order.FeedBack.Text != null && Order.FeedBack.Text != "")
@@ -295,7 +295,7 @@ namespace MyTelegramBot.Messages.Admin
                     });
 
             ///Заявка взять в обработку пользователем или может быть просто открыта любым т.к она уже выполнена
-            if (Order.DoneNavigation!=null)
+            if (Order.Done!=null)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]

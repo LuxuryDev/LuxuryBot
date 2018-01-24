@@ -18,7 +18,7 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-           return View(db.Orders.Include(o => o.BotInfo).Include(o=>o.DoneNavigation).OrderByDescending(o=>o.Id).ToList());
+           return View(db.Orders.Include(o => o.BotInfo).Include(o=>o.Done).OrderByDescending(o=>o.Id).ToList());
 
 
         }
@@ -96,7 +96,7 @@ namespace MyTelegramBot.Controllers
 
             if(id>0)
             Order = db.Orders.Where(o => o.Number == id).Include(o=>o.Invoice).Include(o => o.Confirm).
-                Include(o => o.Delete).Include(o => o.DoneNavigation).Include(o => o.OrderProduct).Include(o=>o.FeedBack).Include(o => o.OrderAddress).Include(o => o.FeedBack).Include(o=>o.OrdersInWork).Include(o => o.Follower).FirstOrDefault();
+                Include(o => o.Delete).Include(o => o.Done).Include(o => o.OrderProduct).Include(o=>o.FeedBack).Include(o => o.OrderAddress).Include(o => o.FeedBack).Include(o=>o.OrdersInWork).Include(o => o.Follower).FirstOrDefault();
 
             if (Order != null)
             {
@@ -143,7 +143,7 @@ namespace MyTelegramBot.Controllers
             if (history != null)
             {
                 history.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
-                Order = db.Orders.Where(o => o.Id == history.OrderId).Include(o=>o.DoneNavigation).Include(o => o.Delete).Include(o => o.Confirm).FirstOrDefault();
+                Order = db.Orders.Where(o => o.Id == history.OrderId).Include(o=>o.Done).Include(o => o.Delete).Include(o => o.Confirm).FirstOrDefault();
             }
 
             if (inwork.FollowerId != history.FollowerId)

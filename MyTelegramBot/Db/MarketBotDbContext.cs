@@ -48,6 +48,7 @@ namespace MyTelegramBot
         public virtual DbSet<Payment> Payment { get; set; }
         public virtual DbSet<PaymentType> PaymentType { get; set; }
         public virtual DbSet<PaymentTypeConfig> PaymentTypeConfig { get; set; }
+        public virtual DbSet<PickupPoint> PickupPoint { get; set; }
         public virtual DbSet<Product> Product { get; set; }
         public virtual DbSet<ProductPhoto> ProductPhoto { get; set; }
         public virtual DbSet<ProductPrice> ProductPrice { get; set; }
@@ -78,9 +79,9 @@ namespace MyTelegramBot
 
                 try
                 {
-                    using(StreamReader sr=new StreamReader("connection.json"))
+                    using (StreamReader sr = new StreamReader("connection.json"))
                     {
-                        connection=sr.ReadLine();
+                        connection = sr.ReadLine();
                     }
                 }
 
@@ -91,8 +92,8 @@ namespace MyTelegramBot
 
                 finally
                 {
-                    if(connection!="")
-                    optionsBuilder.UseSqlServer(connection);
+                    if (connection != "")
+                        optionsBuilder.UseSqlServer(connection);
                 }
             }
         }
@@ -680,8 +681,8 @@ namespace MyTelegramBot
                     .HasForeignKey(d => d.DeleteId)
                     .HasConstraintName("FK_Orders_Orders_Delete");
 
-                entity.HasOne(d => d.DoneNavigation)
-                    .WithMany(p => p.OrdersDoneNavigation)
+                entity.HasOne(d => d.Done)
+                    .WithMany(p => p.OrdersDone)
                     .HasForeignKey(d => d.DoneId)
                     .HasConstraintName("FK_Orders_OrderHistory_Done");
 
@@ -695,6 +696,11 @@ namespace MyTelegramBot
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.InvoiceId)
                     .HasConstraintName("FK_Orders_Invoice");
+
+                entity.HasOne(d => d.PickupPoint)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.PickupPointId)
+                    .HasConstraintName("FK_Orders_PickupPoint");
             });
 
             modelBuilder.Entity<OrdersInWork>(entity =>
@@ -737,6 +743,11 @@ namespace MyTelegramBot
                     .WithMany(p => p.OrderTemp)
                     .HasForeignKey(d => d.PaymentTypeId)
                     .HasConstraintName("FK_OrderTemp_PaymentType");
+
+                entity.HasOne(d => d.PickupPoint)
+                    .WithMany(p => p.OrderTemp)
+                    .HasForeignKey(d => d.PickupPointId)
+                    .HasConstraintName("FK_OrderTemp_PickupPoint");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -794,6 +805,13 @@ namespace MyTelegramBot
                     .WithMany(p => p.PaymentTypeConfig)
                     .HasForeignKey(d => d.PaymentId)
                     .HasConstraintName("FK_PaymentTypeConfig_PaymentType");
+            });
+
+            modelBuilder.Entity<PickupPoint>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Product>(entity =>
