@@ -14,7 +14,7 @@ namespace MyTelegramBot.Messages
     {
         private InlineKeyboardCallbackButton ClearBasketBtn { get; set; }
 
-        private InlineKeyboardCallbackButton ToAddressList { get; set; }
+        private InlineKeyboardCallbackButton ToCheckOutBtn { get; set; }
 
         private InlineKeyboardCallbackButton ReturnToCatalogBtn { get; set; }
 
@@ -41,7 +41,7 @@ namespace MyTelegramBot.Messages
             if (Basket!=null && Basket.Count()>0)
             {
                 ClearBasketBtn = ClearBasket(follower.Id);
-                ToAddressList = ToCheckOut(follower.Id);
+                ToCheckOutBtn = ToCheckOut(follower.Id);
                 BasketEditBtn = BasketEdit(follower.Id);
                 SetInlineKeyBoard();
                 string Info = BasketPositionInfo.GetPositionInfo(follower.Id);
@@ -67,7 +67,7 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            ToAddressList
+                            ToCheckOutBtn
                         },
                 new[]
                         {
@@ -86,7 +86,7 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton ToCheckOut(int FollowerId)
         {
-            string data = BuildCallData(Bot.AddressBot.CmdGetAddressList,Bot.AddressBot.ModuleName ,FollowerId);
+            string data = BuildCallData(Bot.OrderBot.MethodOfObtainingListCmd,Bot.OrderBot.ModuleName ,FollowerId);
             InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Перейти к оформлению", data);
             return button;
         }

@@ -20,7 +20,7 @@ namespace MyTelegramBot.Messages
 
         public PaymentsMethodsListMessage()
         {
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.OrderBot.CmdAddressEditor, OrderBot.ModuleName));
+            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.OrderBot.MethodOfObtainingListCmd, OrderBot.ModuleName));
         }
 
         public PaymentsMethodsListMessage BuildMessage()
@@ -29,7 +29,7 @@ namespace MyTelegramBot.Messages
             {
                 var methods = db.PaymentType.Where(p=>p.Enable==true).ToList();
 
-                if (methods.Count > 1)
+                if (methods.Count >0)
                 {
 
                     PaymentsMethodsListBtns = new InlineKeyboardCallbackButton[methods.Count+1][];

@@ -81,13 +81,13 @@ namespace MyTelegramBot.Messages
             }
 
 
-            if (city == null || city != null && city.Count == 0)
+            if (CheckAvailableCity && city == null || city != null && city.Count == 0)
                 base.TextMessage = "Не удалось определить населенный пункт";
 
-            if (street == null || street != null && street.Count == 0)
+            if (CheckAvailableCity && street == null || street != null && street.Count == 0)
                 base.TextMessage = "Не удалось определить улицу";
 
-            if (House == null || House != null && House.Count == 0)
+            if (CheckAvailableCity && House == null || House != null && House.Count == 0)
                 base.TextMessage = "Не удалось определить номер дома";
 
             return this;

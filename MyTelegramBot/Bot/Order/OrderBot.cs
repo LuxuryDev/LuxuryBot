@@ -55,6 +55,8 @@ namespace MyTelegramBot.Bot
 
         private CheckPayMessage CheckPayMsg { get; set; }
 
+        private MethodOfObtainingMessage MethodOfObtainingMsg { get; set; }
+
         private int OrderId { get; set; }
 
         private Orders Order { get; set; }
@@ -64,9 +66,19 @@ namespace MyTelegramBot.Bot
         public const string CmdEnterDesc = "Введите комментарий";
 
         /// <summary>
+        /// Выбран пункт самовывоза
+        /// </summary>
+        public const string SelectPickupPointCmd = "SelectPickupPoint";
+
+        /// <summary>
+        /// сообщение со списком пунктов самовывоза
+        /// </summary>
+        public PickupPointListMessage PickupPointListMsg { get; set; }
+
+        /// <summary>
         /// Пользователь выбрал адрес доставки
         /// </summary>
-        public const string CmdGetAddress = "GetAddress";
+        public const string CmdSelectAddress = "SelectAddress";
 
         /// <summary>
         /// Изменить адрес доставки заказа
@@ -118,6 +130,16 @@ namespace MyTelegramBot.Bot
         private const int QiwiPayMethodId = 2;
 
         private const int PaymentOnReceipt = 1;
+
+        /// <summary>
+        /// Выбрать способо получения заказа
+        /// </summary>
+        public const string SelectMethodOfObtainingCmd= "SelectMethodOfObtaining";
+
+        /// <summary>
+        /// Показать способы получения заказа
+        /// </summary>
+        public const string MethodOfObtainingListCmd = "MethodOfObtainingList";
 
         public const int IsDeliveryId = 1;
 
@@ -181,10 +203,15 @@ namespace MyTelegramBot.Bot
         {
             switch (base.CommandName)
             {
+                //Пользователь нажал на кнопку Перейти к оформлению заказа
+                //Сообщение с корзиной менятеся на сообщение со способами получения заказа
+                case MethodOfObtainingListCmd:
+                    return await SendMethodOfObtainingList();
+
                 ///Поользователь выбрал адрес доставки нажав на кнопку,
                 ///далее появляется сообщение с выбором метода оплаты, если доступны больше 1ого метода,
                 ///если доступен только один метод, то появляется сообщение с заказом
-                case CmdGetAddress:
+                case GetPaymentMethodListCmd:
                    return await SendPaymentMethodsList();
 
                 ///Польватель нажал изменить адрес доставки. 
@@ -206,10 +233,13 @@ namespace MyTelegramBot.Bot
                 case CmdOrderSave:
                     return await OrderSave();
 
+                ///Пользователь выбрал адрес доставки
+                case CmdSelectAddress:
+                    return await SelectAddressDelivery(Argumetns[0]);
 
                 //Пользователь нажал на один из доступных вариантов оплаты
                 case PaymentMethodCmd:
-                    return await GetPaymentMethod();
+                    return await SelectPaymentMethod();
 
                 //Пользователь нажал на кнопку Мои заказы
                 case MyOrdersListCmd:
@@ -228,10 +258,21 @@ namespace MyTelegramBot.Bot
                 case CheckPayCmd:
                     return await CheckPay();
 
+                case SelectPickupPointCmd:
+                    return await SelectPickupPoint(Argumetns[0]);
+
                 default:
                     break;
                     
             }
+
+            ///Пользователь выбрал способ получения заказа "Доставка" Отправляем ему списко его адресов
+            if (base.CommandName == SelectMethodOfObtainingCmd && Argumetns[0] == IsDeliveryId)
+                return await SendAddressList(base.MessageId);
+
+            ///Пользователь выбрал способо получения заказа "Самовывоз"
+            if (base.CommandName == SelectMethodOfObtainingCmd && Argumetns[0] == IsPickupId)
+                return await SendPickupPointList();
 
             //Пользоватлеь отправил команду /myorder
             if (base.CommandName.Contains(MyOrder))

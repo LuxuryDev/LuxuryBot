@@ -16,7 +16,7 @@ namespace MyTelegramBot.Messages
 
         public PickupPointListMessage()
         {
-            BackBtn = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton("Назад", "Назад к выбору способа получения заказа");
+            BackBtn = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.OrderBot.MethodOfObtainingListCmd, Bot.OrderBot.ModuleName));
         }
 
         public PickupPointListMessage BuildMessage()
@@ -32,15 +32,16 @@ namespace MyTelegramBot.Messages
                 foreach (PickupPoint point in PickupPoitList)
                 {
                     PickupPointListBtn[counter] = new InlineKeyboardCallbackButton[1];
-                    PickupPointListBtn[counter][0] = new InlineKeyboardCallbackButton(point.Name, BuildCallData("SelectPoint", Bot.OrderBot.ModuleName, point.Id));
+                    PickupPointListBtn[counter][0] = new InlineKeyboardCallbackButton(point.Name,
+                        BuildCallData(Bot.OrderBot.SelectPickupPointCmd, Bot.OrderBot.ModuleName, point.Id));
                     counter++;
                 }
 
-                PickupPointListBtn[counter + 1] = new InlineKeyboardCallbackButton[1];
-                PickupPointListBtn[counter + 1][0] = BackBtn;
+                PickupPointListBtn[counter] = new InlineKeyboardCallbackButton[1];
+                PickupPointListBtn[counter][0] = BackBtn;
 
                 base.TextMessage = "Выберите пункт самовывоза";
-
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(PickupPointListBtn);
             }
 
             else
@@ -49,7 +50,7 @@ namespace MyTelegramBot.Messages
                 PickupPointListBtn[0] = new InlineKeyboardCallbackButton[1];
                 PickupPointListBtn[0][0] = BackBtn;
                 base.TextMessage = "Нет доступных пунктов самовывоза. Вернитесь назад и выберите другой способ получения заказа";
-
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(PickupPointListBtn);
             }
 
             return this;

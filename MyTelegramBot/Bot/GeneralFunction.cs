@@ -167,9 +167,10 @@ namespace MyTelegramBot.Bot
             {
                 using (MarketBotDbContext db = new MarketBotDbContext())
                 {
+                    var city_list = db.AvailableСities.ToList();
                     var city = db.AvailableСities.Where(c => c.CityName == name).FirstOrDefault();
 
-                    if (city != null)
+                    if (city != null || city_list.Count==0)
                         return true;
 
                     else

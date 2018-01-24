@@ -13,6 +13,113 @@ namespace MyTelegramBot.Bot
 {
     public partial class OrderBot
     {
+        /// <summary>
+        /// Пользователь выбрал адрес доставки. Сохраняем
+        /// </summary>
+        /// <param name="AddressId"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> SelectAddressDelivery(int AddressId)
+        {
+            using (MarketBotDbContext db = new MarketBotDbContext())
+            {
+                var OrderTemp = db.OrderTemp.Where(o => o.BotInfoId == BotInfo.Id).Include(o=>o.PickupPoint).FirstOrDefault();
+
+                if (OrderTemp != null)
+                {
+                    OrderTemp.AddressId = AddressId;
+                    OrderTemp.PickupPoint = null;
+                }
+
+                else
+                {
+                    OrderTemp orderTemp = new OrderTemp
+                    {
+                        FollowerId = FollowerId,
+                        BotInfoId = BotInfo.Id,
+                        PickupPointId = AddressId,
+                    };
+
+                    db.OrderTemp.Add(orderTemp);
+                }
+
+                db.SaveChanges();
+
+                return await SendPaymentMethodsList();
+            }
+        }
+
+        /// <summary>
+        /// ПОказать одним сообщеним все адреса пользователя
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> SendAddressList(int MessageId = 0)
+        {
+            AddressListMessage ViewAddressListMsg = new AddressListMessage(base.FollowerId);
+            if (await SendMessage(ViewAddressListMsg.BuildMessage(), MessageId) != null)
+                return base.OkResult;
+
+            else
+                return base.NotFoundResult;
+        }
+
+        /// <summary>
+        /// Отправить сообщение со способами получения заказа
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> SendMethodOfObtainingList()
+        {
+            MethodOfObtainingMsg = new MethodOfObtainingMessage(base.BotInfo.Name);
+            if (await EditMessage(MethodOfObtainingMsg.BuildMessage()) != null)
+                return base.OkResult;
+
+            else
+                return NotFoundResult;
+        }
+
+        /// <summary>
+        /// Отправить сообщение со списком пунктов самовывоза
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> SendPickupPointList()
+        {
+            PickupPointListMsg = new PickupPointListMessage();
+
+            if (await EditMessage(PickupPointListMsg.BuildMessage()) != null)
+                return OkResult;
+
+            else
+                return NotFoundResult;
+        }
+
+        private async Task<IActionResult> SelectPickupPoint(int PickupPointId)
+        {
+            using(MarketBotDbContext db=new MarketBotDbContext())
+            {
+                var OrderTemp = db.OrderTemp.Where(o => o.BotInfoId == BotInfo.Id).Include(o=>o.Address).FirstOrDefault();
+
+                if (OrderTemp != null)
+                {
+                    OrderTemp.PickupPointId = PickupPointId;
+                    OrderTemp.Address = null;
+                }
+
+                else
+                {
+                    OrderTemp orderTemp = new OrderTemp
+                    {
+                        FollowerId = FollowerId,
+                        BotInfoId = BotInfo.Id,
+                        PickupPointId = PickupPointId,
+                    };
+
+                    db.OrderTemp.Add(orderTemp);
+                }
+
+                db.SaveChanges();
+
+                return await SendPaymentMethodsList();
+            }
+        }
 
         private async Task<IActionResult> SendInvoice()
         {
@@ -115,7 +222,7 @@ namespace MyTelegramBot.Bot
         /// Пользователь выбрал методо оплаты
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> GetPaymentMethod()
+        private async Task<IActionResult> SelectPaymentMethod()
         {
             int id= 0;
             if (Argumetns.Count > 0)
@@ -144,12 +251,12 @@ namespace MyTelegramBot.Bot
         {
             int AddressId = 0;
 
-            if (Argumetns.Count > 0)
-            { // сохраняем адрес
-                AddressId = Argumetns[0];
+            //if (Argumetns.Count > 0)
+            //{ // сохраняем адрес
+            //    AddressId = Argumetns[0];
 
-                AddAddressToOrderTemp(AddressId);
-            }
+            //    AddAddressToOrderTemp(AddressId);
+            //}
 
             var message = PaymentsMethodsListMsg.BuildMessage();
 
@@ -157,30 +264,32 @@ namespace MyTelegramBot.Bot
                 return OkResult;
             
 
-            else // если сообщение с вариантами оплаты пустое, значит досутпен только один метод. Его выбираем и записываем в БД.
-            // и отправляем сообщение с описание заказа, но перед эти проверяем номер телефон пользователя или его UserName в завизимости от настроек бота
+            else // если сообщение с вариантами оплаты пустое, значит все варианты оплаты выключены. Отправляем пользователю
+            //сообщение с оишбкой
             {
-                using (MarketBotDbContext db = new MarketBotDbContext())
-                {
-                    var method = db.PaymentType.Where(p => p.Enable == true).FirstOrDefault();
-                    base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
+                await SendMessage(new BotMessage { TextMessage = "Нет досутпных способов оплаты. Свяжитесь с технической поддержкой /help" });
 
-                    //если включена верификация номера телефона, то проверяем есть ли БД номер телефона текущего пользователя
-                    if (method != null && ConfigurationBot.VerifyTelephone)
-                        await TelephoneCheck(method.Id);
+                                    //using (MarketBotDbContext db = new MarketBotDbContext())
+                //{
+                //    var method = db.PaymentType.Where(p => p.Enable == true).FirstOrDefault();
+                //    base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
 
-                    if(method != null && ConfigurationBot.VerifyTelephone==false) // Если верификации номера телефона нет, то проверяем указан ли у пользователя UserName
-                        await UserNameCheck(base.ConfigurationBot, method.Id);
+                //    //если включена верификация номера телефона, то проверяем есть ли БД номер телефона текущего пользователя
+                //    if (method != null && ConfigurationBot.VerifyTelephone)
+                //        await TelephoneCheck(method.Id);
 
-                    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
-                    if (method == null && ConfigurationBot.VerifyTelephone)
-                        await TelephoneCheck(PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
+                //    if(method != null && ConfigurationBot.VerifyTelephone==false) // Если верификации номера телефона нет, то проверяем указан ли у пользователя UserName
+                //        await UserNameCheck(base.ConfigurationBot, method.Id);
 
-                    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
-                    if (method == null && ConfigurationBot.VerifyTelephone==false)
-                        await UserNameCheck(base.ConfigurationBot, PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
+                //    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
+                //    if (method == null && ConfigurationBot.VerifyTelephone)
+                //        await TelephoneCheck(PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
 
-                }
+                //    //Если Все методы оплаты выключены, то будет выбран метод оплаты "При получении"
+                //    if (method == null && ConfigurationBot.VerifyTelephone==false)
+                //        await UserNameCheck(base.ConfigurationBot, PaymentType.GetTypeId(Services.PaymentTypeEnum.PaymentOnReceipt));
+
+                //}
 
                 return OkResult;
             }

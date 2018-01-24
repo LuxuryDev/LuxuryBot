@@ -18,15 +18,20 @@ namespace MyTelegramBot.Messages
 
         InlineKeyboardCallbackButton DescEditorBtn { get; set; }
 
-        InlineKeyboardCallbackButton AddressEditor { get; set; }
+        InlineKeyboardCallbackButton MethodOfObtainingEditor { get; set; }
 
         InlineKeyboardCallbackButton PaymentMethodEditor { get; set; }
+
 
         private int FollowerId { get; set; }
 
         private OrderTemp OrderTemp { get; set; }
 
         private int BotId { get; set; }
+
+        private Address Address { get; set; }
+
+        private PickupPoint PickupPoint { get; set; }
 
         public OrderTempMessage(int FollowerId, int BotId)
         {
@@ -36,15 +41,24 @@ namespace MyTelegramBot.Messages
 
         public OrderTempMessage BuildMessage()
         {
+            SendBtn = new InlineKeyboardCallbackButton("Сохранить" + " \ud83d\udcbe", BuildCallData(Bot.OrderBot.CmdOrderSave, OrderBot.ModuleName));
+            DescEditorBtn = new InlineKeyboardCallbackButton("Комментарий к заказу" + " \ud83d\udccb", BuildCallData(Bot.OrderBot.CmdOrderDesc, OrderBot.ModuleName));
+            MethodOfObtainingEditor = new InlineKeyboardCallbackButton("Изменить способ получения заказа" + " \ud83d\udd8a", BuildCallData(Bot.OrderBot.MethodOfObtainingListCmd, OrderBot.ModuleName));
+            PaymentMethodEditor = new InlineKeyboardCallbackButton("Изменить способ оплаты" + " \ud83d\udd8a", BuildCallData(Bot.OrderBot.GetPaymentMethodListCmd, OrderBot.ModuleName));
+
+
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 OrderTemp = db.OrderTemp.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.PaymentType).FirstOrDefault();
+                string PositionInfo = BasketPositionInfo.GetPositionInfo(FollowerId);
 
-                if (OrderTemp != null)
+                if (OrderTemp != null)  // если  способ получения заказа "Доставка" то определям адрес доставки
                 {
-                    var Address = db.Address.Where(a => a.Id == OrderTemp.AddressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+                    if(OrderTemp.AddressId != null)
+                        Address = db.Address.Where(a => a.Id == OrderTemp.AddressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
-                    string PositionInfo = BasketPositionInfo.GetPositionInfo(FollowerId);
+                    if (OrderTemp.PickupPointId != null)
+                        PickupPoint = db.PickupPoint.Find(OrderTemp.PickupPointId);
 
                     string Desc = "-";
 
@@ -55,20 +69,22 @@ namespace MyTelegramBot.Messages
 
                     if (PositionInfo != null)
                     {
-
                         if (OrderTemp.Text != null)
                             Desc = OrderTemp.Text;
 
+                        if(OrderTemp.AddressId != null)
                         base.TextMessage = "Информация о заказе:" +
                                     NewLine() + PositionInfo +
                                     NewLine() + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number +
                                     NewLine()+  Bold("Способ оплаты:")+PaymentMethod+
                                     NewLine() + Bold("Кoмментарий к заказу: ") + Desc;
 
-                        SendBtn = new InlineKeyboardCallbackButton("Сохранить" + " \ud83d\udcbe", BuildCallData(Bot.OrderBot.CmdOrderSave,OrderBot.ModuleName));
-                        DescEditorBtn = new InlineKeyboardCallbackButton("Комментарий к заказу" + " \ud83d\udccb", BuildCallData(Bot.OrderBot.CmdOrderDesc, OrderBot.ModuleName));
-                        AddressEditor = new InlineKeyboardCallbackButton("Изменить адрес"+ " \ud83d\udd8a", BuildCallData(Bot.OrderBot.CmdAddressEditor, OrderBot.ModuleName));
-                        PaymentMethodEditor = new InlineKeyboardCallbackButton("Изменить способ оплаты" + " \ud83d\udd8a", BuildCallData("PaymentMethodEditor", OrderBot.ModuleName));
+                        if(OrderTemp.PickupPointId!=null)
+                            base.TextMessage = "Информация о заказе:" +
+                                                NewLine() + PositionInfo +
+                                                NewLine() + Bold("Пункт самовывоза: ") + PickupPoint.Name +
+                                                NewLine() + Bold("Способ оплаты:") + PaymentMethod +
+                                                NewLine() + Bold("Кoмментарий к заказу: ") + Desc;
 
                         SetInlineKeyBoard();
                         return this;
@@ -93,7 +109,11 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            AddressEditor
+                            MethodOfObtainingEditor
+                        },
+                new[]
+                        {
+                            PaymentMethodEditor
                         },
                 new[]
                         {
@@ -105,6 +125,9 @@ namespace MyTelegramBot.Messages
     }
 
 
+    /// <summary>
+    /// формирует строку с позиция в корзине
+    /// </summary>
     public static class BasketPositionInfo
     {
         public static string GetPositionInfo(int FollowerID)

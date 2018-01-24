@@ -76,7 +76,7 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton AddressBtn(string text, int Id)
         {
-            string data = BuildCallData(Bot.OrderBot.CmdGetAddress, Bot.OrderBot.ModuleName,Id);
+            string data = BuildCallData(Bot.OrderBot.CmdSelectAddress, Bot.OrderBot.ModuleName,Id);
             InlineKeyboardCallbackButton  btn = new InlineKeyboardCallbackButton(text, data);
             return btn;
         }
