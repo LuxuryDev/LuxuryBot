@@ -36,7 +36,7 @@ namespace MyTelegramBot.Controllers
 
             if (id > 0)
             {
-                var category = db.Category.Where(c => c.Id == id).FirstOrDefault();
+                var category = db.Category.Find(id);
 
                 if (category != null)
                     return View(category);

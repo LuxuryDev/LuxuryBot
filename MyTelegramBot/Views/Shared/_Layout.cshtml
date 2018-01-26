@@ -30,15 +30,25 @@
             <div class="collapse navbar-collapse js-navbar">
                 <ul class="nav navbar-nav">
                     <li><a href="~/Home/">Главная</a></li>
+
+                    <li class="dropdown">
+                        <a id="drop2" href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Справочники
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="~/Product/">Список товаров</a></li>
+                            <li><a href="~/Category/">Список категорий товаров</a></li>
+                            <li><a href="~/AvailableСities/">Список доступных городов</a></li>
+                            <li><a href="~/Operators/">Список Операторов</a></li>
+                            <li><a href="~/Pickuppoint/">Список пунктов самовывоза</a></li>
+                            <li><a href="~/Users/">Пользователи</a></li>
+                        </ul>
+                    </li>
                     <li><a href="~/Db/">Настройка подлкючения к БД</a></li>
-                    <li><a href="~/Product/">Список товаров</a></li>
-                    <li><a href="~/Category/">Список категорий товаров</a></li>
                     <li><a href="~/Order/">Заказы</a></li>
-                    <li><a href="~/Help/">HelpDesk</a></li>
-                    <li><a href="~/Users/">Пользователи</a></li>
+                    <li><a href="~/Help/">HelpDesk</a></li>                    
                     <li><a href="~/Stock/">Остатки товаров</a></li>
-                    <li><a href="~/AvailableСities/">Список доступных городов</a></li>
-                    <li><a href="~/Operators/">Список Операторов</a></li>
                     <li class="dropdown">
                         <a id="drop1" href="#" class="dropdown-toggle" data-toggle="dropdown">
                             Настройка платежей

@@ -83,6 +83,8 @@ namespace MyTelegramBot.Controllers
             {
                 conf.OwnerPrivateNotify = _configuration.OwnerPrivateNotify;
                 conf.VerifyTelephone = _configuration.VerifyTelephone;
+                conf.Pickup = _configuration.Pickup;
+                conf.Delivery = _configuration.Delivery;
 
                 if (db.SaveChanges() >= 0)
                     return Json("Сохранено");

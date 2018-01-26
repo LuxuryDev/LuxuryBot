@@ -50,6 +50,21 @@
         </label>
         @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().OwnerPrivateNotify, new { @class = "form-control" })
     </p>
+
+    <h3>Способы получения заказа:</h3>
+    <p>
+        <label>
+            Доставка
+        </label>
+        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().Delivery, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <label>
+            Самовывоз
+        </label>
+        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().Pickup, new { @class = "form-control" })
+    </p>
 }
 
 
@@ -95,28 +110,31 @@
 }
 
 <script type="text/javascript">
-        function ajaxSave()
-        {
+    function ajaxSave() {
+
             var Config = {
                 'VerifyTelephone': $("#VerifyTelephone").prop("checked"),
                 'OwnerPrivateNotify': $("#OwnerPrivateNotify").prop("checked"),
+                'Delivery': $("#Delivery").prop("checked"),
+                'Pickup': $("#Pickup").prop("checked"),
                 'Id': $("#Id").val()
             }
-        $.ajax({
-            type: "POST",
-            url: 'Home/save',
-            data: JSON.stringify(Config),
-            contentType: "application/json; charset=utf-8",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("XSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            dataType: "json"
-        }).done(function (data) {
-            alert(data);
 
-        })
-        }
+            $.ajax({
+                type: "POST",
+                url: '/Home/save',
+                data: JSON.stringify(Config),
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                dataType: "json"
+            }).done(function (data) {
+                alert(data);
+            })
+        
+    }
 </script>
 
 <script type="text/javascript">

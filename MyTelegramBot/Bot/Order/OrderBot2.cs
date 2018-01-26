@@ -522,8 +522,9 @@ namespace MyTelegramBot.Bot
                 await EditMessage(InvoiceViewMsg.BuildMessage());
             }
 
-            // Если тип платежа "при получении", то отправляем уведомление о новом заказке Админам
-            if (new_order!=null && new_order.Invoice == null)
+            // Если тип платежа "при получении" или способ доставки самовывоз,
+            //то отправляем уведомление о новом заказке Админам
+            if (new_order!=null && new_order.Invoice == null || new_order != null && new_order.PickupPoint!=null)
             {
                 OrderViewMsg = new OrderViewMessage(new_order);
                 await EditMessage(OrderViewMsg.BuildMessage());
