@@ -10,13 +10,15 @@ using Microsoft.EntityFrameworkCore;
 namespace MyTelegramBot.Messages
 {
     /// <summary>
-    /// Весь ассортимент одним сообщением
+    /// Весь ассортимент категории одним сообщением
     /// </summary>
     public class ViewAllProductMessage:Bot.BotMessage
     {
         private List<Product> Products { get; set; }
 
         private List<IGrouping<int,Category>> Categorys { get; set; }
+
+
 
         public ViewAllProductMessage()
         {

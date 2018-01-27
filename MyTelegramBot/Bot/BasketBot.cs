@@ -45,7 +45,7 @@ namespace MyTelegramBot.Bot
         {
             try
             {
-                ViewBasketMsg = new ViewBasketMessage(base.FollowerId);
+                ViewBasketMsg = new ViewBasketMessage(base.FollowerId,BotInfo.Id);
                 BasketPositionListMsg = new BasketPositionListMessage(base.FollowerId);
 
 

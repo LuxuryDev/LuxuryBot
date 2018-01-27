@@ -105,8 +105,12 @@ namespace MyTelegramBot.Messages
                         if (Order.BotInfo == null)
                             Order.BotInfo = db.BotInfo.Where(o => o.Id == Order.BotInfoId).FirstOrDefault();
 
+                        //Прибавляем стоимость доставки к стоимости заказа
+                        if (Order.OrderAddress != null)
+                            total += Order.OrderAddress.ShipPriceValue;
+
                         if (Order.Done != null ) //Заказ выполнен
-                            done = "Да";
+                        done = "Да";
 
                         else // ЗАказ не выполен
                             done = "Нет";
@@ -123,6 +127,7 @@ namespace MyTelegramBot.Messages
                         if(Order.OrderAddress!=null)
                             base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                                     + Position + NewLine()
+                                    +Bold("Стоимость доставки:") + Order.OrderAddress.ShipPriceValue.ToString() + NewLine()
                                     + Bold("Общая стоимость: ") + total.ToString() + Order.OrderProduct.FirstOrDefault().Price.Currency.ShortName + NewLine()
                                     + Bold("Комментарий: ") + Order.Text + NewLine()
                                     + Bold("Способо получения закза: ") + " Доставка" + NewLine()

@@ -531,9 +531,8 @@ namespace MyTelegramBot.Bot
             //под это правило. Если подходит то офрмляем заказ
             if (!blocked && ConfigurationBot.StartTime!=null &&
                 ConfigurationBot.EndTime!=null && ConfigurationBot.StartTime.Value.Hours <=
-                DateTime.Now.Hour && ConfigurationBot.StartTime.Value.Minutes<= DateTime.Now.Minute &&
-                 ConfigurationBot.EndTime.Value.Hours>DateTime.Now.Hour && ConfigurationBot.EndTime.Value.Minutes>
-                 DateTime.Now.Hour)
+                DateTime.Now.Hour && ConfigurationBot.StartTime.Value<= DateTime.Now.TimeOfDay &&
+                 ConfigurationBot.EndTime.Value>DateTime.Now.TimeOfDay)
                       new_order= insertNewOrder.AddOrder();
                 
 

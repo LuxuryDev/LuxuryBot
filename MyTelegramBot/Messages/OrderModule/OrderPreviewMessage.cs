@@ -33,6 +33,8 @@ namespace MyTelegramBot.Messages
 
         private PickupPoint PickupPoint { get; set; }
 
+        private Configuration Configuration { get; set; }
+
         public OrderTempMessage(int FollowerId, int BotId)
         {
             this.FollowerId = FollowerId;
@@ -50,12 +52,32 @@ namespace MyTelegramBot.Messages
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 OrderTemp = db.OrderTemp.Where(o => o.FollowerId == FollowerId && o.BotInfoId==BotId).Include(o=>o.PaymentType).FirstOrDefault();
-                string PositionInfo = BasketPositionInfo.GetPositionInfo(FollowerId);
+                string PositionInfo = BasketPositionInfo.GetPositionInfo(FollowerId,BotId);
+                Configuration = db.Configuration.Where(c => c.BotInfoId == BotId).FirstOrDefault();
+                double BasketTotalPrice = BasketPositionInfo.BasketTotalPrice(FollowerId, BotId);
 
-                if (OrderTemp != null)  // если  способ получения заказа "Доставка" то определям адрес доставки
+                if (OrderTemp != null)  
                 {
-                    if(OrderTemp.AddressId != null)
+                    double ShipPice = 0;
+
+                    if(OrderTemp.AddressId != null) // если  способ получения заказа "Доставка" то определям адрес доставки и стоимость доставки
+                    {
                         Address = db.Address.Where(a => a.Id == OrderTemp.AddressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+
+                        //определям стоимост доставки
+                        //Стоимость заказа подходит под условия бесплатной доставки
+                        if(Configuration.ShipPrice>0 && BasketTotalPrice >= Configuration.FreeShipPrice)
+                            ShipPice = 0;
+
+                        //Стоимость заказа НЕ подходит под условия бесплатной доставки
+                        if (Configuration.ShipPrice > 0 && BasketTotalPrice < Configuration.FreeShipPrice)
+                            ShipPice = Configuration.ShipPrice;
+
+                        //Доставка бесплатая
+                        if (Configuration.ShipPrice == 0)
+                            ShipPice = 0;
+
+                    }
 
                     if (OrderTemp.PickupPointId != null)
                         PickupPoint = db.PickupPoint.Find(OrderTemp.PickupPointId);
@@ -76,6 +98,7 @@ namespace MyTelegramBot.Messages
                         base.TextMessage = "Информация о заказе:" +
                                     NewLine() + PositionInfo +
                                     NewLine() + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number +
+                                    NewLine()+Bold("Стоимость доставки:")+ ShipPice.ToString()+
                                     NewLine()+  Bold("Способ оплаты:")+PaymentMethod+
                                     NewLine() + Bold("Кoмментарий к заказу: ") + Desc;
 
@@ -130,11 +153,11 @@ namespace MyTelegramBot.Messages
     /// </summary>
     public static class BasketPositionInfo
     {
-        public static string GetPositionInfo(int FollowerID)
+        public static string GetPositionInfo(int FollowerID, int BotId)
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                var basket = db.Basket.Where(b => b.FollowerId == FollowerID && b.Enable);
+                var basket = db.Basket.Where(b => b.FollowerId == FollowerID && b.Enable && b.BotInfoId== BotId);
 
                 var IdList = basket.Select(b => b.ProductId).Distinct().AsEnumerable();
 
@@ -162,11 +185,39 @@ namespace MyTelegramBot.Messages
 
                     }
 
-                    return message + Bot.BotMessage.NewLine() + Bot.BotMessage.Bold("Общая стоимость: ") + total.ToString() + currency;
+                    return message + Bot.BotMessage.NewLine() + Bot.BotMessage.Bold("Общая стоимость: ") + total.ToString()+ " " + currency;
                 }
 
                 else
                     return null;
+            }
+        }
+
+        public static double BasketTotalPrice (int FollowerID, int BotId)
+        {
+            using (MarketBotDbContext db = new MarketBotDbContext())
+            {
+                var basket = db.Basket.Where(b => b.FollowerId == FollowerID && b.Enable && b.BotInfoId == BotId);
+
+                var IdList = basket.Select(b => b.ProductId).Distinct().AsEnumerable();
+
+                double total = 0.0;
+
+
+                if (IdList.Count() > 0)
+                {
+                    foreach (int id in IdList)
+                    {
+                        int count = basket.Where(p => p.ProductId == id).Count();
+                        var price = db.ProductPrice.Where(p => p.ProductId == id && p.Enabled).Include(p => p.Currency).FirstOrDefault();                      
+                        total += price.Value * count;
+                    }
+
+                    return total;
+                }
+
+                else
+                    return 0.0;
             }
         }
     }

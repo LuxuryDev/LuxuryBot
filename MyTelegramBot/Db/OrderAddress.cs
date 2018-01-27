@@ -7,8 +7,10 @@ namespace MyTelegramBot
     {
         public int AdressId { get; set; }
         public int OrderId { get; set; }
-        public int? ShipPriceId { get; set; }
 
+        /// <summary>
+        /// Стоимость заказа
+        /// </summary>
         public double ShipPriceValue { get; set; }
 
         public Address Adress { get; set; }

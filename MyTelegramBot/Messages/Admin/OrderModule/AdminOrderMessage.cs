@@ -79,6 +79,12 @@ namespace MyTelegramBot.Messages.Admin
 
         public AdminOrderMessage BuildMessage()
         {
+            double total = 0.0;
+            double ShipPrice = 0;
+            string Position = "";
+            int counter = 0;
+            string Paid = "";
+
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 if(this.Order==null && this.OrderId>0)
@@ -91,32 +97,42 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o=>o.Confirm).
                     Include(o => o.Delete).
                     Include(o => o.Done).
+                    Include(o=>o.PickupPoint).
                     FirstOrDefault();
 
-                ///////////Провереряем какой метод оплаты и наличие платежей////////////
+                ///////////Провереряем какой способ оплаты ///////////
                 if (Order.Invoice != null)
-                    PaymentMethodName = "Метод оплаты";
-                
+                    PaymentMethodName = db.PaymentType.Find(Order.Invoice.PaymentTypeId).Name;
 
+                    else
+                        PaymentMethodName = "При получении";
+
+                //Вытаскиваем полный адрес доставки
                 if (Order != null && Order.OrderAddress == null)
                     Order.OrderAddress = db.OrderAddress.Where(o => o.OrderId == Order.Id).FirstOrDefault();
 
                 if(Order != null && Order.OrderAddress!=null)
                     Address = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
-                double total = 0.0;
-                string Position = "";
-                int counter = 0;
-                string Paid = "";
+                //Вытаскиваем полный адрес доставки
+
+                //Вытаскиваем стоимость доставки
+                if (Order != null && Order.OrderAddress != null)
+                {
+                    ShipPrice = Order.OrderAddress.ShipPriceValue;
+                    total += ShipPrice;
+                }
+                    
 
                 if (Order.BotInfo == null)
                     Order.BotInfo = db.BotInfo.Where(b => b.Id == Order.BotInfoId).FirstOrDefault();
 
+
                 if (Order.Paid == true)
                     Paid = "Оплачено";
 
-                else
-                    Paid = "Не оплачено";
+                    else
+                        Paid = "Не оплачено";
 
 
                 if (Order.OrderProduct == null || Order.OrderProduct != null && Order.OrderProduct.Count == 0)
@@ -137,6 +153,7 @@ namespace MyTelegramBot.Messages.Admin
                 if(Order != null && Order.OrderAddress!=null)
                     base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                             + Position + NewLine()
+                            + Bold("Стоимость доставки:") + Order.OrderAddress.ShipPriceValue.ToString() + NewLine()
                             + Bold("Общая стоимость: ") + total.ToString() + NewLine()
                             + Bold("Комментарий: ") + Order.Text + NewLine()
                             + Bold("Способ получения заказа: ") + " Доставка" + NewLine()
@@ -147,7 +164,7 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Статус платежа: ") + Paid;
 
                 /////////Формируем основную часть сообщения - Самовывоз
-                if (Order != null && Order.OrderAddress != null)
+                if (Order != null && Order.PickupPoint != null)
                     base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
                             + Position + NewLine()
                             + Bold("Общая стоимость: ") + total.ToString() + NewLine()

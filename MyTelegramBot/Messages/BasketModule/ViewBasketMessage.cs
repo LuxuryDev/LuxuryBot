@@ -20,31 +20,34 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton BasketEditBtn { get; set; }
 
-        private Follower follower { get; set; }
+        private Follower Follower { get; set; }
 
         private List<Basket> Basket { get; set; }
         private int FollowerId { get; set; }
 
-        public ViewBasketMessage(int FollowerId)
+        private int BotId { get; set; }
+
+        public ViewBasketMessage(int FollowerId, int BotId)
         {
             this.FollowerId = FollowerId;
+            this.BotId = BotId;
         }
 
         public ViewBasketMessage BuildMessage ()
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                follower = db.Follower.Where(f => f.Id == FollowerId).FirstOrDefault();
-                Basket = db.Basket.Where(b => b.FollowerId == follower.Id && b.Enable).ToList();
+                Follower = db.Follower.Where(f => f.Id == FollowerId).FirstOrDefault();
+                Basket = db.Basket.Where(b => b.FollowerId == Follower.Id && b.Enable).ToList();
             }
 
             if (Basket!=null && Basket.Count()>0)
             {
-                ClearBasketBtn = ClearBasket(follower.Id);
-                ToCheckOutBtn = ToCheckOut(follower.Id);
-                BasketEditBtn = BasketEdit(follower.Id);
+                ClearBasketBtn = ClearBasket(Follower.Id);
+                ToCheckOutBtn = ToCheckOut(Follower.Id);
+                BasketEditBtn = BasketEdit(Follower.Id);
                 SetInlineKeyBoard();
-                string Info = BasketPositionInfo.GetPositionInfo(follower.Id);
+                string Info = BasketPositionInfo.GetPositionInfo(Follower.Id, BotId);
                 base.TextMessage = Bold("Ваша корзина:") + NewLine() + Info;
             }
 

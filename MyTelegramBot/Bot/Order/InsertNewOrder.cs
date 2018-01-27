@@ -40,6 +40,7 @@ namespace MyTelegramBot.Bot.Order
         public Orders AddOrder()
         {
             double total = 0.0;
+            double ShipPrice =0;
             int Number = 0;
 
             Basket = db.Basket.Where(b => b.FollowerId == FollowerId && b.Enable && b.BotInfoId == BotInfo.Id).Include(b=>b.Product).GroupBy(b => b.ProductId).ToList();
@@ -66,16 +67,25 @@ namespace MyTelegramBot.Bot.Order
                     Paid = false,
                     BotInfoId = BotInfo.Id,
 
-
                 };
 
                 if (OrderTmp.PickupPointId != null)// самовывоз
                     NewOrder.PickupPointId = OrderTmp.PickupPointId;
 
+                // Определям стоимость заказа с учетом доставки 
+                // Заказ НЕ подходит под условия бесплатной доставки. Доставка платная
+                if (OrderTmp.AddressId != null && BotInfo.Configuration.ShipPrice > 0 && total < BotInfo.Configuration.FreeShipPrice)
+                {
+                    ShipPrice = BotInfo.Configuration.ShipPrice;
+                    total += BotInfo.Configuration.ShipPrice;
+                }
+
+                // создаем инвойс для оплаты в через КИВИ
                 if (PaymentTypeEnum == Services.PaymentTypeEnum.Qiwi)
                     Invoice= AddQiwiInvoice(NewOrder, total);
 
-                if (PaymentTypeEnum != Services.PaymentTypeEnum.PaymentOnReceipt && PaymentTypeEnum != Services.PaymentTypeEnum.Qiwi) // создаем инвойс для оплаты в криптовалюте
+                // создаем инвойс для оплаты в криптовалюте
+                if (PaymentTypeEnum != Services.PaymentTypeEnum.PaymentOnReceipt && PaymentTypeEnum != Services.PaymentTypeEnum.Qiwi) 
                     Invoice= AddCryptoCurrencyInvoice(NewOrder, PaymentTypeEnum, total);
 
                 if(Invoice!=null)
@@ -84,10 +94,13 @@ namespace MyTelegramBot.Bot.Order
                 db.Orders.Add(NewOrder);
                 db.SaveChanges();
 
-                if(OrderTmp.AddressId!=null) // доставка
-                    AddAddressToOrder(NewOrder.Id, OrderTmp.AddressId);
 
-                foreach (var group in Basket) // переносим в корзины в Состав заказа
+                // добавляем инф. о доставке в БД
+                if (OrderTmp!=null)
+                    AddAddressToOrder(NewOrder.Id, OrderTmp.AddressId, ShipPrice);
+
+                // переносим в корзины в Состав заказа
+                foreach (var group in Basket) 
                     NewOrder.OrderProduct.Add(FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group));
 
 
@@ -264,7 +277,7 @@ namespace MyTelegramBot.Bot.Order
         /// <param name="OrderId"></param>
         /// <param name="AddressId"></param>
         /// <returns></returns>
-        private int AddAddressToOrder(int OrderId, int? AddressId)
+        private int AddAddressToOrder(int OrderId, int? AddressId, double ShipPrice=0)
         {
             if (OrderId > 0 && AddressId > 0)
             {
@@ -272,7 +285,8 @@ namespace MyTelegramBot.Bot.Order
                 new OrderAddress
                 {
                     OrderId = OrderId,
-                    AdressId = Convert.ToInt32(AddressId)
+                    AdressId = Convert.ToInt32(AddressId),
+                    ShipPriceValue=ShipPrice
                 });
 
                 return db.SaveChanges();
