@@ -22,39 +22,39 @@ namespace MyTelegramBot.Messages
         public ContactMessage()
         {
             using (MarketBotDbContext db=new MarketBotDbContext())
-                Company = db.Company.Where(c => c.Enable == true).OrderByDescending(o => o.Id).FirstOrDefault();            
+                Company = db.Company.FirstOrDefault();            
             
         }
 
         public ContactMessage BuildMessage()
         {
-            if(Company.Vk!="")
+            if(Company!=null && Company.Vk!="")
                 VkBtn = new InlineKeyboardUrlButton("Vk.com", Company.Vk);
 
             else
                 VkBtn = new InlineKeyboardUrlButton("Vk.com", "https://vk.com/");
 
-            if(Company.Instagram!="")
+            if(Company != null && Company.Instagram!="")
                 InstagramBtn = new InlineKeyboardUrlButton("Instagram", Company.Instagram );
 
             else
                 InstagramBtn = new InlineKeyboardUrlButton("Instagram", "https://www.instagram.com/");
 
-            if(Company.Chanel!="")
+            if(Company != null && Company.Chanel!="")
                 ChannelBtn = new InlineKeyboardUrlButton("Канал в телеграм", Company.Chanel);
 
             else
                 ChannelBtn = new InlineKeyboardUrlButton("Канал в телеграм", "https://t.me/");
 
-            if(Company.Chat!="")
+            if(Company != null && Company.Chat!="")
                 ChatBtn = new InlineKeyboardUrlButton("Чат в телеграм", Company.Chat);
 
             else
                 ChatBtn = new InlineKeyboardUrlButton("Чат в телеграм", "https://t.me/");
 
-            base.TextMessage = "Контакты";
 
             SetInlineKeyBoard();
+
 
             return this;
         }

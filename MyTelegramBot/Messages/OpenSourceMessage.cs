@@ -12,9 +12,9 @@ namespace MyTelegramBot.Messages
         public Bot.BotMessage BuildMessage()
         {
 
-            this.TextMessage = "Это проект с открытым исходым. Вы можете скачать";
+            this.TextMessage = "Это проект с открытым исходым. Вы можете скачать его " +HrefUrl("https://github.com/", "здесь");
 
-            BackBtn = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton("Назад", "MainMenu");
+            BackBtn = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton("Назад", BuildCallData("MainMenu", Bot.MainMenuBot.ModuleName));
 
             base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{

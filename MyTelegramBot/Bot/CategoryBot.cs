@@ -18,7 +18,7 @@ namespace MyTelegramBot.Bot
 
         ProductViewMessage ProductViewMsg { get; set; }
 
-        ViewAllProductMessage ViewAllProductMsg { get; set; }
+        ViewAllProductInCategoryMessage ViewAllProductInCategoryMsg { get; set; }
 
         public CategoryBot(Update _update) : base(_update)
         {
@@ -38,7 +38,7 @@ namespace MyTelegramBot.Bot
                     ProductViewMsg = new ProductViewMessage(Category,BotInfo.Id);
                 }
 
-                ViewAllProductMsg = new ViewAllProductMessage();
+                ViewAllProductInCategoryMsg = new ViewAllProductInCategoryMessage();
             }
 
             catch
@@ -65,6 +65,9 @@ namespace MyTelegramBot.Bot
 
                 case "BackCategoryList":
                     return await GetCategoryList(base.MessageId);
+
+                case "GetCategory":
+                    return await GetCategory();
 
                 default:
                     return null;
@@ -105,7 +108,22 @@ namespace MyTelegramBot.Bot
         private async Task<IActionResult> GetAllProduct()
         {
 
-            if (await EditMessage(ViewAllProductMsg.BuildMessage()) != null)
+            if (await EditMessage(ViewAllProductInCategoryMsg.BuildMessage()) != null)
+                return base.OkResult;
+
+            else
+                return base.NotFoundResult;
+        }
+
+        /// <summary>
+        /// Покзаать одним сообщение все товары в категории
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IActionResult> GetCategory()
+        {
+            ViewAllProductInCategoryMsg = new  ViewAllProductInCategoryMessage(Argumetns[0]);
+
+            if (await EditMessage(ViewAllProductInCategoryMsg.BuildMessage()) != null)
                 return base.OkResult;
 
             else

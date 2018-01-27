@@ -43,6 +43,10 @@ namespace MyTelegramBot.Bot
             if (base.CommandName == "OpenSource")
                 return await OpenSourceSend();
 
+            if (base.CommandName == "MethodOfObtainingInfo")
+                return await SendMethodOfObtainingInfo();
+
+
             else return null;
         }
 
@@ -94,6 +98,15 @@ namespace MyTelegramBot.Bot
             OpenSourceMessage openSource = new OpenSourceMessage();
 
             await EditMessage(openSource.BuildMessage());
+
+            return OkResult;
+        }
+
+        private async Task<IActionResult> SendMethodOfObtainingInfo()
+        {
+            MethodOfObtainingInfoMessage message = new MethodOfObtainingInfoMessage();
+
+            await EditMessage(message.BuildMessage());
 
             return OkResult;
         }

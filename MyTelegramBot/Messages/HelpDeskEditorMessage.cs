@@ -70,7 +70,7 @@ namespace MyTelegramBot.Messages
             {
                 if (HelpDesk.HelpDeskAttachment != null)
                     base.TextMessage =Bold("Номер заявки: ")+HelpDesk.Number.ToString()+NewLine()
-                            +Bold("Дата: ") +HelpDesk.Timestamp.ToString()+
+                            +Bold("Дата: ") +HelpDesk.Timestamp.ToString()+ NewLine() +
                             Bold("Описание проблемы: ")+ HelpDesk.Text + NewLine() + Bold("Прикрепленных файлов: ") + HelpDesk.HelpDeskAttachment.Count.ToString();
 
                 else

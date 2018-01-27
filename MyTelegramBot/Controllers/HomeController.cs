@@ -79,8 +79,12 @@ namespace MyTelegramBot.Controllers
             if (db == null)
                 db = new MarketBotDbContext();
 
+            if (_configuration.Delivery == false && _configuration.Delivery == false)
+                return Json("Должен быть доступен хотя бы один способ получения заказов");
+
             if(_configuration!=null)
                 conf=db.Configuration.Where(c => c.Id == _configuration.Id).FirstOrDefault();
+
 
             if (conf != null && conf.Id>0 && _configuration.FreeShipPrice!=0 && _configuration.ShipPrice>0  ||
                 conf != null && conf.Id > 0 && _configuration.FreeShipPrice == 0 && _configuration.ShipPrice == 0 )
