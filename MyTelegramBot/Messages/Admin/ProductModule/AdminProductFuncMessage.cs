@@ -43,7 +43,7 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton OpenProductBtn { get; set; }
 
-        private InlineKeyboardCallbackButton CurrencyBtn { get; set; }
+        //private InlineKeyboardCallbackButton CurrencyBtn { get; set; }
 
         private InlineKeyboardCallbackButton UnitBtn { get; set; }
 
@@ -94,7 +94,7 @@ namespace MyTelegramBot.Messages.Admin
 
                 UnitBtn = new InlineKeyboardCallbackButton("Ед.изм.", BuildCallData(ProductEditBot.ProudctUnitCmd, ProductEditBot.ModuleName, ProductId));
 
-                CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductEditBot.ModuleName, ProductId));
+                //CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductEditBot.ModuleName, ProductId));
 
                 InlineImageBtn = new InlineKeyboardCallbackButton("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductEditBot.ModuleName, ProductId));
 
@@ -128,7 +128,7 @@ namespace MyTelegramBot.Messages.Admin
                         },
                 new[]
                         {
-                            ProductEditPriceBtn, ProductEditStockBtn, CurrencyBtn
+                            ProductEditPriceBtn, ProductEditStockBtn
                         },
 
                 new[]
@@ -168,7 +168,7 @@ namespace MyTelegramBot.Messages.Admin
                         },
                 new[]
                         {
-                            ProductEditPriceBtn, ProductEditStockBtn,CurrencyBtn
+                            ProductEditPriceBtn, ProductEditStockBtn
                         },
 
                 new[]

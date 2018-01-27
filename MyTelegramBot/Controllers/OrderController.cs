@@ -18,7 +18,7 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
-           return View(db.Orders.Include(o => o.BotInfo).Include(o=>o.Done).OrderByDescending(o=>o.Id).ToList());
+           return View(db.Orders.Include(o => o.BotInfo).OrderByDescending(o=>o.Id).ToList());
 
 
         }
@@ -100,7 +100,8 @@ namespace MyTelegramBot.Controllers
 
             if (Order != null)
             {
-                Order.OrderAddress.Adress = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
+                if(Order.OrderAddress!=null)
+                    Order.OrderAddress.Adress = db.Address.Where(a => a.Id == Order.OrderAddress.AdressId).Include(a => a.House).Include(a => a.House.Street).Include(a => a.House.Street.City).FirstOrDefault();
 
                 if (Order.Invoice != null)
                     Order.Invoice.PaymentType = db.PaymentType.Where(payment => payment.Id == Order.Invoice.PaymentTypeId).FirstOrDefault();

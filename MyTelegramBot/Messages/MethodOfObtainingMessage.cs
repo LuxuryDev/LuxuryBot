@@ -32,7 +32,7 @@ namespace MyTelegramBot.Messages
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
                 Configuration = db.BotInfo.Where(b => b.Name == BotName).Include(b => b.Configuration)
-                    .FirstOrDefault().Configuration.FirstOrDefault();
+                    .FirstOrDefault().Configuration;
 
             BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd, Bot.BasketBot.ModuleName));
 

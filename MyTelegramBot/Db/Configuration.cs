@@ -10,9 +10,6 @@ namespace MyTelegramBot
         public string TemplateCsvFileId { get; set; }
         public bool? BotBlocked { get; set; }
         public string ManualFileId { get; set; }
-        public string TemplateCsvFileImd5 { get; set; }
-        public string ExampleCsvFileMd5 { get; set; }
-        public string ManualFileMd5 { get; set; }
 
         /// <summary>
         /// Id чата куда добавлен бот для отправки уведомлений
@@ -41,10 +38,28 @@ namespace MyTelegramBot
         public bool Delivery { get; set; }
 
         /// <summary>
+        /// Стоимость доставки
+        /// </summary>
+        public double ShipPrice { get; set; }
+
+        /// <summary>
+        /// Стоимость заказа при которой, доставка будет бесплатной
+        /// </summary>
+        public double FreeShipPrice { get; set; }
+
+        /// <summary>
         /// Способ получения заказа: Самовывоз. true - доступен для пользователей
         /// </summary>
         public bool Pickup { get; set; }
+
+        public int? CurrencyId { get; set; }
+
+        public TimeSpan? StartTime { get; set; }
+
+        public TimeSpan? EndTime { get; set; }
+
         public BotInfo BotInfo { get; set; }
+        public Currency Currency { get; set; }
 
 
     }

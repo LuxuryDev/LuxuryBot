@@ -18,5 +18,52 @@ namespace MyTelegramBot.Controllers
 
             return View(list);
         }
+
+        [HttpGet]
+        public IActionResult Blocked(int Id)
+        {
+
+            db = new MarketBotDbContext();
+
+
+            if (Id > 0)
+            {
+                var follower = db.Follower.Find(Id);
+
+                follower.Blocked = true;
+
+                db.Update(follower);
+
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            else
+                return NotFound();
+        }
+
+        [HttpGet]
+        public IActionResult UnBlocked(int Id)
+        {
+
+            db = new MarketBotDbContext();
+
+            if (Id > 0)
+            {
+                var follower = db.Follower.Find(Id);
+
+                follower.Blocked = false;
+
+                db.Update(follower);
+
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            else
+                return NotFound();
+        }
     }
 }

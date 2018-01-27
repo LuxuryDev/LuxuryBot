@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 using MyTelegramBot.Model;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MyTelegramBot.Controllers
 {
@@ -35,6 +36,8 @@ namespace MyTelegramBot.Controllers
             {
                 botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
                 company = db.Company.FirstOrDefault();
+                ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name", botInfo.Configuration.CurrencyId);
+
             }
 
             if (botInfo == null)
@@ -77,14 +80,26 @@ namespace MyTelegramBot.Controllers
                 db = new MarketBotDbContext();
 
             if(_configuration!=null)
-            conf=db.Configuration.Where(c => c.Id == _configuration.Id).FirstOrDefault();
+                conf=db.Configuration.Where(c => c.Id == _configuration.Id).FirstOrDefault();
 
-            if (conf != null && conf.Id>0)
+            if (conf != null && conf.Id>0 && _configuration.FreeShipPrice!=0 && _configuration.ShipPrice>0  ||
+                conf != null && conf.Id > 0 && _configuration.FreeShipPrice == 0 && _configuration.ShipPrice == 0 )
             {
                 conf.OwnerPrivateNotify = _configuration.OwnerPrivateNotify;
                 conf.VerifyTelephone = _configuration.VerifyTelephone;
                 conf.Pickup = _configuration.Pickup;
                 conf.Delivery = _configuration.Delivery;
+                conf.StartTime = _configuration.StartTime;
+                conf.EndTime = _configuration.EndTime;
+                conf.ShipPrice = _configuration.ShipPrice;
+                conf.FreeShipPrice = _configuration.FreeShipPrice;
+
+                if (conf.CurrencyId != _configuration.CurrencyId) // если изенился тип валюты, то меняем тип валюты во всех ценах на товары
+                {
+                    conf.CurrencyId = _configuration.CurrencyId;
+                    UpdatePriceCurrency(Convert.ToInt32(_configuration.CurrencyId));
+                }
+                    
 
                 if (db.SaveChanges() >= 0)
                     return Json("Сохранено");
@@ -93,6 +108,9 @@ namespace MyTelegramBot.Controllers
                     return Json("Ошибка");
             }
 
+            if(_configuration.ShipPrice>0 && _configuration.FreeShipPrice==0)
+                return Json("Ошибка. Если стоимость доставки больше 0, то значение поля \"Бесплатная доставка от\" должна быть больше 0");
+            
             else
                 return Json("Ошибка");
         }
@@ -125,6 +143,22 @@ namespace MyTelegramBot.Controllers
 
             else
                 return Json("Ошибка");
+        }
+
+
+        private void UpdatePriceCurrency (int CurrencyId)
+        {
+            if (db == null)
+                db = new MarketBotDbContext();
+
+            var PriceList = db.ProductPrice.Where(p => p.Enabled).ToList();
+
+            foreach (ProductPrice pr in PriceList)
+            {
+                pr.CurrencyId = CurrencyId;
+            }
+
+            db.SaveChanges();
         }
 
         public async Task<IActionResult> Editor()
@@ -190,7 +224,7 @@ namespace MyTelegramBot.Controllers
 
                 if (_bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
                 {
-                    _bot.Configuration.Add(new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery=true, Pickup=false });
+                    _bot.Configuration=new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery=true, Pickup=false, ShipPrice=0, FreeShipPrice=0, CurrencyId=1 };
                     _bot=InsertBotInfo(_bot);
                     Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
                     db.Company.Add(company);

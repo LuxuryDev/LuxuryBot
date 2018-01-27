@@ -48,9 +48,13 @@ namespace MyTelegramBot.Controllers
         {
             db = new MarketBotDbContext();
 
+            var Bot = db.BotInfo.Where(b => b.Name == MyTelegramBot.Bot.GeneralFunction.GetBotName()).FirstOrDefault();
+
+            var Follower = db.Follower.Find(id);
+
             var admin= db.Admin.Where(a => a.FollowerId == id).FirstOrDefault();
 
-            if (admin == null)
+            if (admin == null && Bot.OwnerChatId!=Follower.ChatId) //Проверям что бы этот пользователь уже не был владельцем бота
             {
                 Admin adm = new Admin
                 {

@@ -74,7 +74,7 @@ namespace MyTelegramBot.Bot
                 
 
             //пользователь отрправил свою геолокацию, проверям есть ли у него хоть что нибудь в корзине && Connection.getConnection().Basket.Where(b=>b.FollowerId==FollowerId).Count()>0
-            if (Update.Message != null && Update.Message.Location != null )
+            if (Update.Message != null && Update.Message.Location != null && GetConfigurationBot(BotInfo.Id).Delivery)
                 return await ConfirmationRequestAddress();          
 
             else
@@ -87,11 +87,25 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> ConfirmationRequestAddress()
         {
-            ConfirmNewAddress = new NewAddressConfirmMessage(base.FollowerId, Update.Message.Location.Latitude, Update.Message.Location.Longitude);
-            var message= ConfirmNewAddress.BuildMessage();
+            bool blocked = false;
 
-            if (await SendMessage(message) != null)
+            using (MarketBotDbContext db = new MarketBotDbContext())
+                blocked = db.Follower.Find(FollowerId).Blocked;
+
+            if (!blocked)
+            {
+                ConfirmNewAddress = new NewAddressConfirmMessage(base.FollowerId, Update.Message.Location.Latitude, Update.Message.Location.Longitude);
+                var message = ConfirmNewAddress.BuildMessage();
+
+                if (await SendMessage(message) != null)
+                    return base.OkResult;
+            }
+
+            if (blocked)
+            {
+                await AnswerCallback("Вы заблокированы администратором системы!", true);
                 return base.OkResult;
+            }
 
             else
                 return base.NotFoundResult;

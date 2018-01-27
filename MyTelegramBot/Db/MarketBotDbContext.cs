@@ -20,7 +20,6 @@ namespace MyTelegramBot
         public virtual DbSet<AttachmentType> AttachmentType { get; set; }
         public virtual DbSet<AvailableСities> AvailableСities { get; set; }
         public virtual DbSet<Basket> Basket { get; set; }
-        public virtual DbSet<BlackList> BlackList { get; set; }
         public virtual DbSet<BotInfo> BotInfo { get; set; }
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<City> City { get; set; }
@@ -55,7 +54,6 @@ namespace MyTelegramBot
         public virtual DbSet<Raiting> Raiting { get; set; }
         public virtual DbSet<Region> Region { get; set; }
         public virtual DbSet<ReportsRequestLog> ReportsRequestLog { get; set; }
-        public virtual DbSet<ShipPrice> ShipPrice { get; set; }
         public virtual DbSet<Stock> Stock { get; set; }
         public virtual DbSet<Street> Street { get; set; }
         public virtual DbSet<TelegramMessage> TelegramMessage { get; set; }
@@ -227,17 +225,6 @@ namespace MyTelegramBot
                     .HasConstraintName("FK_Cart_Product");
             });
 
-            modelBuilder.Entity<BlackList>(entity =>
-            {
-                entity.Property(e => e.DateAdd).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Follower)
-                    .WithMany(p => p.BlackList)
-                    .HasForeignKey(d => d.FollowerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Blacklist_Follower");
-            });
-
             modelBuilder.Entity<BotInfo>(entity =>
             {
                 entity.Property(e => e.Name)
@@ -311,22 +298,16 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<Configuration>(entity =>
             {
+                entity.HasIndex(e => e.BotInfoId)
+                    .HasName("IX_Configuration_BotInfoId")
+                    .IsUnique();
+
                 entity.Property(e => e.ExampleCsvFileId)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ExampleCsvFileMd5)
-                    .HasColumnName("ExampleCsvFileMD5")
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.ManualFileId)
                     .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ManualFileMd5)
-                    .HasColumnName("ManualFileMD5")
-                    .HasMaxLength(500)
                     .IsUnicode(false);
 
                 entity.Property(e => e.PrivateGroupChatId)
@@ -337,19 +318,19 @@ namespace MyTelegramBot
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.TemplateCsvFileImd5)
-                    .HasColumnName("TemplateCsvFileIMD5")
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.UserNameFaqFileId)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.BotInfo)
-                    .WithMany(p => p.Configuration)
-                    .HasForeignKey(d => d.BotInfoId)
+                    .WithOne(p => p.Configuration)
+                    .HasForeignKey<Configuration>(d => d.BotInfoId)
                     .HasConstraintName("FK_Configuration_BotInfo");
+
+                entity.HasOne(d => d.Currency)
+                    .WithMany(p => p.Configuration)
+                    .HasForeignKey(d => d.CurrencyId)
+                    .HasConstraintName("FK_Configuration_Currency");
             });
 
             modelBuilder.Entity<Currency>(entity =>
@@ -599,11 +580,6 @@ namespace MyTelegramBot
                     .HasForeignKey<OrderAddress>(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_OrderAdress_Order");
-
-                entity.HasOne(d => d.ShipPrice)
-                    .WithMany(p => p.OrderAddress)
-                    .HasForeignKey(d => d.ShipPriceId)
-                    .HasConstraintName("FK_OrdersAdress_ShipPrice");
             });
 
             modelBuilder.Entity<OrderHistory>(entity =>
@@ -907,15 +883,6 @@ namespace MyTelegramBot
                     .WithMany(p => p.ReportsRequestLog)
                     .HasForeignKey(d => d.FollowerId)
                     .HasConstraintName("FK_ReportsRequestLog_Follower");
-            });
-
-            modelBuilder.Entity<ShipPrice>(entity =>
-            {
-                entity.Property(e => e.ShipPriceId).HasColumnName("ShipPrice_id");
-
-                entity.Property(e => e.ShipPriceEnable).HasColumnName("ShipPrice_enable");
-
-                entity.Property(e => e.ShipPriceValue).HasColumnName("ShipPrice_value");
             });
 
             modelBuilder.Entity<Stock>(entity =>

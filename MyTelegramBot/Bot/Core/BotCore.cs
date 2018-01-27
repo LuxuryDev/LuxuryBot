@@ -300,7 +300,7 @@ namespace MyTelegramBot.Bot
             {
                 using (MarketBotDbContext db=new MarketBotDbContext())
                 {
-                   return db.Configuration.Where(c => c.BotInfoId == BotId).FirstOrDefault();
+                   return db.Configuration.Where(c => c.BotInfoId == BotId).Include(c=>c.Currency).FirstOrDefault();
                 }
             }
 

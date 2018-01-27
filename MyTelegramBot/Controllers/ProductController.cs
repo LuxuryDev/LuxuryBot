@@ -29,7 +29,11 @@ namespace MyTelegramBot.Controllers
         [HttpGet]
         public IActionResult Creator()
         {
+
             db = new MarketBotDbContext();
+
+            var conf = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).Include(b=>b.Configuration).FirstOrDefault();
+
             Product product = new Product();
             product.Id = 0;
             product.Name = String.Empty;
@@ -38,7 +42,7 @@ namespace MyTelegramBot.Controllers
             product.TelegraphUrl = String.Empty;
             product.Text = String.Empty;
             product.PhotoUrl = String.Empty;
-            product.ProductPrice.Add(new ProductPrice { CurrencyId = 1, Value = 0 });
+            product.ProductPrice.Add(new ProductPrice { CurrencyId = conf.Configuration.CurrencyId, Value = 0 });
             ViewBag.Category = new SelectList(db.Category.ToList(), "Id", "Name", db.Category.FirstOrDefault().Id);
             ViewBag.Currency = db.Currency.ToList();
             ViewBag.Unit = new SelectList(db.Units.ToList(), "Id", "Name", product.UnitId);
@@ -89,7 +93,11 @@ namespace MyTelegramBot.Controllers
 
             bool Check = true;
 
-            if(SaveProduct!=null)
+            var conf = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).Include(b => b.Configuration).FirstOrDefault();
+
+            SaveProduct.ProductPrice.FirstOrDefault().CurrencyId = conf.Configuration.CurrencyId;
+
+            if (SaveProduct!=null)
                 Check = CheckName(SaveProduct.Name);
 
             if (SaveProduct != null && SaveProduct.Id > 0)
@@ -116,11 +124,9 @@ namespace MyTelegramBot.Controllers
                 Product.Text = SaveProduct.Text;
                 Product.UnitId = SaveProduct.UnitId;
 
-                // Проверям изменил ли пользователь цену или тип валюты.  Если изменил то добавляем новую запись в БД
+                // Проверям изменил ли пользователь цену .  Если изменил то добавляем новую запись в БД
                 if (SaveProduct.ProductPrice.FirstOrDefault().Value != Product.ProductPrice.FirstOrDefault().Value 
-                    && SaveProduct.ProductPrice.FirstOrDefault().Value >0 ||
-                    SaveProduct.ProductPrice.FirstOrDefault().CurrencyId != Product.ProductPrice.FirstOrDefault().CurrencyId
-                    && SaveProduct.ProductPrice.FirstOrDefault().Value > 0)
+                    && SaveProduct.ProductPrice.FirstOrDefault().Value >0)
                 {
                     SaveProduct.ProductPrice.FirstOrDefault().ProductId = Product.ProductPrice.FirstOrDefault().ProductId;
                     ProductPriceInsert(SaveProduct.ProductPrice.FirstOrDefault());

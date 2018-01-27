@@ -789,8 +789,8 @@ namespace MyTelegramBot.Bot
                 try
                 {
                     //string quote = "\"";
-                    //" Название товара, Категория, Цена, Валюта, Еденица измерения, В наличии, " + quote + "Краткое описание [не обязательно]"
-                    //  "Сникерс, Конфеты, 50, руб., г., 1000" + quote + "Вкусные конфеты. Ага" + quote
+                    //" Название товара, Категория, Цена, Еденица измерения, В наличии, " + quote + "Краткое описание [не обязательно]"
+                    //  "Сникерс, Конфеты, 50, г., 1000" + quote + "Вкусные конфеты. Ага" + quote
 
                     if (base.Caption != null && ReplyToMessageText==null)
                     {
@@ -811,7 +811,6 @@ namespace MyTelegramBot.Bot
                     string Name = String.Empty;
                     string CategoryName = String.Empty;
                     double Price = 0.0;
-                    string CurrencyName = "";
                     Currency Currency=new Currency();
                     string UnitName = "";
                     Units unit = new Units();
@@ -825,6 +824,7 @@ namespace MyTelegramBot.Bot
 
                     if (SplitData != null && SplitData.Count > 0)
                     {
+
                         Name = SplitData[0];
 
                         CategoryName = SplitData[1];
@@ -832,20 +832,18 @@ namespace MyTelegramBot.Bot
                         Price = ToDouble(SplitData[2]);
 
                         //определям валюту
-                        CurrencyName = SplitData[3];
-                        if (CurrencyName != null)
-                            Currency = db.Currency.Where(c => c.ShortName == CurrencyName).FirstOrDefault();
+                         Currency = db.Currency.Find(BotInfo.Configuration.CurrencyId);
 
                         //Определяем ед измерения
-                        UnitName = SplitData[4];
+                        UnitName = SplitData[3];
                         if (UnitName != null)
                             unit = db.Units.Where(u => u.ShortName == UnitName).FirstOrDefault();
 
                         //В наличии
-                        Stock = ToInt(SplitData[5]);
+                        Stock = ToInt(SplitData[4]);
                         
-                        if (SplitData.Count>6 && SplitData[6] != "")// Комментарий к товару
-                            Text = SplitData[6].Substring(1, SplitData[6].Length - 2);
+                        if (SplitData.Count>5 && SplitData[5] != "")// Комментарий к товару
+                            Text = SplitData[5].Substring(1, SplitData[5].Length - 2);
 
 
                         ///ПРоверяем есть ли уже товар с таким название в БД
@@ -868,9 +866,6 @@ namespace MyTelegramBot.Bot
 
                         if (Price ==0) //ошибка. Цена не может быть меньше или равно 0
                             return await ErrorMessage(AdminBot.EnterNameNewProductCmd, "Цена не может быть равно 0");
-
-                        if (Currency==null) //Не удалось определить валюту
-                            return await ErrorMessage(AdminBot.EnterNameNewProductCmd, "Не удалось определить валюту");
 
                         if(unit==null)
                             return await ErrorMessage(AdminBot.EnterNameNewProductCmd, "Не удалось определить еденицу измерения");

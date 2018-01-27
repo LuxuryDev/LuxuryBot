@@ -1032,10 +1032,10 @@ namespace MyTelegramBot.Bot.AdminModule
 
             const string quote = "\"";
             string Example = "Пришлите фотографию товара, а в поле под фотографией(можно без фотографии, просто ответьте на сообщение бота) добавьте комментарий следующего вида:" +
-                             " Название товара, Категория, Цена, Валюта, Еденица измерения, В наличии, " + quote + "Краткое описание [не обязательно]" + quote + BotMessage.NewLine()
-                             + BotMessage.Bold("Например: ") + "Хреновуха, Настойки,500, руб., шт., 5, " + quote + "40 градусов" + quote + BotMessage.NewLine()
-                             + BotMessage.Bold("Например: ") + "Рис, Крупы,100, руб., кг., 100" + BotMessage.NewLine()
-                             + BotMessage.Bold("Например: ") + "Сникерс, Конфеты, 50, руб., г., 1000" + quote + "Вкусные конфеты. Ага" + quote
+                             " Название товара, Категория, Цена, Еденица измерения, В наличии, " + quote + "Краткое описание [не обязательно]" + quote + BotMessage.NewLine()
+                             + BotMessage.Bold("Например: ") + "Хреновуха, Настойки,500, шт., 5, " + quote + "40 градусов" + quote + BotMessage.NewLine()
+                             + BotMessage.Bold("Например: ") + "Рис, Крупы,100, кг., 100" + BotMessage.NewLine()
+                             + BotMessage.Bold("Например: ") + "Сникерс, Конфеты, 50, г., 1000" + quote + "Вкусные конфеты. Ага" + quote
                              + BotMessage.NewLine() + BotMessage.NewLine() + BotMessage.Bold("Доступные валюты: ") + Currencies
                              + BotMessage.NewLine()+ BotMessage.Bold("Еденицы измерения: ") + Units;
 

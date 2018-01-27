@@ -15,7 +15,7 @@
 
 @if (Model.Item1.Id > 0)
 {
-<h3>Бот</h3>
+<h2>Бот</h2>
 <table class="table">
     <tr>
         <td>Название</td>
@@ -35,35 +35,61 @@
 
 @using (Html.BeginForm("Save", "Home", FormMethod.Post))
 {
-    <h3>Настройки</h3>
-    @Html.HiddenFor(m => m.Item1.Configuration.FirstOrDefault().Id)
+    @Html.HiddenFor(m => m.Item1.Configuration.Id)
+    <h2>Основные настройки</h2> <br />
+
     <p>
+        <label>Валюта</label><br />
+        @Html.DropDownListFor(Model => Model.Item1.Configuration.CurrencyId, ViewBag.Currency as SelectList, new { @class = "form-control" })
+    </p>
+
+
+    <p>
+        <h4>Режим обработки заказов. </h4>
+        <h5>Если бот обрабатывает заказы круглосуточно, то оставьте эти поля пустыми</h5>
+        <label>Начало</label>
+        @Html.TextBoxFor(m=>m.Item1.Configuration.StartTime, new { @class = "form-control" })
+
+        <label>Конец</label>
+        @Html.TextBoxFor(m => m.Item1.Configuration.EndTime, new { @class = "form-control" })
+
+    </p>
+<hr />
+<p>
         <label>
             Требовать от пользователя номер телефона при офрмлении заказа
         </label>
-        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().VerifyTelephone, new { @class = "form-control" })
+        @Html.CheckBoxFor(m => m.Item1.Configuration.VerifyTelephone, new { @class = "form-control" })
     </p>
 
     <p>
         <label>
             Получать уведомления в ЛС от бота при добавлении новых заказов/ заявок и т.д
         </label>
-        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().OwnerPrivateNotify, new { @class = "form-control" })
+        @Html.CheckBoxFor(m => m.Item1.Configuration.OwnerPrivateNotify, new { @class = "form-control" })
     </p>
 
-    <h3>Способы получения заказа:</h3>
+    <h4>Способы получения заказа:</h4>
     <p>
         <label>
             Доставка
         </label>
-        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().Delivery, new { @class = "form-control" })
+        @Html.CheckBoxFor(m => m.Item1.Configuration.Delivery, new { @class = "form-control" })
     </p>
 
     <p>
         <label>
             Самовывоз
         </label>
-        @Html.CheckBoxFor(m => m.Item1.Configuration.FirstOrDefault().Pickup, new { @class = "form-control" })
+        @Html.CheckBoxFor(m => m.Item1.Configuration.Pickup, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <h4>Стоимость доставки</h4>
+        <label>Стоимость</label>
+        @Html.TextBoxFor(m => m.Item1.Configuration.ShipPrice, new { @class = "form-control" })
+        <label>Бесплатная доставка от</label><br />
+        @Html.TextBoxFor(m => m.Item1.Configuration.FreeShipPrice, new { @class = "form-control" })
     </p>
 }
 
@@ -73,7 +99,7 @@
 
 @using (Html.BeginForm("ContactUpdate", "Home", FormMethod.Post))
 {
-    <h3>Контактные данные</h3>
+    <h2>Контактные данные</h2>
     <p>
         @Html.HiddenFor(m => m.Item2.Id)
         <label>
@@ -113,11 +139,16 @@
     function ajaxSave() {
 
             var Config = {
-                'VerifyTelephone': $("#VerifyTelephone").prop("checked"),
-                'OwnerPrivateNotify': $("#OwnerPrivateNotify").prop("checked"),
-                'Delivery': $("#Delivery").prop("checked"),
-                'Pickup': $("#Pickup").prop("checked"),
-                'Id': $("#Id").val()
+                'VerifyTelephone': $("#Item1_Configuration_VerifyTelephone").prop("checked"),
+                'OwnerPrivateNotify': $("#Item1_Configuration_OwnerPrivateNotify").prop("checked"),
+                'Delivery': $("#Item1_Configuration_Delivery").prop("checked"),
+                'Pickup': $("#Item1_Configuration_Pickup").prop("checked"),
+                'StartTime': $("#Item1_Configuration_StartTime").val(),
+                'EndTime': $("#Item1_Configuration_EndTime").val(),
+                'ShipPrice': $("#Item1_Configuration_ShipPrice").val(),
+                'FreeShipPrice': $("#Item1_Configuration_FreeShipPrice").val(),
+                'CurrencyId': $("#Item1_Configuration_CurrencyId").val(),
+                'Id': $("#Item1_Configuration_Id").val()
             }
 
             $.ajax({
@@ -133,7 +164,7 @@
             }).done(function (data) {
                 alert(data);
             })
-        
+
     }
 </script>
 

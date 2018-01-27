@@ -48,15 +48,15 @@ price = Model.ProductPrice.FirstOrDefault();
 
                 @if (@Model.ProductPrice.FirstOrDefault().CurrencyId == 1)
                 {
-                    <select class="form-control" id="ProductPrice[0].CurrencyId" name="ProductPrice[0].CurrencyId">
+                    <select class="form-control" id="ProductPrice[0].CurrencyId" name="ProductPrice[0].CurrencyId" disabled="disabled">
                         <option selected="selected" value="1">&#x420;&#x443;&#x431;&#x43B;&#x44C;</option>
-                        <option value="2">&#x413;&#x440;&#x438;&#x432;&#x43D;&#x430;</option>
+                        <option value="2">&#x413;&#x440;&#x438;&#x432;&#x43D;&#x430;</option> 
                     </select>
                 }
 
                 @if (@Model.ProductPrice.FirstOrDefault().CurrencyId == 2)
                 {
-                    <select class="form-control" id="ProductPrice[0].CurrencyId" name="ProductPrice[0].CurrencyId">
+                    <select class="form-control" id="ProductPrice[0].CurrencyId" name="ProductPrice[0].CurrencyId" disabled="disabled">
                         <option selected="selected" value="2">&#x413;&#x440;&#x438;&#x432;&#x43D;&#x430;</option>
                         <option value="1">&#x420;&#x443;&#x431;&#x43B;&#x44C;</option>
                     </select>

@@ -20,6 +20,20 @@
             <td>@follower.UserName</td>
             <td>@follower.Telephone</td>
             <td>@follower.DateAdd</td>
+            @if (follower.Blocked == true)
+            {
+                <td>Заблокирован</td>
+                <td><a href="~/Users/Unblocked/@follower.Id">Разблокировать</a></td>
+
+            }
+
+            @if (follower.Blocked == false)
+            {
+                <td></td>
+                <td><a href="~/Users/Blocked/@follower.Id">Заблокировать</a></td>
+
+            }
+
             <td><a href="~/Operators/Add/@follower.Id">Дать права оператора</a></td>
 
         </tr>

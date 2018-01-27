@@ -28,7 +28,7 @@ namespace MyTelegramBot
         public string LastName { get; set; }
         public string UserName { get; set; }
         public int? ChatType { get; set; }
-        public bool? Blocked { get; set; }
+        public bool Blocked { get; set; }
         public string Telephone { get; set; }
         public int ChatId { get; set; }
         public DateTime? DateAdd { get; set; }

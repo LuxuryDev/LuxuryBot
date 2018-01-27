@@ -76,7 +76,9 @@ namespace MyTelegramBot.Bot
                         LastName = Update.Message.Chat.LastName,
                         UserName = Update.Message.Chat.Username,
                         ChatId = Convert.ToInt32(Update.Message.Chat.Id),
-                        DateAdd = DateTime.Now
+                        DateAdd = DateTime.Now,
+                        Blocked=false
+                        
 
                     };
 

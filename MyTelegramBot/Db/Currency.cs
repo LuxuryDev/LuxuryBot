@@ -7,6 +7,7 @@ namespace MyTelegramBot
     {
         public Currency()
         {
+            Configuration = new HashSet<Configuration>();
             ProductPrice = new HashSet<ProductPrice>();
         }
 
@@ -15,7 +16,7 @@ namespace MyTelegramBot
         public string ShortName { get; set; }
         public string Code { get; set; }
 
-
+        public ICollection<Configuration> Configuration { get; set; }
         public ICollection<ProductPrice> ProductPrice { get; set; }
     }
 }

@@ -9,8 +9,9 @@ namespace MyTelegramBot
         public int OrderId { get; set; }
         public int? ShipPriceId { get; set; }
 
+        public double ShipPriceValue { get; set; }
+
         public Address Adress { get; set; }
         public Orders Order { get; set; }
-        public ShipPrice ShipPrice { get; set; }
     }
 }

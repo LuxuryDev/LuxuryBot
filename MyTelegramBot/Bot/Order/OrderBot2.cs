@@ -228,10 +228,11 @@ namespace MyTelegramBot.Bot
             if (Argumetns.Count > 0)
                 id = Argumetns[0];
 
+            base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
+
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
                 var method = db.PaymentType.Where(p => p.Enable == true).FirstOrDefault();
-                base.ConfigurationBot = GetConfigurationBot(BotInfo.Id);
                 //если включена верификация номера телефона, то проверяем есть ли БД номер телефона текущего пользователя
                 if (method != null && ConfigurationBot!=null && ConfigurationBot.VerifyTelephone)
                     return await TelephoneCheck(id);
@@ -512,9 +513,37 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> OrderSave()
         {
+            Orders new_order = null;
+            bool blocked = false;
+
             Bot.Order.InsertNewOrder insertNewOrder = new Bot.Order.InsertNewOrder(FollowerId, BotInfo);
 
-            var new_order = insertNewOrder.AddOrder();
+            ConfigurationBot = base.GetConfigurationBot(BotInfo.Id);
+
+            using (MarketBotDbContext db = new MarketBotDbContext())
+                blocked = db.Follower.Find(FollowerId).Blocked;
+            
+
+            if (blocked)
+                await AnswerCallback("Вы заблокированы администратором системы!", true);
+
+            // если в настройках бота указано время работы магазина, то проверяем подходит ли текщее время 
+            //под это правило. Если подходит то офрмляем заказ
+            if (!blocked && ConfigurationBot.StartTime!=null &&
+                ConfigurationBot.EndTime!=null && ConfigurationBot.StartTime.Value.Hours <=
+                DateTime.Now.Hour && ConfigurationBot.StartTime.Value.Minutes<= DateTime.Now.Minute &&
+                 ConfigurationBot.EndTime.Value.Hours>DateTime.Now.Hour && ConfigurationBot.EndTime.Value.Minutes>
+                 DateTime.Now.Hour)
+                      new_order= insertNewOrder.AddOrder();
+                
+
+            //Время работы магазина не указано.
+            else if (!blocked && ConfigurationBot.EndTime==null && ConfigurationBot.StartTime==null)
+                new_order = insertNewOrder.AddOrder();
+
+            else
+                await AnswerCallback("Мы обрабатываем заказы только в период с "+ConfigurationBot.StartTime.ToString()+ 
+                    " и по "+ConfigurationBot.EndTime.ToString() , true);
 
             if (new_order != null && new_order.Invoice != null)
             {

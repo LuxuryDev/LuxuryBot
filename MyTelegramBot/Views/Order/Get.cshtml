@@ -25,9 +25,9 @@
     <div class="tab-content">
         <div class="tab-pane active" id="main">
             <div class="row">
-                @if (Model.Item1.DoneNavigation != null)
+                @if (Model.Item1.Done != null)
                 {
-                    <h3 class="bg-success">Заказ выполнен. @Model.Item1.DoneNavigation.Timestamp</h3>
+                    <h3 class="bg-success">Заказ выполнен. @Model.Item1.Done.Timestamp</h3>
 
                 }
 
@@ -39,7 +39,7 @@
 
                 }
 
-                @if (Model.Item1.Confirm != null && Model.Item1.DoneNavigation == null && Model.Item1.Delete == null)
+                @if (Model.Item1.Confirm != null && Model.Item1.Done == null && Model.Item1.Delete == null)
                 {
                     <h3 class="bg-info">Заказ согласован</h3>
                     <h3 class="bg-info">Комментарий : @Model.Item1.Confirm.Text </h3>
@@ -59,12 +59,16 @@
                         </label>
                         @Html.DisplayFor(m => m.Item1.Text)
                     </p>
-                    <p>
-                        <label>
-                            Адрес доставки:
-                        </label>
-                        @Html.DisplayName(Model.Item1.OrderAddress.Adress.House.Street.City.Name + ", " + Model.Item1.OrderAddress.Adress.House.Street.Name + ", " + Model.Item1.OrderAddress.Adress.House.Number)
-                    </p>
+                    
+                        @if (Model.Item1.OrderAddress != null)
+                        {
+                            <p>
+                                <label>
+                                    Адрес доставки:
+                                </label>
+                                @Html.DisplayName(Model.Item1.OrderAddress.Adress.House.Street.City.Name + ", " + Model.Item1.OrderAddress.Adress.House.Street.Name + ", " + Model.Item1.OrderAddress.Adress.House.Number)
+                            </p>
+                        }
                     <p>
                         <label>
                             Пользователь:
@@ -188,13 +192,13 @@
 
             }
 
-            @if (Model.Item1.DoneNavigation != null)
+            @if (Model.Item1.Done != null)
             {
                 <input type="hidden" name="Done" id="Done" value="true" /> <!--выполнен-->
 
             }
 
-            @if (Model.Item1.DoneNavigation == null)
+            @if (Model.Item1.Done == null)
             {
                 <input type="hidden" name="Done" id="Done" value="false" /> <!--не  выполнен-->
 
