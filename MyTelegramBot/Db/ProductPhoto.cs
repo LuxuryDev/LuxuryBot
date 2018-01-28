@@ -8,6 +8,8 @@ namespace MyTelegramBot
         public int ProductId { get; set; }
         public int AttachmentFsId { get; set; }
 
+        public bool MainPhoto { get; set; }
+
         public AttachmentFs AttachmentFs { get; set; }
         public Product Product { get; set; }
     }

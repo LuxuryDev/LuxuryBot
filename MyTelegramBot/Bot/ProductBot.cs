@@ -20,6 +20,11 @@ namespace MyTelegramBot.Bot
 
         private AddProductToBasketMessage AddProductToBasketMsg { get; set; }
 
+        /// <summary>
+        /// Сообщение со всеми фотографиями товара
+        /// </summary>
+        private ProductAllPhotoMessage ProductAllPhotoMsg { get; set; }
+
         public const string GetProductCmd = "GetProduct";
 
         public const string AddToBasketCmd = "AddToBasket";
@@ -29,6 +34,8 @@ namespace MyTelegramBot.Bot
         public const string MoreInfoProductCmd = "MoreInfoProduct";
 
         public const string ProductCmd = "/product";
+
+        public const string ViewAllPhotoProductCmd = "ViewAllPhotoProduct";
 
         public ProductBot(Update _update) : base(_update)
         {
@@ -75,6 +82,9 @@ namespace MyTelegramBot.Bot
                 //Пользователь нажал "Подробнее" 
                 case MoreInfoProductCmd:
                     return await MoreInfoProduct();
+
+                case ViewAllPhotoProductCmd:
+                    return await SendAllProductPhoto();
             }
 
             //inlene поиск
@@ -95,6 +105,29 @@ namespace MyTelegramBot.Bot
 
             else
                 return null;
+        }
+        
+        private async Task<IActionResult> SendAllProductPhoto()
+        {
+            try
+            {
+                ProductAllPhotoMsg = new ProductAllPhotoMessage(this.ProductId, BotInfo.Id);
+
+                ProductAllPhotoMsg.BuildMessage();
+
+                //отправляем альбом с фотографиями
+                await base.SendMediaPhotoGroup(ProductAllPhotoMsg.MediaGroupPhoto);
+
+                //следом отправляем кнопку назад
+                await base.SendMessage(ProductAllPhotoMsg);
+
+                return OkResult;
+            }
+            catch
+            {
+                return NotFoundResult;
+            }
+
         }
 
         private async Task<IActionResult> ProductInlineSearch(string Query)

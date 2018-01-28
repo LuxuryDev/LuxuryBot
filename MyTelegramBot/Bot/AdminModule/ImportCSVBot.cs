@@ -259,7 +259,8 @@ namespace MyTelegramBot.Bot
                         ProductPhoto photo = new ProductPhoto
                         {
                             AttachmentFsId = AttachemntFsID,
-                            ProductId = ProductId
+                            ProductId = ProductId,
+                            MainPhoto=true
                         };
 
                         db.ProductPhoto.Add(photo);

@@ -58,7 +58,8 @@ namespace MyTelegramBot.Controllers
                 db = new MarketBotDbContext();
                 var product = db.Product.Where(p => p.Id == id).Include(p => p.Unit).Include(p=>p.Category).FirstOrDefault();
 
-                product.ProductPhoto.Add(db.ProductPhoto.Where(photo => photo.ProductId == product.Id).OrderByDescending(photo=>photo.AttachmentFsId).Include(photo=>photo.AttachmentFs).FirstOrDefault());
+                product.ProductPhoto.Add(db.ProductPhoto.Where(photo => photo.ProductId == product.Id && photo.MainPhoto).
+                    OrderByDescending(photo=>photo.AttachmentFsId).Include(photo=>photo.AttachmentFs).FirstOrDefault());
 
                 product.ProductPrice.Add(db.ProductPrice.Where(price => price.ProductId == product.Id && price.Enabled == true).OrderByDescending(price => price.Id).FirstOrDefault());
                 if (product.ProductPhoto.FirstOrDefault() != null)
@@ -238,7 +239,8 @@ namespace MyTelegramBot.Controllers
             ProductPhoto productPhoto = new ProductPhoto
             {
                 AttachmentFsId = fs.Id,
-                ProductId = ProductId
+                ProductId = ProductId,
+                MainPhoto=true
             };
 
             db.ProductPhoto.Add(productPhoto);

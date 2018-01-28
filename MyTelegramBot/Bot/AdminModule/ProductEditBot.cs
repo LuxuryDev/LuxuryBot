@@ -321,7 +321,7 @@ namespace MyTelegramBot.Bot
 
                 //Пользователь прислал новую фотографию для товара. данные обновляются в БД. Бот присылает сообщение с Описание товара и кнопки с функциями
                 if (base.OriginalMessage.Contains(ProductEditPhotoReply))
-                    return await UpdateProductPhoto();
+                    return await UpdateMainProductPhoto();
 
                 //пользователь прислал новую ссылку на Inline фотографию
                 if (base.OriginalMessage.Contains(InlineForceReply))
@@ -605,10 +605,10 @@ namespace MyTelegramBot.Bot
 
 
         /// <summary>
-        /// Обновить фотографию
+        /// Обновить главную фотографию товара
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> UpdateProductPhoto()
+        private async Task<IActionResult> UpdateMainProductPhoto()
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
@@ -620,7 +620,8 @@ namespace MyTelegramBot.Bot
                 ProductPhoto productPhoto = new ProductPhoto
                 {
                     AttachmentFsId = fs_id,
-                    ProductId = product.Id
+                    ProductId = product.Id,
+                    MainPhoto=true
                 };
 
                 AttachmentTelegram attachment = new AttachmentTelegram
@@ -996,7 +997,8 @@ namespace MyTelegramBot.Bot
                             ProductPhoto productPhoto = new ProductPhoto
                             {
                                 AttachmentFsId = newProduct.AttacmentFsId,
-                                ProductId = product.Id
+                                ProductId = product.Id,
+                                MainPhoto=true
                             };
                             db.ProductPhoto.Add(productPhoto);
                            int a= db.SaveChanges();

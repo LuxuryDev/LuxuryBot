@@ -30,6 +30,8 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton ViewBasketBtn { get; set; }
 
+        private InlineKeyboardCallbackButton ViewAllPhotoBtn { get; set; }
+
         private int NextProductId { get; set; }
 
         private int PreviousProductId { get; set; }
@@ -80,10 +82,12 @@ namespace MyTelegramBot.Messages
             {
 
                 if (CategoryId > 0)
-                    Product = db.Product.Where(p => p.CategoryId == CategoryId && p.Enable == true).Include(p => p.ProductPrice).Include(p=>p.ProductPhoto).Include(p => p.Stock).Include(p => p.Unit).FirstOrDefault();
+                    Product = db.Product.Where(p => p.CategoryId == CategoryId && p.Enable == true)
+                        .Include(p => p.ProductPrice).Include(p=>p.ProductPhoto).Include(p => p.Stock).Include(p => p.Unit).FirstOrDefault();
 
                 if (ProductId > 0)
-                    Product = db.Product.Where(p => p.Id == ProductId && p.Enable == true).Include(p => p.ProductPrice).Include(p => p.ProductPhoto).Include(p => p.Stock).Include(p=>p.Unit).FirstOrDefault();
+                    Product = db.Product.Where(p => p.Id == ProductId && p.Enable == true)
+                        .Include(p => p.ProductPrice).Include(p => p.ProductPhoto).Include(p => p.Stock).Include(p=>p.Unit).FirstOrDefault();
 
                 if (Product != null && Product.Id > 0)
                 {
@@ -101,22 +105,26 @@ namespace MyTelegramBot.Messages
 
                     ViewBasketBtn = ViewBasket();
 
-                    
+                    ViewAllPhotoBtn = new InlineKeyboardCallbackButton("Все фотографии", BuildCallData("ViewAllPhotoProduct", ProductBot.ModuleName, Product.Id));
 
-                    if (Product.TelegraphUrl!=null && Product.TelegraphUrl.Length > 0)
+
+                    if (Product.TelegraphUrl!=null && Product.TelegraphUrl.Length > 0) // Если есть ссылка на заметку то делаем кнопку "Подробнее"
                         InfoProductBtn = MoreInfoProduct(Product.Id);
 
-                    if (Product.Stock.Count > 0 && Product.Stock.OrderByDescending(s => s.Id).FirstOrDefault().Balance > 0)
+                    if (Product.Stock.Count > 0 && Product.Stock.OrderByDescending(s => s.Id).FirstOrDefault().Balance > 0) // если есть в наличии то Добавляем кнопки +/-
                     {
                         AddToBasketBtn = AddProductToBasket(Product.Id);
                         RemoveFromBasketBtn = RemoveFromBasket(Product.Id);
                     }
 
+               
+                                       
+
                     base.TextMessage = Product.ToString();
 
                     base.CallBackTitleText = Product.Name;
 
-                    GetPhoto(db, base.TextMessage);
+                    GetMainPhoto(db, base.TextMessage);
 
                     SetInlineKeyBoard();
 
@@ -178,15 +186,15 @@ namespace MyTelegramBot.Messages
                             ReturnToCatalogListBtn,
                             NextProductBtn
                         },
-
+                new[]
+                        {
+                            ViewAllPhotoBtn,InfoProductBtn
+                        }
+                ,
                 new[]
                         {
                             RemoveFromBasketBtn,
                             AddToBasketBtn
-                        },
-                new[]
-                        {
-                            InfoProductBtn
                         },
                 new[]
                         {
@@ -204,6 +212,11 @@ namespace MyTelegramBot.Messages
                             ReturnToCatalogListBtn,
                             NextProductBtn
                         },
+                new[]
+                        {
+                            ViewAllPhotoBtn
+                        }
+                ,
 
                 new[]
                         {
@@ -226,11 +239,12 @@ namespace MyTelegramBot.Messages
                             ReturnToCatalogListBtn,
                             NextProductBtn
                         },
-
                 new[]
                         {
-                            InfoProductBtn
-                        },
+                            ViewAllPhotoBtn,InfoProductBtn
+                        }
+                ,
+
                 new[]
                         {
                             ViewBasketBtn
@@ -248,6 +262,11 @@ namespace MyTelegramBot.Messages
                             ReturnToCatalogListBtn,
                             NextProductBtn
                         },
+                new[]
+                        {
+                            ViewAllPhotoBtn
+                        }
+                ,
 
                 new[]
                         {
@@ -300,10 +319,10 @@ namespace MyTelegramBot.Messages
         }
 
         
-        private void GetPhoto(MarketBotDbContext db,string Caption)
+        private void GetMainPhoto(MarketBotDbContext db,string Caption)
         {
             //Ищем фотографии для этого бота
-            var photo = Product.ProductPhoto.OrderByDescending(a => a.AttachmentFsId).FirstOrDefault();
+            var photo = Product.ProductPhoto.Where(p=>p.MainPhoto).OrderByDescending(a => a.AttachmentFsId).FirstOrDefault();
             if (photo != null) 
             {
                 //Берем последнюю фотографию
@@ -320,6 +339,7 @@ namespace MyTelegramBot.Messages
                         TypeFileTo = MediaFile.HowMediaType(db.AttachmentFs.Where(a=>a.Id==attach.AttachmentFsId).FirstOrDefault().AttachmentTypeId)
                     };
                 }
+
                 else
                 {
                     var attach_fs = db.AttachmentFs.Where(a => a.Id == photo.AttachmentFsId).OrderByDescending(a=>a.Id).FirstOrDefault();
