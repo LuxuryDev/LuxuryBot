@@ -50,6 +50,89 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpGet]
+        public IActionResult Photos(int id)
+        {
+            db = new MarketBotDbContext();
+
+            Product=db.Product.Where(p => p.Id == id).Include(p => p.ProductPhoto).FirstOrDefault();
+
+            List<AttachmentFs> list = new List<AttachmentFs>();
+
+            foreach(ProductPhoto pp in Product.ProductPhoto)
+                if(!pp.MainPhoto)
+                    list.Add(db.AttachmentFs.Find(pp.AttachmentFsId));
+
+            ViewBag.ProductId = id;
+
+            return View(list);
+        }
+
+        [HttpGet]
+
+        public IActionResult DeletePhoto(int Id)
+        {
+            db = new MarketBotDbContext();
+
+            if (Id > 0)
+            {
+                var pp = db.ProductPhoto.Where(p => p.AttachmentFsId == Id).FirstOrDefault();
+
+                db.ProductPhoto.Remove(pp);
+
+                db.SaveChanges();
+
+                return Ok();
+            }
+
+            else
+                return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddPhoto(int ProductId, IList<IFormFile> image)
+        {
+            if(ProductId>0 && image!=null && image.Count > 0)
+            {
+
+                foreach (IFormFile file in image)
+                    AddAttachment(file, ProductId, false);
+
+
+                RedirectResult redirectResult = new RedirectResult("Photos\\" + ProductId);
+
+                return redirectResult;
+            }
+
+            else
+            {
+                RedirectResult redirectResult = new RedirectResult("Photos\\" + ProductId);
+
+                return redirectResult;
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SaveCaption ([FromBody] AttachmentFs attachmentFs)
+        {
+            db = new MarketBotDbContext();
+
+            if (attachmentFs != null && attachmentFs.Id > 0)
+            {
+                var att = db.AttachmentFs.Find(attachmentFs.Id);
+                att.Caption = attachmentFs.Caption;
+                db.SaveChanges();
+                return Json("Сохранено");
+            }
+
+
+            else
+               return Json("Ошибка");
+
+            
+        }
+
+        [HttpGet]
         public IActionResult Editor (int id)
         {
 
@@ -138,7 +221,7 @@ namespace MyTelegramBot.Controllers
                     AddAttachment(image, SaveProduct.Id);
 
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return new RedirectResult("Editor\\" + SaveProduct.Id);
             }
 
             ///добавление нового товара
@@ -215,7 +298,7 @@ namespace MyTelegramBot.Controllers
             return NewPrice;
         }
 
-        private void AddAttachment(IFormFile file , int ProductId)
+        private void AddAttachment(IFormFile file , int ProductId, bool MainMenu=true)
         {
             if (db == null)
                 db = new MarketBotDbContext();
@@ -240,7 +323,7 @@ namespace MyTelegramBot.Controllers
             {
                 AttachmentFsId = fs.Id,
                 ProductId = ProductId,
-                MainPhoto=true
+                MainPhoto= MainMenu
             };
 
             db.ProductPhoto.Add(productPhoto);

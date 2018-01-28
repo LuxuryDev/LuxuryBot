@@ -68,6 +68,8 @@ namespace MyTelegramBot.Messages
             //Ищем фотографии для этого бота
             var photo = db.ProductPhoto.Where(p => p.ProductId==ProductId && p.MainPhoto==false).ToList();
 
+            
+
             //Проверяем загружены ли фотографии на сервер телеграм 
             foreach(ProductPhoto pp in photo)
             {
@@ -95,7 +97,7 @@ namespace MyTelegramBot.Messages
 
                     MemoryStream ms = new MemoryStream(AttachFs.Fs);
 
-                    InputMediaType inputMediaType = new InputMediaType("Photo.png", ms);
+                    InputMediaType inputMediaType = new InputMediaType(AttachFs.Name, ms);
 
                     InputMediaPhoto mediaPhoto = new InputMediaPhoto { Media = inputMediaType, Caption = AttachFs.Caption };
 

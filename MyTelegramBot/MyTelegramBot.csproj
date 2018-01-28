@@ -12,6 +12,7 @@
     <Content Remove="connection.json" />
     <Content Remove="sql.json" />
     <Content Remove="Views\Home\Owner.cshtml" />
+    <Content Remove="Views\Product\View.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -481,7 +481,7 @@ namespace MyTelegramBot.Bot
                     foreach (Message mess in res) // проверяем есть ли FileId у отправленных фотографий. Если нет, то заносим в БД
                     {
                         if (mediaGroup.FsIdTelegramFileId.ElementAt(counter).Value == null)
-                            InsertToAttachmentTelegram(mess.Photo[1].FileId, mediaGroup.FsIdTelegramFileId.ElementAt(counter).Key);
+                            InsertToAttachmentTelegram(mess.Photo[mess.Photo.Length-1].FileId, mediaGroup.FsIdTelegramFileId.ElementAt(counter).Key);
 
                         counter++;
                     }

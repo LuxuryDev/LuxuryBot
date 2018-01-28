@@ -6,8 +6,9 @@
 
 
 @{
-MyTelegramBot.ProductPrice price = new MyTelegramBot.ProductPrice();
-price = Model.ProductPrice.FirstOrDefault();
+    Layout = "_Layout";
+    MyTelegramBot.ProductPrice price = new MyTelegramBot.ProductPrice();
+    price = Model.ProductPrice.FirstOrDefault();
 }
 
 
@@ -21,6 +22,15 @@ price = Model.ProductPrice.FirstOrDefault();
         </div>
         <p>
     
+            @if (Model.Id > 0)
+            {
+                <p>
+                    <a href="~/Product/Photos/@Model.Id">Другие фотографии</a>
+                </p>
+               
+
+            }
+
             <label>Название товара</label><br />
             @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
 
