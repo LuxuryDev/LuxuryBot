@@ -116,11 +116,19 @@ namespace MyTelegramBot.Bot
                 ProductAllPhotoMsg.BuildMessage();
 
                 //отправляем альбом с фотографиями
-                await base.SendMediaPhotoGroup(ProductAllPhotoMsg.MediaGroupPhoto);
 
-                //следом отправляем кнопку назад
-                await base.SendMessage(ProductAllPhotoMsg);
+                if (ProductAllPhotoMsg.MediaGroupPhoto != null && ProductAllPhotoMsg.MediaGroupPhoto.ListMedia != null && ProductAllPhotoMsg.MediaGroupPhoto.ListMedia.Count > 0)
+                {
+                    await base.SendMediaPhotoGroup(ProductAllPhotoMsg.MediaGroupPhoto);
 
+                    //следом отправляем кнопку назад
+                    await base.SendMessage(ProductAllPhotoMsg);
+                }
+
+                else
+                {
+                    await base.AnswerCallback("Фотографии отсутствуют");
+                }
                 return OkResult;
             }
             catch

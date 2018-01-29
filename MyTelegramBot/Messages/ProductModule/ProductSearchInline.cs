@@ -35,7 +35,7 @@ namespace MyTelegramBot.Messages
         {
             List<Product> product = new List<MyTelegramBot.Product>();
             SqlParameter param = new SqlParameter("@name", "%" + Query + "%");
-            product = db.Product.FromSql("SELECT Product.* FROM Product Inner Join Category On Category.Id=Product.CategoryId WHERE Product.Name LIKE @name OR Category.Name LIKE @name OR Product.Text LIKE @name and Product.Enable=1", param).
+            product = db.Product.FromSql("SELECT Product.* FROM Product Inner Join Category On Category.Id=Product.CategoryId WHERE Product.Name LIKE @name and Product.Enable=1 OR Category.Name LIKE @name and Product.Enable=1 OR Product.Text LIKE @name and Product.Enable=1", param).
                     Include(p=>p.ProductPrice).Include(p=>p.Stock).Include(p=>p.ProductPrice).Include(p=>p.Unit).ToList();
 
 
