@@ -25,6 +25,7 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton PaymentsEnableListBtn { get; set; }
 
+        private InlineKeyboardCallbackButton StockViewBtn { get; set; }
         private MyTelegramBot.Admin Admin { get; set; }
 
         private int FollowerId { get; set; }
@@ -44,20 +45,18 @@ namespace MyTelegramBot.Messages.Admin
                 ContactEditPanelBtn= new InlineKeyboardCallbackButton("Изменить контактные данные"+ " \ud83d\udd8a", BuildCallData(AdminBot.ContactEditCmd, AdminBot.ModuleName));
                 NoConfirmOrdersBtn = new InlineKeyboardCallbackButton("Показать необработанные заказы" + " \ud83d\udcd2", BuildCallData(AdminBot.NoConfirmOrderCmd, AdminBot.ModuleName));
                 PaymentsEnableListBtn = new InlineKeyboardCallbackButton("Выбрать доступные методы оплаты" + " \ud83d\udcb0", BuildCallData(AdminBot.PayMethodsListCmd, AdminBot.ModuleName));
-
+                StockViewBtn = new InlineKeyboardCallbackButton("Посмотреть остатки", BuildCallData("ViewStock", AdminBot.ModuleName));
             base.TextMessage = Bold("Панель администратора") + NewLine() +
-                               "1) Показать текущие остатки /currentstock" + NewLine() +
-                               "2) Показать все товары одним сообщением /allprod" + NewLine() +
-                               "3) Импорт новых товаров из CSV файла /import" + NewLine() +
-                               "4) Экспорт всех заказов в CSV файл /export" + NewLine() +
-                               "5) Экспорт истории изменения остатков /stockexport" + NewLine() +
-                               "6) Добавить новый товар /newprod" + NewLine() +
-                               "7) Создать новую категорию /newcategory" + NewLine() +
-                               "8) Выбрать доступные способы оплаты /paymethods" + NewLine() +
-                               "9) Статистика /stat" + NewLine() +
-                               "10) Список операторов / Добавить нового / Удалить /operators" + NewLine() +
-                               "11) Список доступных городов /cities" + NewLine()+
-                               "12) Бот рассылает уведомления в ЛС. Что бы выключить нажмите /off , что бы включить нажмите /on";
+                               "1) Импорт новых товаров из CSV файла /import" + NewLine() +
+                               "2) Экспорт всех заказов в CSV файл /export" + NewLine() +
+                               "3) Экспорт истории изменения остатков /stockexport" + NewLine() +
+                               "4) Добавить новый товар /newprod" + NewLine() +
+                               "5) Создать новую категорию /newcategory" + NewLine() +
+                               "6) Выбрать доступные способы оплаты /paymethods" + NewLine() +
+                               "7) Статистика /stat" + NewLine() +
+                               "8) Список операторов / Добавить нового / Удалить /operators" + NewLine() +
+                               "9) Список доступных городов /cities" + NewLine()+
+                               "10) Бот рассылает уведомления в ЛС. Что бы выключить нажмите /off , что бы включить нажмите /on";
 
                 SetInlineKeyBoard();
                 return this;
@@ -69,6 +68,10 @@ namespace MyTelegramBot.Messages.Admin
             
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                     new[]{
+                        new[]
+                        {
+                            StockViewBtn
+                        },
                 new[]
                         {
                             EditProductBtn

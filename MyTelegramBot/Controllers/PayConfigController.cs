@@ -154,10 +154,10 @@ namespace MyTelegramBot.Controllers
 
             }
 
-            ViewBag.Title = "Bitcoin Cash";
+            ViewBag.Title = "Doge";
             ViewBag.Text = "В папке с установленными Doge Core создайте бат файл.Сохраните и запустите этот бат файл и дождитесь синхронизации базы данных (Размер базы данных более 20гб)." +
                 "Содержимое бат файла:";
-            ViewBag.Bat = "bitcoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=8332";
+            ViewBag.Bat = "dogecoin-qt.exe -server -rest -rpcuser=root -rpcpassword=toor -rpcport=8332";
 
             return View("CryptoCurrency", PaymentTypeConfig);
         }

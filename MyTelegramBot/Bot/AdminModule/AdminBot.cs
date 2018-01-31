@@ -174,8 +174,8 @@ namespace MyTelegramBot.Bot.AdminModule
                         case "/allprod":
                             return await SendAllProductsView();
 
-                        case "/currentstock":
-                            return await SendCurrentStock();
+                        case "ViewStock":
+                            return await SendCurrentStock(0,MessageId);
 
                         case "/on":
                             return await OnOffPrivateMessage(true);
@@ -247,6 +247,9 @@ namespace MyTelegramBot.Bot.AdminModule
 
                     case "/newcity":
                         return await ForceReplyBuilder("Введите название города");
+
+                    case "GetCategoryStock":
+                        return await SendCurrentStock(Argumetns[0],MessageId);
 
                     default:
                         break;
@@ -524,11 +527,12 @@ namespace MyTelegramBot.Bot.AdminModule
         /// Отправить сообещние с текущими остатками по товарам
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> SendCurrentStock()
+        private async Task<IActionResult> SendCurrentStock(int CategoryId=0, int MessageId=0)
         {
             try
             {
-                await SendMessage(AdminCurrentStockMsg.BuildMessage());
+                AdminCurrentStockMsg = new AdminCurrentStockMessage(CategoryId);
+                await SendMessage(AdminCurrentStockMsg.BuildMessage(), MessageId);
                 return OkResult;
             }
             catch

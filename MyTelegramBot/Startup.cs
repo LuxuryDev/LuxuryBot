@@ -39,6 +39,7 @@ namespace MyTelegramBot
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            
 
             if (env.IsDevelopment())
             {
@@ -51,6 +52,8 @@ namespace MyTelegramBot
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseMiddleware<AdminWhiteListMiddleware>();
+
             app.UseMvc();
 
             app.UseStaticFiles();
@@ -60,10 +63,13 @@ namespace MyTelegramBot
 
             app.UseMvc(routes =>
             {
+
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+
             });
+
         }
 
 

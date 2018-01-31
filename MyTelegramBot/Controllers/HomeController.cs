@@ -221,10 +221,10 @@ namespace MyTelegramBot.Controllers
                     toSend = ConvertToFileToSend(file);
 
                 if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl!=null && file!=null) // обновляем вебхук
-                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/api/values/", toSend);
+                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/", toSend);
 
                 if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file == null) // обновляем вебхук
-                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/api/values/");
+                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/");
 
                 if (_bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
                 {

@@ -105,7 +105,9 @@ namespace MyTelegramBot.Controllers
                 
             }
 
-            return RedirectToAction("Index");
+            RedirectResult redirectResult = new RedirectResult("Editor\\" + Id);
+
+            return redirectResult;
         }
     }
 }

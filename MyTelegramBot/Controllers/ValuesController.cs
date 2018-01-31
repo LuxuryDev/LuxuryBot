@@ -12,8 +12,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace MyTelegramBot.Controllers
 {
+    [Route("bot/")]
+
     [Produces("application/json")]
-    [Route("api/Values")]
     public class ValuesController : Controller
     {
         private CategoryBot Category { get; set; }
