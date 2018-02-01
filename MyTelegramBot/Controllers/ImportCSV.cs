@@ -27,7 +27,7 @@ namespace MyTelegramBot.Controllers
             int CurrentCurrencyId = 1;
 
             using (MarketBotDbContext db = new MarketBotDbContext())
-                CurrentCurrencyId = (int)db.BotInfo.Where(b => b.Name ==Bot.GeneralFunction.GetBotName()).
+                CurrentCurrencyId = (int)db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).
                     Include(b => b.Configuration).FirstOrDefault().Configuration.CurrencyId;
 
 
@@ -52,20 +52,14 @@ namespace MyTelegramBot.Controllers
                     if (split != null && split[0] != "") // Название
                         parseStruct.Name = split[0];
 
-                    else
-                        throw new Exception("Не удалось определить навзание товара");
 
                     if (split != null && split.Length > 1) // Цена
                         parseStruct.Price = Convert.ToDouble(split[1]);
 
-                    else
-                        throw new Exception("Не удалось определить стоимость товара");
 
                     if (split != null && split.Length > 2 && split[2] != "") // Категория
                         parseStruct.CategoryName = split[2];
 
-                    else
-                        throw new Exception("Не удалось определить категорию товара");
 
                     //Остаток
                     if (split.Length > 2 && split[3] != null)
@@ -338,7 +332,7 @@ namespace MyTelegramBot.Controllers
                         TelegraphUrl = Newprod.NoteUrl,
                         Text = Newprod.Desc,
                         DateAdd = DateTime.Now,
-                        PhotoId = Newprod.PhotoId,
+                        PhotoUrl=Newprod.PhotoUrl,
                         Enable = true,
                         UnitId = Newprod.UnitId
                     };

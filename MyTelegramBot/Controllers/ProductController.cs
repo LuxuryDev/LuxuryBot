@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.AspNetCore.Hosting; // для IHostingEnvironment
+
 namespace MyTelegramBot.Controllers
 {
     [Produces("application/json")]
@@ -14,6 +17,13 @@ namespace MyTelegramBot.Controllers
         MarketBotDbContext db;
 
         Product Product { get; set; }
+
+        private readonly IHostingEnvironment _appEnvironment;
+
+        public ProductController(IHostingEnvironment appEnvironment)
+        {
+            _appEnvironment = appEnvironment;
+        }
 
         public IActionResult Index()
         {
@@ -110,6 +120,49 @@ namespace MyTelegramBot.Controllers
 
                 return redirectResult;
             }
+        }
+
+
+        [HttpGet]
+        public IActionResult ImportFaq()
+        {
+            return View();
+        }
+
+        [HttpGet]
+
+        public FileStreamResult Template()
+        {
+            string path = Path.Combine(_appEnvironment.ContentRootPath, "Files/Шаблон.csv");
+            FileStream fs = new FileStream(path, FileMode.Open);
+            string file_type = "text/plain";
+            string file_name = "Шаблон.csv";
+            return File(fs, file_type, file_name);
+      
+        }
+
+        [HttpGet]
+        public IActionResult Example()
+        {
+            string path = Path.Combine(_appEnvironment.ContentRootPath, "Files/Пример.csv");
+            FileStream fs = new FileStream(path, FileMode.Open);
+            string file_type = "text/plain";
+            string file_name = "Пример.csv";
+            return File(fs, file_type, file_name);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Import(IFormFile import)
+        {
+            if (import != null)
+            {
+                ImportCSV importCSV = new ImportCSV();
+                await importCSV.ImportToDb(import.OpenReadStream());
+                return RedirectToAction("Index");
+            }
+
+            else
+                return RedirectToAction("ImportFaq");
         }
 
         [HttpPost]

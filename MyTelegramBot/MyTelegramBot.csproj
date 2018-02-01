@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <Compile Remove="Bot\AdminModule\ImportCSVBot.cs" />
-    <Compile Remove="Controllers\ImportCSV.cs" />
     <Compile Remove="Model\CustomExceptionFilterAttribute.cs" />
   </ItemGroup>
 
@@ -57,6 +56,12 @@
 
   <ItemGroup>
     <None Update="db.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\Пример.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\Шаблон.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="UserNameFaq.png">
