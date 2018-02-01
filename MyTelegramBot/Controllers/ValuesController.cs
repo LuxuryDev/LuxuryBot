@@ -41,8 +41,6 @@ namespace MyTelegramBot.Controllers
 
         private AdminBot AdminBot { get; set; }
 
-        private ImportCSVBot ImportCSVBot { get; set; }
-
         private HelpDeskBot HelpDeskBot { get; set; }
 
         private Bot.AdminModule.OrderProccesingBot OrderProccesingBot { get; set; }
@@ -146,11 +144,6 @@ namespace MyTelegramBot.Controllers
                 Result = await MainMenuBot.Response();
             }
 
-            if (Result == null && ModuleName == null)
-            {
-                ImportCSVBot = new ImportCSVBot(update);
-                Result = await ImportCSVBot.Response();
-            }
 
             if (Result == null && ModuleName != null && ModuleName == HelpDeskBot.ModuleName || Result == null && ModuleName == null)
             {

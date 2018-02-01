@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\ImportCSV.cs" />
     <Compile Remove="Model\CustomExceptionFilterAttribute.cs" />
   </ItemGroup>
 
