@@ -23,6 +23,15 @@ namespace MyTelegramBot.Bot
 
         public const string CmdGetAddressList = "GetAddressList";
 
+        public const string SelectApartmentNumberCmd = "SelectApartmentNumber";
+
+        public const string DoneApartmentCmd = "DoneApartment";
+
+        public const string ClearApartmentNumberCmd = "ClearApartmentNumber";
+
+
+        private ApartmentMessage ApartmentMsg { get; set; }
+
         private int AddressId { get; set; }
 
         public AddressBot(Update _update) : base(_update)
@@ -67,6 +76,15 @@ namespace MyTelegramBot.Bot
 
                 case CmdDeleteAddress:
                     return await DeleteAddress();
+
+                case SelectApartmentNumberCmd:
+                    return await UpdateApartmentNumber();
+
+                case ClearApartmentNumberCmd:
+                    return await UpdateApartmentNumber();
+
+                case DoneApartmentCmd:
+                    return await DoneApartment();
 
                 default:
                     break;
@@ -136,7 +154,43 @@ namespace MyTelegramBot.Bot
         }
 
         /// <summary>
-        /// Пользователь подтвердил, что проживает по этому адресу. Значит в таблице Address заполняем поле FollowerId. Теперь этот адрес принадлежит пользователю
+        /// Обновляем номер квартиры
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> UpdateApartmentNumber()
+        {
+            ApartmentMsg = new ApartmentMessage(Argumetns[0], Argumetns[1]);
+
+            var mess = ApartmentMsg.BuildMessage();
+
+            if (mess != null)
+                await EditMessage(mess);
+
+            else
+                await AnswerCallback("");
+
+            return OkResult;
+
+
+        }
+
+        public async Task<IActionResult> DoneApartment()
+        {
+            ViewAddressListMsg = new AddressListMessage(base.FollowerId);
+
+            var mess = ViewAddressListMsg.BuildMessage();
+
+            if (mess != null)
+                await EditMessage(mess);
+
+            else
+                await AnswerCallback("");
+
+            return OkResult;
+        }
+
+        /// <summary>
+        /// Пользователь подтвердил, что проживает по этому адресу. Значит в таблице Address заполняем поле FollowerId. И отправляем сообщение с вводом комера квартиры
         /// </summary>
         /// <returns></returns>
         private async Task<IActionResult> UpdateNewAddress()
@@ -151,7 +205,9 @@ namespace MyTelegramBot.Bot
                 {
                     address.FollowerId = base.FollowerId;
                     db.SaveChanges();
-                    return await GetAddressList();
+                    ApartmentMsg = new ApartmentMessage(address.Id);
+                    await EditMessage(ApartmentMsg.BuildMessage());
+                    return OkResult;
                 }
 
                 else

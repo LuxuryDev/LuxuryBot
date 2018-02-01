@@ -16,6 +16,10 @@ namespace MyTelegramBot
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
+        public int? ZipCode { get; set; }
+
+        public string Apartment { get; set; }
+
         public Street Street { get; set; }
         public ICollection<Address> Address { get; set; }
     }

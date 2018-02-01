@@ -157,7 +157,7 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Общая стоимость: ") + total.ToString() + NewLine()
                             + Bold("Комментарий: ") + Order.Text + NewLine()
                             + Bold("Способ получения заказа: ") + " Доставка" + NewLine()
-                            + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number + NewLine()
+                            + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", д. " + Address.House.Number+", "+Address.House.Apartment + NewLine()
                             + Bold("Время: ") + Order.DateAdd.ToString() +NewLine()
                             + Bold("Способ оплаты: ") + PaymentMethodName + NewLine() 
                             +Bold("Оформлено через: ")+"@" + Order.BotInfo.Name +NewLine()

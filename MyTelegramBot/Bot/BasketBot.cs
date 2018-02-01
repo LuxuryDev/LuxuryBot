@@ -101,11 +101,15 @@ namespace MyTelegramBot.Bot
         private async Task<IActionResult> ViewBasket(int Message=0)
         {
             ViewBasketMsg.BuildMessage();
-            if (ViewBasketMsg!=null && await SendMessage(ViewBasketMsg,Message) != null)
-                return base.OkResult;
+            var mess= ViewBasketMsg.BuildMessage();
+
+            if (mess != null && mess.TextMessage != null)
+                await SendMessage(ViewBasketMsg, Message);
 
             else
-                return base.NotFoundResult;
+                await AnswerCallback("Корзина пуста!", true);
+
+            return OkResult;
         }
 
         private async Task<IActionResult> ClearBasket()

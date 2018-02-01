@@ -517,6 +517,10 @@ namespace MyTelegramBot
                     .WithMany(p => p.House)
                     .HasForeignKey(d => d.StreetId)
                     .HasConstraintName("FK_House_Street");
+
+                entity.Property(e => e.Apartment)
+                        .HasMaxLength(10)
+                        .IsUnicode(false);
             });
 
             modelBuilder.Entity<Invoice>(entity =>

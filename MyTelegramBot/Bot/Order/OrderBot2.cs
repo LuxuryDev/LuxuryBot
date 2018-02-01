@@ -402,11 +402,14 @@ namespace MyTelegramBot.Bot
 
             var message = OrderPreviewMsg.BuildMessage();
 
-            if (message != null && await EditMessage(message) != null)
-                return base.OkResult;
+            if (message != null)
+                await EditMessage(message);
 
-            else
-                return base.NotFoundResult;
+            if (message == null)
+                await AnswerCallback("Корзина пуста", true);
+
+            return OkResult;
+
         }
 
         /// <summary>

@@ -196,7 +196,8 @@ namespace MyTelegramBot.Messages
                         Number = number,
                         StreetId = streetid,
                         Latitude = latitude,
-                        Longitude = longitude
+                        Longitude = longitude,
+                        Apartment=String.Empty
                     };
 
                     db.House.Add(house);

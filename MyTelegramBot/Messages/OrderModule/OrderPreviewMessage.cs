@@ -97,7 +97,7 @@ namespace MyTelegramBot.Messages
                         if(OrderTemp.AddressId != null)
                         base.TextMessage = "Информация о заказе:" +
                                     NewLine() + PositionInfo +
-                                    NewLine() + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", " + Address.House.Number +
+                                    NewLine() + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", д. " + Address.House.Number +","+Address.House.Apartment+
                                     NewLine()+Bold("Стоимость доставки:")+ ShipPice.ToString()+
                                     NewLine()+  Bold("Способ оплаты:")+PaymentMethod+
                                     NewLine() + Bold("Кoмментарий к заказу: ") + Desc;

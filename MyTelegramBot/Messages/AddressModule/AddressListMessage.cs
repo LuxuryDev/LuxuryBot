@@ -43,7 +43,7 @@ namespace MyTelegramBot.Messages
                     var Street = address.House.Street;
                     var City = address.House.Street.City;
 
-                    string Adr = City.Name + ", " + Street.Name + ", " + House.Number;
+                    string Adr = City.Name + ", " + Street.Name + ", д. " + House.Number+", " +House.Apartment;
                     AddressListBtn[counter] = new InlineKeyboardCallbackButton[1];
                     AddressListBtn[counter][0] = AddressBtn(Adr, Convert.ToInt32(address.Id));
                     counter++;
