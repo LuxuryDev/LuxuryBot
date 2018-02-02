@@ -359,7 +359,7 @@ namespace MyTelegramBot
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.Property(e => e.Text)
-                    .HasMaxLength(500)
+                    .HasMaxLength(2500)
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Order)

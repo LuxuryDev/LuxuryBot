@@ -650,7 +650,9 @@ namespace MyTelegramBot.Bot.AdminModule
                         FollowerId = FollowerId,
                         Timestamp = DateTime.Now,
                         Text = Text,
-                        Value = value
+                        Value = value,
+                        OrderId= OrderId,
+                        ActionId=ActionId
 
                     };
 

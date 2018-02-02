@@ -8,7 +8,7 @@
 @using (Html.BeginForm("Get", "Order", FormMethod.Get))
 {
     <label>Введите номер заказа</label>
-    @Html.TextBox("Id")
+    @Html.TextBox("Number")
     <input type="submit" value="Открыть" class="btn btn-success" />
 }
 
@@ -16,7 +16,7 @@
 
 
 <table class="table">
-    <tr>
+    <tr > 
         <td>Номер заказа</td>
         <td>Комментарий</td>
         <td>Дата</td>
@@ -26,7 +26,7 @@
     @foreach (var order in Model)
     {
         <tr>
-            <td><a href="~/Order/Get/@order.Number">@("Заказ №"+@order.Number)</a></td>
+            <td><a href="~/Order/Get/Get?Number=@order.Number">@("Заказ №"+@order.Number)</a></td>
             <td>@order.Text</td>
             <td>@order.DateAdd</td>
             <td><a href=@("https://t.me/" + order.BotInfo.Name)>@order.BotInfo.Name</a></td>

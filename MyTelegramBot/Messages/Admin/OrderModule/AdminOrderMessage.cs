@@ -195,7 +195,9 @@ namespace MyTelegramBot.Messages.Admin
 
                 //Детали Отзыва к заказу
                 if (Order != null && Order.FeedBack != null && Order.FeedBack.Text != null && Order.FeedBack.Text != "")
-                    base.TextMessage += NewLine() + NewLine() + Bold("Отзыв к заказу:") + NewLine() + Italic(Order.FeedBack.Text + " | Время: " + Order.FeedBack.DateAdd.ToString());
+                    base.TextMessage += NewLine() + 
+                        NewLine() + Bold("Отзыв к заказу:") + 
+                        NewLine() + Italic(Order.FeedBack.Text +" | Оценка: " +Order.FeedBack.RaitingValue.ToString()+ " из 5 | Время: " + Order.FeedBack.DateAdd.ToString());
 
                 InWorkFollowerId = WhoInWork(Order);
 

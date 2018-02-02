@@ -176,10 +176,7 @@ namespace MyTelegramBot.Controllers
             {
                 using (MarketBotDbContext db = new MarketBotDbContext())
                 {
-                    var builder = new ConfigurationBuilder()
-                    .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json");
-                    string name = builder.Build().GetSection("BotName").Value;
+                    string name = GeneralFunction.GetBotName();
 
                     if (update.CallbackQuery != null && update.InlineQuery == null)
                     {

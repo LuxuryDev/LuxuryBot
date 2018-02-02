@@ -26,7 +26,7 @@
     @foreach (var help in Model)
     {
         <tr>
-            <td><a href="~/Help/Get/@help.Number">@("Заявка №" + help.Number)</a></td>
+            <td><a href="~/Help/Get/Number?=@help.Number">@("Заявка №" + help.Number)</a></td>
             <td>@help.Text</td>
             <td>@help.Timestamp</td>
             <td><a href=@("https://t.me/" + help.BotInfo.Name)>@help.BotInfo.Name</a></td>

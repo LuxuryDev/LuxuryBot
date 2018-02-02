@@ -53,11 +53,10 @@
                         <label>Время:</label>
                         @Html.DisplayFor(m => m.Item1.DateAdd)
                     </p>
+
                     <p>
-                        <label>
-                            Комментарий к заказу:
-                        </label>
-                        @Html.DisplayFor(m => m.Item1.Text)
+                        <label>Стоимость заказа:</label>
+                        @ViewBag.TotalPrice
                     </p>
                     
                         @if (Model.Item1.OrderAddress != null)
@@ -68,20 +67,44 @@
                                 </label>
                                 @Html.DisplayName(Model.Item1.OrderAddress.Adress.House.Street.City.Name + ", " + Model.Item1.OrderAddress.Adress.House.Street.Name + ", " + Model.Item1.OrderAddress.Adress.House.Number)
                             </p>
+
+                            <p>
+                                <label>Стоимость доставки:</label>
+                                @Html.DisplayName(Model.Item1.OrderAddress.ShipPriceValue.ToString())
+                            </p>
+
                         }
+
+                        @if (Model.Item1.PickupPoint != null)
+                        {
+                            <p>
+                                <label>Пункт самовывоза</label>
+                                @Html.DisplayName(Model.Item1.PickupPoint.Name)
+                            </p>
+
+                        }
+                    <p>
+
+                    </p>
+
                     <p>
                         <label>
                             Пользователь:
                         </label>
                         <a href=@("https://t.me/"+ Model.Item1.Follower.UserName)>@(@Model.Item1.Follower.FirstName + " " + @Model.Item1.Follower.LastName)</a>
                     </p>
-
+                    <p>
+                        <label>
+                            Комментарий к заказу:
+                        </label>
+                        @Html.DisplayFor(m => m.Item1.Text)
+                    </p>
                 </div>
                 <div class="col-md-6">
                     @if (Model.Item1.Invoice != null)
                     {
                         <div>
-                            <h4>Счет на оплату № @Model.Item1.Invoice.InvoiceNumber</h4>
+                            <h4>Счет на оплату </h4>
                             <p>
                                 <label>Сумма:</label>
                                 @Html.DisplayName(Model.Item1.Invoice.Value.ToString())
@@ -106,10 +129,15 @@
                             </p>
                             <p>
                                 <label>
+                                    Оплатить не позднее
+                                </label>
+                                @Model.Item1.Invoice.CreateTimestamp.Value.AddHours(@Model.Item1.Invoice.InvoiceNumber.Value)
+                            </p>
+                            <p>
+                                <label>
                                     Оплачен:
                                 </label>
-                                @Html.DisplayFor(m => m.Item1.Invoice.Paid)
-                         
+                               @Html.CheckBoxFor(m => m.Item1.Invoice.Paid)
                             </p>
                         </div>
                     }
@@ -152,7 +180,7 @@
                         <td>Товар</td>
                         <td>Цена</td>
                         <td>Количество</td>
-                        <td>Общая стоимость</td>
+                        <td>Итого</td>
                     </tr>
                     @foreach (var item in Model.Item1.OrderProduct)
                     {
@@ -265,6 +293,7 @@
             {
                 <h3>@Model.Item1.FeedBack.DateAdd</h3>
                 <blockquote>@Model.Item1.FeedBack.Text </blockquote>
+                <h4>Оценка: @Model.Item1.FeedBack.RaitingValue</h4>
 
 
             }

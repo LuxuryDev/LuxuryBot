@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="col-md-6">
-    
+        <input type="hidden" name="Id" id="Id" value="@Model.Id" />
         <h4>Заявка № @Model.Number</h4>
         <p>
             <label>Время:</label>
@@ -29,9 +29,17 @@
         <p>
             <label>
                 Выполнен:
+                @Html.CheckBoxFor(m=>m.Closed)
             </label>
         </p>
 
+        <p>
+            <label>Влоежения</label>
+            <a href="" target="_blank" onclick="ViewAttach();return false">
+               Посмотреть вложения
+            </a>
+
+        </p>
     </div>
 </div>
 
@@ -66,6 +74,22 @@
     <div class="tab-pane" id="done">
         @if (Model.HelpDeskAnswer != null)
         {
+            <h3>Добавить комментарий</h3>
+
+            <p>
+                <label>Комментарий:</label> <br />
+                @Html.TextArea("Comment", new { style = "min-width: 100%" })
+            </p>
+           <p>
+               <label>
+                   Выполнено:
+               </label>
+               @Html.CheckBox("Closed", false)
+           </p>
+           <p>
+               <button type="button" id="AddComment" class="btn btn-success btn-block" onclick="AddComment();">Добавить</button>
+           </p>
+
             <table class="table">
                 <tr>
                     <td>Пользователь</td>
@@ -84,3 +108,52 @@
         }
     </div>
 </div>
+
+<script type="text/javascript">
+
+
+    function ViewAttach() {
+        $.ajax({
+            type: "Get",
+            url: '/Help/ViewAttach?id=' + $("#Id").val(), //
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            alert(data);
+            
+
+        }).error(function (data) {
+            // если с ответом сервера чтото пошло не так...
+        })
+
+
+    }
+
+    function AddComment() {
+
+        var Config = {
+            'HelpDeskId': $("#Id").val(),
+            'Closed': $('#Closed').prop("checked"),
+            'Text':$('#Comment').val()
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '/Help/AddComment',
+            data: JSON.stringify(Config),
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json"
+        }).done(function (data) {
+            alert(data);
+        })
+
+    }
+</script>

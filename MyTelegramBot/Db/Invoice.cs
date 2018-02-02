@@ -19,7 +19,7 @@ namespace MyTelegramBot
         public string Comment { get; set; }
         public double? Value { get; set; }
         public int? InvoiceNumber { get; set; }
-        public bool? Paid { get; set; }
+        public bool Paid { get; set; }
 
         public PaymentType PaymentType { get; set; }
         public ICollection<Orders> Orders { get; set; }

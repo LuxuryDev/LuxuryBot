@@ -15,7 +15,7 @@ namespace MyTelegramBot
         public DateTime? Timestamp { get; set; }
         public int? FollowerId { get; set; }
         public string Text { get; set; }
-        public bool? Closed { get; set; }
+        public bool Closed { get; set; }
         public DateTime? ClosedTimestamp { get; set; }
 
         public Follower Follower { get; set; }

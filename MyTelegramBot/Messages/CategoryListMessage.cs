@@ -42,6 +42,12 @@ namespace MyTelegramBot.Messages
         //флаг который показывает отображать ли кнопку "Показать все все товары"
         private bool VisableAllProductBtn { get; set; }
 
+        private InlineKeyboardCallbackButton NextPageBtn { get; set; }
+
+        private InlineKeyboardCallbackButton PreviusPageBtn { get; set; }
+
+        private const int PageSize = 5;
+
         /// <summary>
         /// Для меню. Показывает кнопки всех категорий и кнопку "Показать весь ассортимент"
         /// </summary>
@@ -53,6 +59,17 @@ namespace MyTelegramBot.Messages
             BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.MainMenuBot.ModuleName));
             
         }
+
+
+        /// <summary>
+        /// Конструктор для пролистования категорий
+        /// </summary>
+        /// <param name="NextPageCatId"></param>
+        public CategoryListMessage(int NextPageCatId)
+        {
+
+        }
+
 
         /// <summary>
         /// Другое действие
@@ -85,7 +102,7 @@ namespace MyTelegramBot.Messages
         public CategoryListMessage BuildMessage()
         {           
             using (MarketBotDbContext db=new MarketBotDbContext())
-                Categorys=db.Category.ToList();
+                Categorys=db.Category.Where(c=>c.Enable).ToList();
 
             if (VisableAllProductBtn)
             {
@@ -111,7 +128,14 @@ namespace MyTelegramBot.Messages
             {
                 foreach (Category cat in Categorys)
                 {
-                    if (EditProductId > 0) // Если меняем категорию в которой находится товар. Для админа
+                    if (count > PageSize) // Если категорий больше 5. То делаем кнопку Далее и выходим из цикла
+                    {
+                        NextPageBtn = new InlineKeyboardCallbackButton("Далее", BuildCallData("NxtCatPage", Bot.CategoryBot.ModuleName, cat.Id));
+                        PreviusPageBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("PrvCatPage", Bot.CategoryBot.ModuleName, Categorys.Last().Id));
+                        break;
+                    }
+
+                    if (EditProductId > 0 && count <= PageSize) // Если меняем категорию в которой находится товар. Для админа
                     {
                         InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
                             base.BuildCallData(Cmd, ModuleName,EditProductId,cat.Id));
@@ -119,7 +143,7 @@ namespace MyTelegramBot.Messages
                         CategoryListBtn[count][0] = button;
                     }
 
-                    else 
+                    if (EditProductId <= 0 && count<=PageSize)
                     {
                         InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
                             base.BuildCallData(Cmd,ModuleName ,cat.Id));
@@ -133,6 +157,8 @@ namespace MyTelegramBot.Messages
                 base.TextMessage = "Выберите категорию";
                 CategoryListBtn[CategoryListBtn.Length-1] = new InlineKeyboardCallbackButton[1];
                 CategoryListBtn[CategoryListBtn.Length-1][0] = BackBtn;
+
+                
 
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(CategoryListBtn);
             }

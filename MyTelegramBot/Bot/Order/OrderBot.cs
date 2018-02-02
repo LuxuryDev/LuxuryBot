@@ -57,6 +57,11 @@ namespace MyTelegramBot.Bot
 
         private MethodOfObtainingMessage MethodOfObtainingMsg { get; set; }
 
+        /// <summary>
+        /// сообщение с кнопками оценок для отзыва к заказу от 1 до 5
+        /// </summary>
+        private RaitingMessage RaitingMsg { get; set; }
+
         private int OrderId { get; set; }
 
         private Orders Order { get; set; }
@@ -148,6 +153,11 @@ namespace MyTelegramBot.Bot
         public const int IsPickupId= 2;
 
         public const string IsPickupName = "Самовывоз";
+
+        /// <summary>
+        /// Оценка к отзыву
+        /// </summary>
+        public const string SelectRaitingCmd = "SelectRaiting";
 
         int AddressId { get; set; }
 
@@ -261,6 +271,9 @@ namespace MyTelegramBot.Bot
                 case SelectPickupPointCmd:
                     return await SelectPickupPoint(Argumetns[0]);
 
+                case SelectRaitingCmd:
+                    return await SelectRaiting();
+
                 default:
                     break;
                     
@@ -288,7 +301,7 @@ namespace MyTelegramBot.Bot
 
             ///Добавить отзыв
             if (base.OriginalMessage.Contains(ForceReplyAddFeedBack))
-                return await SaveNewFeedBack();
+                return await AddNewFeedBack();
 
 
             else

@@ -14,6 +14,45 @@ namespace MyTelegramBot.Bot
     public partial class OrderBot
     {
         /// <summary>
+        /// Добавляем оценку к отзыву
+        /// </summary>
+        /// <param name="FeedBackId"></param>
+        /// <param name="RaitingValue"></param>
+        /// <param name="MessageId"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> SelectRaiting()
+        {
+            if (Argumetns!=null && Argumetns.Count==2 && Argumetns[0]>0)
+            {
+                using (MarketBotDbContext db = new MarketBotDbContext())
+                {
+                    var feed = db.FeedBack.Find(Argumetns[0]);
+
+                    feed.RaitingValue = Argumetns[1];
+
+                    db.Update(feed);
+
+                    db.SaveChanges();
+
+                    await SendMessage(new BotMessage { TextMessage = "Ваш отзыв сохранен. /start" }, MessageId);
+
+
+                    var Admins = db.Admin.Include(a => a.Follower).ToList();
+
+                    NewFeedBackAddedMsg = new NewFeedBackAddedMessage(Convert.ToInt32(feed.OrderId)); 
+                    // Уведомляем всех о новом отзыве
+                    NewFeedBackAddedMsg.BuildMessage();
+                    await SendMessageAllBotEmployeess(NewFeedBackAddedMsg);
+
+                    return OkResult;
+                }
+            }
+
+            else
+                return NotFoundResult;
+        }
+
+        /// <summary>
         /// Пользователь выбрал адрес доставки. Сохраняем
         /// </summary>
         /// <param name="AddressId"></param>
@@ -605,7 +644,7 @@ namespace MyTelegramBot.Bot
         /// Добавить отзыв к заказу
         /// </summary>
         /// <returns></returns>
-        private async Task<IActionResult> SaveNewFeedBack()
+        private async Task<IActionResult> AddNewFeedBack()
         {
             int orderid = 0;
             using (MarketBotDbContext db = new MarketBotDbContext())
@@ -636,13 +675,10 @@ namespace MyTelegramBot.Bot
 
                         if (db.SaveChanges() > 0)
                         {
-                            await SendMessage(new BotMessage { TextMessage = "Ваш отзыв добавлен. Спасибо!" });
+                            RaitingMsg = new RaitingMessage(feedBack.Id);
+                            //отправляем сообщение с кнопками от 1 до 5
+                            await EditMessage(RaitingMsg.BuildMessage());
 
-                            var Admins = db.Admin.Include(a => a.Follower).ToList();
-
-                            NewFeedBackAddedMsg = new NewFeedBackAddedMessage(order); // Уведомляем всех о новом отзыве
-                            NewFeedBackAddedMsg.BuildMessage();
-                            await SendMessageAllBotEmployeess(NewFeedBackAddedMsg);
 
                         }
 

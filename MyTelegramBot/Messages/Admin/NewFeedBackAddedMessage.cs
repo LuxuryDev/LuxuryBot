@@ -14,29 +14,40 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton OpenOrderBtn { get; set; }
 
+        private int OrderId { get; set; }
         public NewFeedBackAddedMessage(Orders order)
         {
             this.Order = order;
         }
 
+        public NewFeedBackAddedMessage(int OrderId)
+        {
+            this.OrderId = OrderId;
+        }
+
         public NewFeedBackAddedMessage BuildMessage()
         {
-            if (Order!=null)
-            {
-                base.TextMessage = Bold("Новый отзыв:") + NewLine() + "Добавлен отзыв к заказу №" + Order.Number.ToString();
-                OpenOrderBtn = new InlineKeyboardCallbackButton("Посмотреть детали заказа", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, OrderProccesingBot.ModuleName, Order.Id));
+            if (Order == null && OrderId > 0)
+                using (MarketBotDbContext db = new MarketBotDbContext())
+                    this.Order = db.Orders.Where(o => o.Id == OrderId).Include(o => o.FeedBack).FirstOrDefault();
 
-                base.MessageReplyMarkup = new InlineKeyboardMarkup(
-                new[]{
-                new[]
+
+                    if (Order != null)
+                    {
+                        base.TextMessage = Bold("Новый отзыв:") + NewLine() + "Добавлен отзыв к заказу №" + Order.Number.ToString();
+                        OpenOrderBtn = new InlineKeyboardCallbackButton("Посмотреть детали заказа", BuildCallData(OrderProccesingBot.CmdGetOrderAdmin, OrderProccesingBot.ModuleName, Order.Id));
+
+                        base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                        new[]{
+                        new[]
                         {
                             OpenOrderBtn
                         },
 
 
-                });
+                        });
 
-            }
+                    }
 
             return this;
         }
