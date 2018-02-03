@@ -95,13 +95,13 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton YesBtn(int FollowerId)
         {
-            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Да", BuildCallData(Bot.AddressBot.SaveChangesAddressCmd,AddressBot.ModuleName,this.AddressId));
+            InlineKeyboardCallbackButton btn = BuildInlineBtn("Да", BuildCallData(Bot.AddressBot.SaveChangesAddressCmd,AddressBot.ModuleName,this.AddressId),base.DoneEmodji);
             return btn; 
         }
 
         private InlineKeyboardCallbackButton NoBtn()
         {
-            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Нет", BuildCallData(Bot.AddressBot.CmdDeleteAddress, AddressBot.ModuleName, this.AddressId));
+            InlineKeyboardCallbackButton btn =BuildInlineBtn("Нет", BuildCallData(Bot.AddressBot.CmdDeleteAddress, AddressBot.ModuleName, this.AddressId),base.CrossEmodji);
             return btn;
         }
 

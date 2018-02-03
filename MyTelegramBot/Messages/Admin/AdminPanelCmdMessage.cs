@@ -13,6 +13,9 @@ using MyTelegramBot.Bot.AdminModule;
 namespace MyTelegramBot.Messages.Admin
 {
 
+    /// <summary>
+    /// Панель администратора
+    /// </summary>
     public class AdminPanelCmdMessage:Bot.BotMessage
     {
         private InlineKeyboardCallbackButton EditProductBtn { get; set; }
@@ -40,22 +43,21 @@ namespace MyTelegramBot.Messages.Admin
         {
 
 
-                EditProductBtn = new InlineKeyboardCallbackButton("Изменить товар"+ " \ud83d\udd8a", BuildCallData(AdminBot.ProductEditCmd, AdminBot.ModuleName));
-                EditCategoryBtn = new InlineKeyboardCallbackButton("Изменить категорию"+ " \ud83d\udd8a", BuildCallData(AdminBot.CategoryEditCmd, CategoryEditBot.ModuleName));
+                EditProductBtn = new InlineKeyboardCallbackButton("Изменить товар"+ " \ud83d\udd8a", BuildCallData(ProductEditBot.ProductEditorCmd, ProductEditBot.ModuleName));
+                EditCategoryBtn = new InlineKeyboardCallbackButton("Изменить категорию"+ " \ud83d\udd8a", BuildCallData(CategoryEditBot.CategoryEditorCmd, CategoryEditBot.ModuleName));
                 ContactEditPanelBtn= new InlineKeyboardCallbackButton("Изменить контактные данные"+ " \ud83d\udd8a", BuildCallData(AdminBot.ContactEditCmd, AdminBot.ModuleName));
                 NoConfirmOrdersBtn = new InlineKeyboardCallbackButton("Показать необработанные заказы" + " \ud83d\udcd2", BuildCallData(AdminBot.NoConfirmOrderCmd, AdminBot.ModuleName));
                 PaymentsEnableListBtn = new InlineKeyboardCallbackButton("Выбрать доступные методы оплаты" + " \ud83d\udcb0", BuildCallData(AdminBot.PayMethodsListCmd, AdminBot.ModuleName));
                 StockViewBtn = new InlineKeyboardCallbackButton("Посмотреть остатки", BuildCallData("ViewStock", AdminBot.ModuleName));
             base.TextMessage = Bold("Панель администратора") + NewLine() +
-                               "1) Импорт новых товаров из CSV файла /import" + NewLine() +
-                               "2) Экспорт всех заказов в CSV файл /export" + NewLine() +
-                               "3) Экспорт истории изменения остатков /stockexport" + NewLine() +
-                               "4) Добавить новый товар /newprod" + NewLine() +
-                               "5) Создать новую категорию /newcategory" + NewLine() +
-                               "6) Выбрать доступные способы оплаты /paymethods" + NewLine() +
-                               "7) Список операторов / Добавить нового / Удалить /operators" + NewLine() +
-                               "8) Список доступных городов /cities" + NewLine()+
-                               "9) Бот рассылает уведомления в ЛС. Что бы выключить нажмите /off , что бы включить нажмите /on";
+                               "1) Экспорт всех заказов в CSV файл /export" + NewLine() +
+                               "2) Экспорт истории изменения остатков /stockexport" + NewLine() +
+                               "3) Добавить новый товар /newprod" + NewLine() +
+                               "4) Создать новую категорию /newcategory" + NewLine() +
+                               "5) Выбрать доступные способы оплаты /paymethods" + NewLine() +
+                               "6) Список операторов / Добавить нового / Удалить /operators" + NewLine() +
+                               "7) Список доступных городов /cities" + NewLine()+
+                               "8) Бот рассылает уведомления в ЛС. Что бы выключить нажмите /off , что бы включить нажмите /on";
 
                 SetInlineKeyBoard();
                 return this;

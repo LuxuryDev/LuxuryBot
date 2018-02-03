@@ -16,9 +16,6 @@ namespace MyTelegramBot.Messages.Admin
     {
         private InlineKeyboardCallbackButton [][] MethodsBtns { get; set; }
 
-        const string CheckEmodji = "\u2714\ufe0f";
-
-        const string UnCheckEmodji = "\ud83d\udd32";
 
         public AdminPayMethodsSettings BuildMessage()
         {
@@ -38,10 +35,10 @@ namespace MyTelegramBot.Messages.Admin
                     MethodsBtns[counter]= new InlineKeyboardCallbackButton[1];
 
                     if (pt.Enable==true)
-                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name+" "+CheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
+                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name+" "+base.CheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
 
                     else
-                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name + " "+ UnCheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
+                        MethodsBtns[counter][0] = new InlineKeyboardCallbackButton(pt.Name + " "+ base.UnCheckEmodji, BuildCallData(AdminBot.PaymentTypeEnableCmd, AdminBot.ModuleName, pt.Id));
 
                     counter++;
                 }

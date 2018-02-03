@@ -20,6 +20,129 @@ namespace MyTelegramBot.Bot
 {
     public class BotMessage
     {
+        /// <summary>
+        /// ✔️
+        /// </summary>
+        protected string CheckEmodji = "\u2714\ufe0f";
+
+        protected string UnCheckEmodji = "\ud83d\udd32";
+
+        /// <summary>
+        /// 🔹 - синий ромб
+        /// </summary>
+        protected string BlueRhombus = "\ud83d\udd39";
+
+        /// <summary>
+        /// 🔸 - золотой ромб
+        /// </summary>
+        protected string GoldRhobmus = "\ud83d\udd38";
+
+        /// <summary>
+        /// ⚠️ - Воскл. знак
+        /// </summary>
+        protected string WarningEmodji = "\u26a0\ufe0f";
+
+        /// <summary>
+        /// 🛒 - Корзина
+        /// </summary>
+        protected string BasketEmodji = "\ud83d\uded2";
+
+        /// <summary>
+        /// ⚙️ - Шестеренка
+        /// </summary>
+        protected string CogwheelEmodji = "\u2699\ufe0f";
+
+        /// <summary>
+        /// 🖊 - Ручка
+        /// </summary>
+        protected string PenEmodji = "\ud83d\udd8a";
+
+        /// <summary>
+        /// 🏠 - Домик
+        /// </summary>
+        protected string HouseEmodji = "\ud83c\udfe0";
+
+        /// <summary>
+        /// 🚚 - Машина
+        /// </summary>
+        protected string CarEmodji = "\ud83d\ude9a";
+
+        /// <summary>
+        /// 🙋🏻‍♂️ - Человек
+        /// </summary>
+        protected string ManEmodji = "\ud83d\ude4b\ud83c\udffb\u200d\u2642\ufe0f";
+
+        /// <summary>
+        /// ⭐️- Звезда
+        /// </summary>
+        protected string StartEmodji = "\u2b50\ufe0f";
+
+        /// <summary>
+        /// ➡️
+        /// </summary>
+        protected string NextEmodji = "\u27a1\ufe0f";
+
+        /// <summary>
+        /// ⬅️
+        /// </summary>
+        protected string PreviuosEmodji = "\u2b05\ufe0f";
+
+        /// <summary>
+        /// ◀️
+        /// </summary>
+        protected string Previuos2Emodji = "\u25c0\ufe0f";
+
+        /// <summary>
+        /// ▶️
+        /// </summary>
+        protected string Next2Emodji = "\u25b6\ufe0f";
+
+        /// <summary>
+        /// 💰 - мешочек с деньгами
+        /// </summary>
+        protected string CashEmodji = "\ud83d\udcb0";
+
+        /// <summary>
+        /// ⚖️ весы
+        /// </summary>
+        protected string WeigherEmodji = "\u2696\ufe0f";
+
+        /// <summary>
+        /// 🖼 - картина
+        /// </summary>
+        protected string PictureEmodji = "\ud83d\uddbc";
+
+        /// <summary>
+        /// 📝 - тетрадь с ручкой
+        /// </summary>
+        protected string NoteBookEmodji = "\ud83d\udcdd";
+
+        /// <summary>
+        /// 📉 - график
+        /// </summary>
+        protected string DepthEmodji = "\ud83d\udcc9";
+
+        /// <summary>
+        /// 📤 - отправить
+        /// </summary>
+        protected string SenderEmodji = "\ud83d\udce4";
+
+        /// <summary>
+        /// 📜 - лист
+        /// </summary>
+        protected string PaperEmodji = "\ud83d\udcdc";
+
+
+        /// <summary>
+        /// ❌ - красный крест
+        /// </summary>
+        protected string CrossEmodji = "\u274c";
+
+        /// <summary>
+        /// ✅ 
+        /// </summary>
+        protected string DoneEmodji = "\u2705";
+
         public BotMessage()
         {
           
@@ -49,6 +172,19 @@ namespace MyTelegramBot.Bot
 
 
         public MediaFile MediaFile { get; set; }
+
+        protected InlineKeyboardCallbackButton BuildInlineBtn(string Text, string CallData, string Emodji=null, bool TextFirst=true)
+        {
+            if(Emodji!=null && TextFirst)
+                return new InlineKeyboardCallbackButton(Text + " " + Emodji, CallData);
+
+            if (Emodji != null && !TextFirst)
+                return new InlineKeyboardCallbackButton(Emodji+" " + Text, CallData);
+
+            else
+                return new InlineKeyboardCallbackButton(Text, CallData);
+
+        }
 
         public string BuildCallData (string CommandName,string ModuleName , params int [] Argument)
         {

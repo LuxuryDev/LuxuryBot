@@ -76,38 +76,38 @@ namespace MyTelegramBot.Messages.Admin
 
                 base.BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(AdminBot.AdminProductInCategoryCmd, AdminBot.ModuleName, Product.CategoryId));
 
-                ProductEditNameBtn = new InlineKeyboardCallbackButton("Название", BuildCallData(ProductEditBot.ProductEditNameCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditNameBtn = BuildInlineBtn("Название", BuildCallData(ProductEditBot.ProductEditNameCmd, ProductEditBot.ModuleName, ProductId),base.PenEmodji);
 
-                ProductEditCategoryBtn = new InlineKeyboardCallbackButton("Категория", BuildCallData(ProductEditBot.ProductEditCategoryCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditCategoryBtn = BuildInlineBtn("Категория", BuildCallData(ProductEditBot.ProductEditCategoryCmd, ProductEditBot.ModuleName, ProductId), base.PenEmodji);
 
-                ProductEditPriceBtn = new InlineKeyboardCallbackButton("Стоимость", BuildCallData(ProductEditBot.ProductEditPriceCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditPriceBtn = BuildInlineBtn("Стоимость", BuildCallData(ProductEditBot.ProductEditPriceCmd, ProductEditBot.ModuleName, ProductId), base.CashEmodji);
 
-                ProductEditStockBtn = new InlineKeyboardCallbackButton("Остаток", BuildCallData(ProductEditBot.ProductEditStockCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditStockBtn = BuildInlineBtn("Остаток", BuildCallData(ProductEditBot.ProductEditStockCmd, ProductEditBot.ModuleName, ProductId),base.DepthEmodji);
 
-                ProductEditTextBtn = new InlineKeyboardCallbackButton("Описание", BuildCallData(ProductEditBot.ProductEditTextCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditTextBtn = BuildInlineBtn("Описание", BuildCallData(ProductEditBot.ProductEditTextCmd, ProductEditBot.ModuleName, ProductId),base.NoteBookEmodji);
 
-                ProductEditPhotoBtn = new InlineKeyboardCallbackButton("Фотография", BuildCallData(ProductEditBot.ProductEditPhotoCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditPhotoBtn = BuildInlineBtn("Фотография", BuildCallData(ProductEditBot.ProductEditPhotoCmd, ProductEditBot.ModuleName, ProductId),base.PictureEmodji);
 
-                ProductEditUrlBtn = new InlineKeyboardCallbackButton("Заметка", BuildCallData(ProductEditBot.ProductEditUrlCmd, ProductEditBot.ModuleName, ProductId));
+                ProductEditUrlBtn = BuildInlineBtn("Заметка", BuildCallData(ProductEditBot.ProductEditUrlCmd, ProductEditBot.ModuleName, ProductId),base.PenEmodji);
 
-                AdminPanelBtn = new InlineKeyboardCallbackButton("Панель администратора", BuildCallData(AdminBot.BackToAdminPanelCmd,AdminBot.ModuleName));
+                AdminPanelBtn = BuildInlineBtn("Панель администратора", BuildCallData(AdminBot.BackToAdminPanelCmd,AdminBot.ModuleName),base.CogwheelEmodji);
 
-                UnitBtn = new InlineKeyboardCallbackButton("Ед.изм.", BuildCallData(ProductEditBot.ProudctUnitCmd, ProductEditBot.ModuleName, ProductId));
+                UnitBtn = BuildInlineBtn("Ед.изм.", BuildCallData(ProductEditBot.ProudctUnitCmd, ProductEditBot.ModuleName, ProductId),base.WeigherEmodji);
 
                 //CurrencyBtn = new InlineKeyboardCallbackButton("Валюта", BuildCallData(ProductEditBot.ProudctCurrencyCmd, ProductEditBot.ModuleName, ProductId));
 
-                InlineImageBtn = new InlineKeyboardCallbackButton("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductEditBot.ModuleName, ProductId));
+                InlineImageBtn = BuildInlineBtn("Фото в Inline", BuildCallData(ProductEditBot.ProductInlineImageCmd, ProductEditBot.ModuleName, ProductId),base.PictureEmodji);
 
                 base.TextMessage = Product.AdminMessage();
 
                 if (Product.Enable == true)
-                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователей", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId));
+                    ProductEditEnableBtn = BuildInlineBtn("Активно", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId),base.CheckEmodji);
 
                 else
-                    ProductEditEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId));
+                    ProductEditEnableBtn = BuildInlineBtn("Активно", BuildCallData(ProductEditBot.ProductEditEnableCmd, ProductEditBot.ModuleName, ProductId),base.UnCheckEmodji);
 
                 if (Product.Enable == true)
-                    OpenProductBtn = new InlineKeyboardCallbackButton("Открыть", BuildCallData(ProductBot.GetProductCmd, ProductBot.ModuleName, Product.Id));
+                    OpenProductBtn = BuildInlineBtn("Открыть", BuildCallData(ProductBot.GetProductCmd, ProductBot.ModuleName, Product.Id),base.SenderEmodji);
 
                        
 
@@ -120,7 +120,7 @@ namespace MyTelegramBot.Messages.Admin
         private void SetInlineKeyBoard()
         {
             if(OpenProductBtn==null)
-            base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                 new[]
                         {
@@ -140,10 +140,7 @@ namespace MyTelegramBot.Messages.Admin
                         {
                             ProductEditEnableBtn, ProductEditUrlBtn,InlineImageBtn
                         },
-                new[]
-                        {
-                            ProductEditEnableBtn
-                        },
+
                 new[]
                          {
                             AdminPanelBtn
@@ -154,7 +151,7 @@ namespace MyTelegramBot.Messages.Admin
                             BackBtn
                         }
 
-                 });
+                });
 
             else
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
@@ -191,7 +188,7 @@ namespace MyTelegramBot.Messages.Admin
                             BackBtn
                         }
 
-     });
+                });
 
         }
     }

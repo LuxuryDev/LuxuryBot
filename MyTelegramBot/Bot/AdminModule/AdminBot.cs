@@ -45,7 +45,7 @@ namespace MyTelegramBot.Bot.AdminModule
 
         public const string ProductEditCmd = "ProductEdit";
 
-        public const string CategoryEditCmd = "CategoryEdit";
+        public const string CategoryEditorCmd = "CategoryEditor";
 
         public const string CategoryCreateCmd = "CategoryCreate";
 
@@ -126,7 +126,6 @@ namespace MyTelegramBot.Bot.AdminModule
             {
                 AdminQiwiSettingsMsg = new AdminQiwiSettingsMessage();
                 AdminCmdListMsg = new AdminPanelCmdMessage(base.FollowerId);
-                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd,ModuleName,true);
                 ContactEditMsg = new ContactEditMessage();
                 AdminAllProductsViewMsg = new AdminAllProductsViewMessage();
                 AdminCurrentStockMsg = new AdminCurrentStockMessage();
@@ -1067,13 +1066,13 @@ namespace MyTelegramBot.Bot.AdminModule
         /// <returns></returns>
         private async Task<IActionResult> EditProduct()
         {
-            CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd, ProductEditBot.ModuleName);
-            if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
+            //CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd, ProductEditBot.ModuleName);
+            //if (await EditMessage(CategoryListMsg.Mess()) != null)
                 return base.OkResult;
 
 
-            else
-                return base.NotFoundResult;
+            //else
+            //    return base.NotFoundResult;
         }
 
 

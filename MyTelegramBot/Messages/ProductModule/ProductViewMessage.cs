@@ -103,9 +103,9 @@ namespace MyTelegramBot.Messages
 
                     ReturnToCatalogListBtn = ReturnToCatalogList();
 
-                    ViewBasketBtn = ViewBasket();
+                    ViewBasketBtn = base.BuildInlineBtn("Перейти в корзину", base.BuildCallData(Bot.BasketBot.ViewBasketCmd, BasketBot.ModuleName), base.BasketEmodji);
 
-                    ViewAllPhotoBtn = new InlineKeyboardCallbackButton("Все фотографии", BuildCallData("ViewAllPhotoProduct", ProductBot.ModuleName, Product.Id));
+                    ViewAllPhotoBtn = base.BuildInlineBtn("Все фотографии", BuildCallData("ViewAllPhotoProduct", ProductBot.ModuleName, Product.Id),base.PictureEmodji);
 
 
                     if (Product.TelegraphUrl!=null && Product.TelegraphUrl.Length > 0) // Если есть ссылка на заметку то делаем кнопку "Подробнее"
@@ -300,7 +300,7 @@ namespace MyTelegramBot.Messages
         private InlineKeyboardCallbackButton MoreInfoProduct (int ProductId)
         {
             string data = base.BuildCallData(Bot.ProductBot.MoreInfoProductCmd, ProductBot.ModuleName,ProductId);
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Подробнее"+ " \ud83d\udd24", data);
+            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Подробнее "+ base.NoteBookEmodji, data);
             return button;
         }
 

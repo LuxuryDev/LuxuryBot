@@ -46,128 +46,242 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton PreviusPageBtn { get; set; }
 
-        private const int PageSize = 5;
+        private const int PageSize = 4;
+
+        /// <summary>
+        /// Сформированные страницы с категориями
+        /// </summary>
+        private Dictionary<int, List<Category>> Pages { get; set; }
+
+        private int PageCount { get; set; }
+
+        private MarketBotDbContext db;
+
+        private int PageNumber { get; set; }
+
+        public const string NextPageCmd = "NxtCatPage";
+
+        public const string PreviuousPageCmd = "PrvCatPage";
 
         /// <summary>
         /// Для меню. Показывает кнопки всех категорий и кнопку "Показать весь ассортимент"
         /// </summary>
-        public CategoryListMessage()
+        public CategoryListMessage(int PageNumber=1)
         {
-            VisableAllProductBtn = true;
-            Cmd = "ProductInCategory";
-            BackCmd = "MainMenu";
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.MainMenuBot.ModuleName));
-            
+            this.VisableAllProductBtn = true;
+            this.Cmd = "ProductInCategory";
+            this.BackCmd = "MainMenu";
+            this.ModuleName = Bot.CategoryBot.ModuleName;
+            base.BackBtn = BuildInlineBtn("Назад", BuildCallData(this.BackCmd, Bot.MainMenuBot.ModuleName));
+            this.PageNumber = PageNumber;
         }
 
-
-        /// <summary>
-        /// Конструктор для пролистования категорий
-        /// </summary>
-        /// <param name="NextPageCatId"></param>
-        public CategoryListMessage(int NextPageCatId)
+        public CategoryListMessage(string ModuleName,string CommandName, int PageNumber = 1)
         {
-
-        }
-
-
-        /// <summary>
-        /// Другое действие
-        /// </summary>
-        /// <param name="Cmd">Название команды</param>
-        /// <param name="VisableAllProductBtn">Отображать ли кнопку "Показать все товары"</param>
-        public CategoryListMessage(string Cmd, string ModuleName ,bool VisableAllProductBtn=false)
-        {
-            this.Cmd = Cmd;
-            this.ModuleName = ModuleName;
-            this.BackCmd =AdminBot.BackToAdminPanelCmd;
-            BackBtn= new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd, AdminBot.ModuleName));
-        }
-
-        /// <summary>
-        /// Выбираем новое значение категории в которой будет находится товар
-        /// </summary>
-        /// <param name="EditProductId"></param>
-        /// <param name="Cmd"></param>
-        public CategoryListMessage (int EditProductId, string Cmd = Bot.ProductEditBot.ProductUpdateCategoryCmd, string ModuleName= Bot.ProductEditBot.ModuleName)
-        {
+            this.PageNumber = PageNumber;
             this.VisableAllProductBtn = false;
-            this.EditProductId = EditProductId;
-            this.Cmd = Cmd;
+            this.Cmd = CommandName;
             this.ModuleName = ModuleName;
-            this.BackCmd = "SelectProduct";
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(BackCmd,Bot.ProductEditBot.ModuleName,this.EditProductId));
+            this.BackBtn = BuildInlineBtn("Панель администратора", BuildCallData(Bot.AdminModule.AdminBot.BackToAdminPanelCmd, Bot.AdminModule.AdminBot.ModuleName),base.CogwheelEmodji);
         }
 
-        public CategoryListMessage BuildMessage()
-        {           
-            using (MarketBotDbContext db=new MarketBotDbContext())
-                Categorys=db.Category.Where(c=>c.Enable).ToList();
+        public Bot.BotMessage BuildCategoryPage()
+        {
+            Pages = BuildPages();
 
-            if (VisableAllProductBtn)
+            var page = Pages[PageNumber];
+
+            if (page != null)
             {
+                int count = 0;
 
                 ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент",
-                        BuildCallData("ViewAllProduct", Bot.CategoryBot.ModuleName));
+                                                    BuildCallData("ViewAllProduct", Bot.CategoryBot.ModuleName));
 
-                CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count + 2][];
+                if (Pages.Keys.Last() != PageNumber && Pages[PageNumber + 1] != null) // Находим следующую страницу 
+                    NextPageBtn = BuildInlineBtn("Следующая. стр", BuildCallData(NextPageCmd, Bot.CategoryBot.ModuleName, PageNumber + 1),base.Next2Emodji);
 
-                CategoryListBtn[Categorys.Count] = new InlineKeyboardCallbackButton[1];
+                if (Pages.Keys.Last() == PageNumber && PageNumber != 1 && Pages[1] != null)
+                    // Если текущая страница является последней, то делаем кнопку с сылкой на первую,
+                    //но при это проверяем не является ли текущая страница первой
+                    NextPageBtn = BuildInlineBtn("Следующая. стр", BuildCallData(NextPageCmd, Bot.CategoryBot.ModuleName, 1), base.Next2Emodji);
 
-                CategoryListBtn[Categorys.Count][0] = ViewAllBtn;
+                //находим предыдующую стр.
+                if (PageNumber > 1 && Pages[PageNumber - 1] != null)
+                    PreviusPageBtn =BuildInlineBtn("Предыдущая. стр", BuildCallData(PreviuousPageCmd, Bot.CategoryBot.ModuleName, PageNumber - 1),base.Previuos2Emodji,false);
+
+                if (PageNumber == 1 && Pages.Keys.Last() != 1)
+                    PreviusPageBtn = BuildInlineBtn("Предыдущая. стр", BuildCallData(PreviuousPageCmd, Bot.CategoryBot.ModuleName, Pages.Keys.Last()),base.Previuos2Emodji,false);
 
 
-            }
-
-            else
-                CategoryListBtn = new InlineKeyboardCallbackButton[Categorys.Count + 1][];
-         
-
-            int count = 0;
-            if (Categorys.Count > 0)
-            {
-                foreach (Category cat in Categorys)
+                if (VisableAllProductBtn && NextPageBtn != null && PreviusPageBtn != null)
                 {
-                    if (count > PageSize) // Если категорий больше 5. То делаем кнопку Далее и выходим из цикла
-                    {
-                        NextPageBtn = new InlineKeyboardCallbackButton("Далее", BuildCallData("NxtCatPage", Bot.CategoryBot.ModuleName, cat.Id));
-                        PreviusPageBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData("PrvCatPage", Bot.CategoryBot.ModuleName, Categorys.Last().Id));
-                        break;
-                    }
+                    CategoryListBtn = new InlineKeyboardCallbackButton[page.Count + 3][];
 
-                    if (EditProductId > 0 && count <= PageSize) // Если меняем категорию в которой находится товар. Для админа
-                    {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
-                            base.BuildCallData(Cmd, ModuleName,EditProductId,cat.Id));
-                        CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
-                        CategoryListBtn[count][0] = button;
-                    }
+                    CategoryListBtn[page.Count + 1] = new InlineKeyboardCallbackButton[1];
 
-                    if (EditProductId <= 0 && count<=PageSize)
-                    {
-                        InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name, 
-                            base.BuildCallData(Cmd,ModuleName ,cat.Id));
-                        CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
-                        CategoryListBtn[count][0] = button;
-                    }
-                    count++;
+                    CategoryListBtn[page.Count + 1][0] = ViewAllBtn;
+
+                    CategoryListBtn[page.Count] = new InlineKeyboardCallbackButton[2];
+
+                    CategoryListBtn[page.Count][0] = PreviusPageBtn;
+
+                    CategoryListBtn[page.Count][1] = NextPageBtn;
+                }
+
+                if (VisableAllProductBtn && NextPageBtn == null && PreviusPageBtn == null)
+                {
+                    CategoryListBtn = new InlineKeyboardCallbackButton[page.Count + 2][];
+
+                    CategoryListBtn[page.Count] = new InlineKeyboardCallbackButton[1];
+
+                    CategoryListBtn[page.Count][0] = ViewAllBtn;
 
                 }
 
-                base.TextMessage = "Выберите категорию";
-                CategoryListBtn[CategoryListBtn.Length-1] = new InlineKeyboardCallbackButton[1];
-                CategoryListBtn[CategoryListBtn.Length-1][0] = BackBtn;
+                if (!VisableAllProductBtn && NextPageBtn != null && PreviusPageBtn != null)
+                {
+                    CategoryListBtn = new InlineKeyboardCallbackButton[page.Count + 2][];
 
-                
+                    CategoryListBtn[page.Count] = new InlineKeyboardCallbackButton[2];
+
+                    CategoryListBtn[page.Count][0] = PreviusPageBtn;
+
+                    CategoryListBtn[page.Count][1] = NextPageBtn;
+                }
+
+                CategoryListBtn[CategoryListBtn.Length - 1] = new InlineKeyboardCallbackButton[1];
+
+                CategoryListBtn[CategoryListBtn.Length - 1][0] = BackBtn;
+
+
+                foreach (Category cat in page)
+                {
+                    InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name,
+                        base.BuildCallData(Cmd, ModuleName, cat.Id));
+                    CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
+                    CategoryListBtn[count][0] = button;
+
+                    count++;
+                }
 
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(CategoryListBtn);
+
+                base.TextMessage = "Выберите категорию:" + NewLine() + "Всего категорий: " + Categorys.Count.ToString()
+                    + NewLine() + "стр. " + PageNumber.ToString() + " из " + PageCount.ToString();
+
+                return this;
             }
 
             else
-                base.TextMessage = "Данные отсутствуют";
-            
+                return null;
+        }
+
+        public Bot.BotMessage BuildCategoryAdminPage()
+        {
+            Pages = BuildPages(false);
+
+            var page = Pages[PageNumber];
+
+            int count = 0;
+
+            if (Pages.Keys.Last() != PageNumber && Pages[PageNumber + 1] != null) // Находим следующую страницу 
+                NextPageBtn = BuildInlineBtn("Следующая стр.", BuildCallData(NextPageCmd, ModuleName, PageNumber + 1),base.Next2Emodji);
+
+            if (Pages.Keys.Last() == PageNumber && PageNumber != 1 && Pages[1] != null)
+                // Если текущая страница является последней, то делаем кнопку с сылкой на первую,
+                //но при это проверяем не является ли текущая страница первой
+                NextPageBtn = BuildInlineBtn("Следующая стр.", BuildCallData(NextPageCmd, ModuleName, 1), base.Next2Emodji);
+
+            //находим предыдующую стр.
+            if (PageNumber > 1 && Pages[PageNumber - 1] != null)
+                PreviusPageBtn = BuildInlineBtn("Предыдущая стр.", BuildCallData(PreviuousPageCmd, ModuleName, PageNumber - 1),base.Previuos2Emodji,false);
+
+            if (PageNumber == 1 && Pages.Keys.Last() != 1)
+                PreviusPageBtn = BuildInlineBtn("Предыдущая стр.", BuildCallData(PreviuousPageCmd, ModuleName, Pages.Keys.Last()), base.Previuos2Emodji, false);
+
+
+            if (NextPageBtn != null && PreviusPageBtn != null)
+            {
+                CategoryListBtn = new InlineKeyboardCallbackButton[page.Count + 2][];
+
+                CategoryListBtn[page.Count] = new InlineKeyboardCallbackButton[2];
+
+                CategoryListBtn[page.Count][0] = PreviusPageBtn;
+
+                CategoryListBtn[page.Count][1] = NextPageBtn;
+            }
+
+            CategoryListBtn[CategoryListBtn.Length - 1] = new InlineKeyboardCallbackButton[1];
+
+            CategoryListBtn[CategoryListBtn.Length - 1][0] = BackBtn;
+
+
+            foreach (Category cat in page)
+            {
+                InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton(cat.Name,
+                    base.BuildCallData(Cmd, ModuleName, cat.Id));
+                CategoryListBtn[count] = new InlineKeyboardCallbackButton[1];
+                CategoryListBtn[count][0] = button;
+
+                count++;
+            }
+
+            base.MessageReplyMarkup = new InlineKeyboardMarkup(CategoryListBtn);
+
+            base.TextMessage = "Выберите категорию:" + NewLine() + "Всего категорий: " + Categorys.Count.ToString()
+                + NewLine() + "стр. " + PageNumber.ToString() + " из " + PageCount.ToString();
+
             return this;
         }
+
+        /// <summary>
+        /// Создаем страницы с категориями
+        /// </summary>
+        /// <param name="Enable">true- показывать только активные категории, false - все</param>
+        /// <returns></returns>
+        private Dictionary<int, List<Category>> BuildPages(bool Enable=true)
+        {
+            db = new MarketBotDbContext();
+
+            if(Enable)
+                Categorys = db.Category.Where(c => c.Enable).ToList();
+
+            else
+                Categorys = db.Category.ToList();
+
+            db.Dispose();
+
+            if (Categorys.Count % PageSize > 0) // Определяем сколько всего будет страниц
+                PageCount = (Categorys.Count / PageSize) + 1;
+
+            else
+                PageCount = Categorys.Count / PageSize;
+
+
+            Pages = new Dictionary<int, List<Category>>();
+
+            //начинаем заполнять
+
+            for (int i = 0; i < PageCount; i++)
+            {
+                List<Category> list = new List<Category>();
+
+                for (int j = 0; j < PageSize; j++)
+                {
+                    if ((i * PageSize + j) < Categorys.Count)
+                        list.Add(Categorys.ElementAt(i * PageSize + j));
+
+                    else
+                        break;
+                }
+                Pages.Add(i + 1, list);
+                    
+            }
+
+            return Pages;
+        }
+
 
 
     }

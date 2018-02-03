@@ -52,10 +52,10 @@ namespace MyTelegramBot.Bot
             switch (base.CommandName)
             {
                 case "Menu":
-                    return await GetCategoryList();
+                    return await SendCategoryList();
 
                 case "ReturnToCatalogList":
-                    return await GetCategoryList();
+                    return await SendCategoryList();
 
                 case "ProductInCategory":
                      return await GetProduct();
@@ -64,10 +64,16 @@ namespace MyTelegramBot.Bot
                     return await GetAllProduct();
 
                 case "BackCategoryList":
-                    return await GetCategoryList(base.MessageId);
+                    return await SendCategoryList(base.MessageId);
 
                 case "GetCategory":
                     return await GetCategory();
+
+                case "NxtCatPage":
+                    return await SelectCategoryPage();
+
+                case "PrvCatPage":
+                    return await SelectCategoryPage();
 
                 default:
                     return null;
@@ -78,10 +84,21 @@ namespace MyTelegramBot.Bot
         }
 
 
-        private async Task<IActionResult> GetCategoryList(int MessageId=0)
+        private async Task<IActionResult> SelectCategoryPage()
+        {
+            CategoryListMessage categoryListMessage = new CategoryListMessage(Argumetns[0]);
+
+            var mess= categoryListMessage.BuildCategoryPage();
+
+            await EditMessage(mess);
+
+            return OkResult;
+        }
+
+        private async Task<IActionResult> SendCategoryList(int MessageId=0)
         {
             CategoryListMessage categoryListMessage = new CategoryListMessage();
-            if (await SendMessage(categoryListMessage.BuildMessage(),MessageId) != null)
+            if (await SendMessage(categoryListMessage.BuildCategoryPage(),MessageId) != null)
                 return base.OkResult;
 
             else

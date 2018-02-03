@@ -34,13 +34,13 @@ namespace MyTelegramBot.Messages
                 Configuration = db.BotInfo.Where(b => b.Name == BotName).Include(b => b.Configuration)
                     .FirstOrDefault().Configuration;
 
-            BackBtn = new InlineKeyboardCallbackButton("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd, Bot.BasketBot.ModuleName));
+            BackBtn = BuildInlineBtn("Назад", BuildCallData(Bot.BasketBot.BackToBasketCmd, Bot.BasketBot.ModuleName),base.BasketEmodji);
 
-            DeliveryBtn = new InlineKeyboardCallbackButton("Доставка",
-                 BuildCallData(Bot.OrderBot.SelectMethodOfObtainingCmd, Bot.OrderBot.ModuleName, Bot.OrderBot.IsDeliveryId));
+            DeliveryBtn = BuildInlineBtn("Доставка",
+                 BuildCallData(Bot.OrderBot.SelectMethodOfObtainingCmd, Bot.OrderBot.ModuleName, Bot.OrderBot.IsDeliveryId),base.CarEmodji);
 
-            PickupBtn = new InlineKeyboardCallbackButton("Самовывоз",
-                 BuildCallData(Bot.OrderBot.SelectMethodOfObtainingCmd, Bot.OrderBot.ModuleName, Bot.OrderBot.IsPickupId));
+            PickupBtn = BuildInlineBtn("Самовывоз",
+                 BuildCallData(Bot.OrderBot.SelectMethodOfObtainingCmd, Bot.OrderBot.ModuleName, Bot.OrderBot.IsPickupId),base.ManEmodji);
 
             base.TextMessage = "Выберите способ получения заказа";
 

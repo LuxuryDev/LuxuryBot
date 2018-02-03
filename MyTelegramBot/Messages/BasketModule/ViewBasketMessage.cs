@@ -83,21 +83,21 @@ namespace MyTelegramBot.Messages
         private InlineKeyboardCallbackButton ClearBasket (int FollowerId)
         {
             string data = BuildCallData(Bot.BasketBot.ClearBasketCmd, Bot.BasketBot.ModuleName, FollowerId);
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Очистить корзину", data);
+            InlineKeyboardCallbackButton button = base.BuildInlineBtn("Очистить корзину", data,base.CrossEmodji);
             return button;
         }
 
         private InlineKeyboardCallbackButton ToCheckOut(int FollowerId)
         {
             string data = BuildCallData(Bot.OrderBot.MethodOfObtainingListCmd,Bot.OrderBot.ModuleName ,FollowerId);
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Перейти к оформлению", data);
+            InlineKeyboardCallbackButton button = base.BuildInlineBtn("Перейти к оформлению", data,base.Next2Emodji);
             return button;
         }
 
         private InlineKeyboardCallbackButton BasketEdit(int FollowerId)
         {
             string data = BuildCallData(Bot.BasketBot.BasketEditCmd,Bot.BasketBot.ModuleName ,FollowerId);
-            InlineKeyboardCallbackButton button = new InlineKeyboardCallbackButton("Изменить", data);
+            InlineKeyboardCallbackButton button = base.BuildInlineBtn("Изменить", data,base.PenEmodji);
             return button;
         }
 

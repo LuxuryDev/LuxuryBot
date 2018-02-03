@@ -70,6 +70,9 @@ namespace MyTelegramBot.Messages
                     base.TextMessage += NewLine() + NewLine() +
                         HrefUrl("https://blockchair.com/bitcoin-cash/address/" + Invoice.AccountNumber, "Посмотреть платеж");
 
+                if (PaymentType.GetPaymentTypeEnum(Invoice.PaymentTypeId) == Services.PaymentTypeEnum.Qiwi && !Invoice.Paid)
+                    base.TextMessage += NewLine() +  HrefUrl(QiwiForm(Invoice.AccountNumber,Convert.ToInt32(Invoice.Value),Invoice.Comment),"Открыть платежную форму")+
+                        NewLine()+"Обязательно указывайте комментарий" + base.WarningEmodji;
 
                 SetButtons();
              
@@ -106,6 +109,12 @@ namespace MyTelegramBot.Messages
                     });
         }
 
+        private string QiwiForm(string tel, int summ, string comm)
+        {
+            //https://qiwi.com/payment/form/99?extra%5B%27account%27%5D=79991112233&amountInteger=1&extra%5B%27comment%27%5D=test123&currency=643
 
+
+            return "https://qiwi.com/payment/form/99?"+ "extra%5B%27account%27%5D="+tel+ "&amountInteger="+summ.ToString()+ "&extra%5B%27comment%27%5D="+comm+ "&currency=643";
+        }
     }
 }

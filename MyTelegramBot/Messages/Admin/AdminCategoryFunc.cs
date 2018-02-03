@@ -37,19 +37,22 @@ namespace MyTelegramBot.Messages.Admin
 
             if (Category != null)
             {
-                EditCategoryNameBtn = new InlineKeyboardCallbackButton("Изменить название", BuildCallData(Bot.CategoryEditBot.CategoryEditNameCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
+                EditCategoryNameBtn = BuildInlineBtn("Изменить название", 
+                                                    BuildCallData(Bot.CategoryEditBot.CategoryEditNameCmd, Bot.CategoryEditBot.ModuleName, CategoryId), base.PenEmodji);
 
                 if(Category.Enable)
-                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Скрыть от пользователя", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
+                    EditCategoryEnableBtn= BuildInlineBtn("Активно",
+                                                    BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId), base.CheckEmodji);
 
                 else
-                    EditCategoryEnableBtn = new InlineKeyboardCallbackButton("Показывать пользователям", BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId));
+                    EditCategoryEnableBtn = BuildInlineBtn("Активно",
+                                                    BuildCallData(Bot.CategoryEditBot.CategoryEditEnableCmd, Bot.CategoryEditBot.ModuleName, CategoryId), base.UnCheckEmodji);
 
-                BackToAdminPanelBtn = new InlineKeyboardCallbackButton("Панель Администратора", BuildCallData(AdminBot.BackToAdminPanelCmd, Bot.AdminModule.AdminBot.ModuleName));
+                BackToAdminPanelBtn = BuildInlineBtn("Панель Администратора", BuildCallData(AdminBot.BackToAdminPanelCmd, Bot.AdminModule.AdminBot.ModuleName),base.CogwheelEmodji);
 
                 SetInlineKeyBoard();               
 
-                base.TextMessage =Category.Name+ " выберите действие";
+                base.TextMessage =base.BlueRhombus+" "+ Category.Name+ base.BlueRhombus+ NewLine() + "выберите действие:";
                 
             }
 

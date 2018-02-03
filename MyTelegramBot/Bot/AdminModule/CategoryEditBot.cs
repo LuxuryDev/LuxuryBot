@@ -18,7 +18,12 @@ namespace MyTelegramBot.Bot
 
         public const string CategoryEditEnableCmd = "EditCategoryEnable";
 
-        public const string SelectCategoryCmd = "SelectCategory";
+        public const string CategoryEditorCmd = "CategoryEditor";
+
+        /// <summary>
+        /// Пользователь выбрал категорию которую хочет отредактировать
+        /// </summary>
+        public const string SelectEditorCategoryCmd = "SelectEditorCategory";
 
         public const string NewNameForceReplyCmd = "Введите новое имя для:";
 
@@ -68,12 +73,18 @@ namespace MyTelegramBot.Bot
                 switch (base.CommandName)
                 {
                 //Пользователь нажал на Кнопку "Изменить категорию" сообщение редактирутся на список категорий
-                    case AdminBot.CategoryEditCmd:
-                        return await GetCategoryList();
+                    case CategoryEditorCmd:
+                        return await SendCategoryPage();
+
+                    case CategoryListMessage.NextPageCmd:
+                        return await SendCategoryPage(Argumetns[0]);
+
+                    case CategoryListMessage.PreviuousPageCmd:
+                        return await SendCategoryPage(Argumetns[0]);
 
                     //Пользователь выбрал какую категорию он хочет изменить. Сообщение редактируется на список доступных функций
-                    case SelectCategoryCmd:
-                        return await CategoryFunc(this.CategoryId);
+                    case SelectEditorCategoryCmd:
+                        return await SendCategoryEditorMsg(this.CategoryId);
 
                         //Пользотваель нажал на кнопку добавить новыую категорию. 
                         //Приход Relpy сообщение с просьбой указать имя новой категории
@@ -110,7 +121,7 @@ namespace MyTelegramBot.Bot
                 return null;
         }
 
-        private async Task<IActionResult> CategoryFunc(int CategoryId)
+        private async Task<IActionResult> SendCategoryEditorMsg(int CategoryId)
         {
             AdminCategoryFuncMsg = new AdminCategoryFuncMessage(CategoryId);
             if (await EditMessage(AdminCategoryFuncMsg.BuildMessage()) != null)
@@ -120,10 +131,12 @@ namespace MyTelegramBot.Bot
                 return NotFoundResult;
         }
 
-        private async Task<IActionResult> GetCategoryList()
+        private async Task<IActionResult> SendCategoryPage(int PageNumber=1)
         {
-            CategoryListMsg = new CategoryListMessage(SelectCategoryCmd, ModuleName);
-            if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
+            
+            CategoryListMsg = new CategoryListMessage(ModuleName, SelectEditorCategoryCmd, PageNumber);
+
+            if (await EditMessage(CategoryListMsg.BuildCategoryAdminPage()) != null)
                 return OkResult;
 
             else
@@ -183,7 +196,7 @@ namespace MyTelegramBot.Bot
 
                         db.SaveChanges();
 
-                        return await CategoryFunc(category.Id);
+                        return await SendCategoryEditorMsg(category.Id);
                     }
 
                 }
@@ -208,7 +221,12 @@ namespace MyTelegramBot.Bot
                     else
                         category.Enable = true;
 
-                    return await CategoryFunc(category.Id);
+                    db.SaveChanges();
+
+                    await SendCategoryEditorMsg(category.Id);
+
+
+                    return OkResult;
                 }
 
                 else

@@ -21,24 +21,15 @@ namespace MyTelegramBot.Controllers
 
             PaymentTypeEnum = PaymentTypeEnum.Qiwi;
 
+            List<PaymentTypeConfig> list = new List<PaymentTypeConfig>();
 
-            PaymentTypeConfig = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(PaymentTypeEnum)).OrderByDescending(p => p.Id).FirstOrDefault();
+            list = db.PaymentTypeConfig.Where(p => p.PaymentId == PaymentType.GetTypeId(PaymentTypeEnum)).OrderByDescending(p => p.Id).ToList();
 
-            if (PaymentTypeConfig == null)
-            {
-                PaymentTypeConfig = new PaymentTypeConfig
-                {
-                    Host = "https://qiwi.com/api",
-                    Login = "",
-                    Pass = "",
-                    Port = "80",
-                    Enable = true,
-                    PaymentId = PaymentType.GetTypeId(PaymentTypeEnum)
-                };
+            PaymentType paymentType = db.PaymentType.Find(PaymentType.GetTypeId(PaymentTypeEnum));
 
-            }
+            Tuple<List<PaymentTypeConfig>, PaymentType> model = new Tuple<List<PaymentTypeConfig>, PaymentType>(list, paymentType);
 
-            return View("Qiwi", PaymentTypeConfig);
+            return View("Qiwi", model);
         }
 
         public IActionResult Litecoin()
@@ -195,7 +186,6 @@ namespace MyTelegramBot.Controllers
         /// <param name="config"></param>
         /// <returns></returns>
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Save([FromBody] PaymentTypeConfig config)
         {
             if(config!=null)
@@ -224,6 +214,77 @@ namespace MyTelegramBot.Controllers
             
             else
                 return Json("Ошибка"); 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        /// 
+        [HttpGet]
+        public IActionResult Delete (int id)
+        {
+            if (id > 0)
+            {
+                db = new MarketBotDbContext();
+
+                var config = db.PaymentTypeConfig.Find(id);
+
+                db.PaymentTypeConfig.Remove(config);
+
+                db.SaveChanges();
+              
+            }
+
+            return RedirectToAction("Qiwi");
+        }
+
+        [HttpPost]
+
+        public IActionResult EnableQiwi([FromBody] PaymentType paymentType)
+        {
+            if (paymentType != null)
+            {
+                db = new MarketBotDbContext();
+
+                var type = db.PaymentType.Find(paymentType.Id);
+
+                type.Enable = paymentType.Enable;
+
+                db.SaveChanges();
+
+                return Json("Сохранено");
+            }
+
+            else
+                return Json("Ошибка");
+        }
+
+        [HttpGet]
+
+        public IActionResult AddQiwi(string telephone, string token)
+        {
+            db = new MarketBotDbContext();
+
+            if (telephone != null && token != null)
+            {
+                PaymentTypeConfig = new PaymentTypeConfig
+                {
+                    Host = "https://qiwi.com/api",
+                    Login = telephone,
+                    Pass = token,
+                    Port = "80",
+                    Enable = true,
+                    PaymentId = PaymentType.GetTypeId(PaymentTypeEnum.Qiwi)
+                };
+
+                db.PaymentTypeConfig.Add(PaymentTypeConfig);
+
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Qiwi");
         }
 
         /// <summary>
@@ -297,7 +358,6 @@ namespace MyTelegramBot.Controllers
         /// <param name="config"></param>
         /// <returns></returns>
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> TestConnection([FromBody] PaymentTypeConfig config)
         {
             if (config != null)
@@ -320,6 +380,12 @@ namespace MyTelegramBot.Controllers
                     FirstBlockHash = "80ca095ed10b02e53d769eb6eaf92cd04e9e0759e5be4a8477b42911ba49c78f";
 
                 if (PaymentTypeEnum == PaymentTypeEnum.BitcoinCash)
+                    FirstBlockHash = "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048";
+
+                if (PaymentTypeEnum == PaymentTypeEnum.Doge)
+                    FirstBlockHash = "82bc68038f6034c0596b6e313729793a887fded6e92a31fbdf70863f89d9bea2";
+
+                if(PaymentTypeEnum==PaymentTypeEnum.Bitcoin)
                     FirstBlockHash = "00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048";
 
                 Services.BitCoinCore.BitCoin ltc = new Services.BitCoinCore.BitCoin(config.Login, config.Pass, config.Host, config.Port);

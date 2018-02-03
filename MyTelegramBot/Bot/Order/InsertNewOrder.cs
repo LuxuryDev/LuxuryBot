@@ -191,8 +191,12 @@ namespace MyTelegramBot.Bot.Order
         /// <returns></returns>
         private Invoice AddQiwiInvoice(Orders order,double Total, int LifeTimeDuration=60)
         {
-            var qiwi = db.PaymentTypeConfig.Where(q => q.PaymentId == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi) && q.Enable == true).
-                OrderByDescending(q => q.Id).FirstOrDefault();
+            var ListQiwi = db.PaymentTypeConfig.Where(q => q.PaymentId == PaymentType.GetTypeId(Services.PaymentTypeEnum.Qiwi) && q.Enable == true).
+                OrderByDescending(q => q.Id).ToList();
+
+            Random random = new Random();
+
+            var qiwi = ListQiwi[random.Next(0, ListQiwi.Count - 1)];
 
             if (qiwi != null && qiwi.Login!=null)
             {

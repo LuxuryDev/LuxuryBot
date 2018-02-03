@@ -45,7 +45,7 @@ namespace MyTelegramBot.Messages
 
                     string Adr = City.Name + ", " + Street.Name + ", д. " + House.Number+", " +House.Apartment;
                     AddressListBtn[counter] = new InlineKeyboardCallbackButton[1];
-                    AddressListBtn[counter][0] = AddressBtn(Adr, Convert.ToInt32(address.Id));
+                    AddressListBtn[counter][0] = base.BuildInlineBtn(Adr, BuildCallData(Bot.OrderBot.CmdSelectAddress, Bot.OrderBot.ModuleName, address.Id), base.HouseEmodji);
                     counter++;
                 }
 
@@ -83,7 +83,7 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton AddAddress()
         {
-            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Добавить", BuildCallData(Bot.AddressBot.CmdAddAddress, Bot.AddressBot.ModuleName));
+            InlineKeyboardCallbackButton btn = new InlineKeyboardCallbackButton("Добавить новый", BuildCallData(Bot.AddressBot.CmdAddAddress, Bot.AddressBot.ModuleName));
             return btn;
         }
     }

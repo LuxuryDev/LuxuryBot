@@ -50,47 +50,52 @@ namespace MyTelegramBot.Bot
         /// <summary>
         /// Изменить название товара
         /// </summary>
-        public const string ProductEditNameCmd = "ProductEditName";
+        public const string ProductEditNameCmd = "ProdEditName";
 
         /// <summary>
         /// Изменить категорию
         /// </summary>
-        public const string ProductEditCategoryCmd = "ProductEditCategory";
+        public const string ProductEditCategoryCmd = "ProdEditCat";
 
         /// <summary>
         /// Изменить стоимтость товара
         /// </summary>
-        public const string ProductEditPriceCmd = "ProductEditPrice";
+        public const string ProductEditPriceCmd = "ProdEditPrice";
 
         /// <summary>
         /// Изменить остаток товара
         /// </summary>
-        public const string ProductEditStockCmd = "ProductEditStock";
+        public const string ProductEditStockCmd = "ProdEditStock";
+
+        /// <summary>
+        /// Пользователь нажал на кнопку изменить товар
+        /// </summary>
+        public const string ProductEditorCmd = "ProdEditor";
 
         /// <summary>
         /// Изменить описание товара
         /// </summary>
-        public const string ProductEditTextCmd = "ProductEditText";
+        public const string ProductEditTextCmd = "ProdEditText";
 
         /// <summary>
         /// Показать / Скрыть товар от пользователей
         /// </summary>
-        public const string ProductEditEnableCmd = "ProductEditEnable";
+        public const string ProductEditEnableCmd = "ProdEditEnable";
 
         /// <summary>
         /// Отредактировать ссылку на описание
         /// </summary>
-        public const string ProductEditUrlCmd = "ProductEditUrl";
+        public const string ProductEditUrlCmd = "ProdEditUrl";
 
         /// <summary>
         /// Изменить фотографию
         /// </summary>
-        public const string ProductEditPhotoCmd = "ProductEditPhoto";
+        public const string ProductEditPhotoCmd = "ProdEditPhoto";
 
         /// <summary>
         /// Обновить категоию в которой находится товар
         /// </summary>
-        public const string ProductUpdateCategoryCmd = "ProductUpdateCategory";
+        public const string ProductUpdateCategoryCmd = "ProdUpdCat";
 
         /// <summary>
         /// ForceReply сообщение с просьбой указать новое название для товара
@@ -125,17 +130,17 @@ namespace MyTelegramBot.Bot
         /// <summary>
         /// Выбрать товар для редактирования
         /// </summary>
-        public const string SelectProductCmd = "SelectProduct";
+        public const string SelectProductCmd = "SelectProd";
 
         /// <summary>
         /// Показать все товары в категории
         /// </summary>
-        public const string AdminProductInCategoryCmd = "AdminProductInCategory";
+        public const string AdminProductInCategoryCmd = "AdminProdInCat";
 
         /// <summary>
         /// Вернуть к выбору категории из которой будем выбирать товар для редактирования
         /// </summary>
-        public const string BackToAdminProductInCategoryCmd = "BackToAdminProductInCategory";
+        public const string BackToAdminProductInCategoryCmd = "BackToAdminProdInCat";
 
         /// <summary>
         /// Панель редактирования товара
@@ -145,17 +150,17 @@ namespace MyTelegramBot.Bot
         /// <summary>
         /// КНопка изменить ед. измерения
         /// </summary>
-        public const string ProudctUnitCmd = "ProudctUnit";
+        public const string ProudctUnitCmd = "ProudEditUnit";
 
         /// <summary>
         /// Кнопка изменить Валюту
         /// </summary>
-        public const string ProudctCurrencyCmd = "ProductCurrency";
+        public const string ProudctCurrencyCmd = "ProdCurrency";
 
         /// <summary>
         /// кнопка изменить Inline фото
         /// </summary>
-        public const string ProductInlineImageCmd = "ProductInlineImage";
+        public const string ProductInlineImageCmd = "ProdEditInlineImg";
 
         private const string InlineForceReply = "Изменить Inline фотографию:";
 
@@ -174,7 +179,6 @@ namespace MyTelegramBot.Bot
         {
             try
             {
-                CategoryListMsg = new CategoryListMessage(AdminProductInCategoryCmd,ModuleName,false);
 
                 if (base.Argumetns != null && base.Argumetns.Count > 0)
                     ProductId = base.Argumetns[0];
@@ -207,6 +211,23 @@ namespace MyTelegramBot.Bot
             {
                 switch (base.CommandName)
                 {
+                    case AdminProductListMessage.NextPageCmd:
+                        return await SendProductPage(Argumetns[0], Argumetns[1]);
+
+                    case AdminProductListMessage.PreviuousPageCmd:
+                        return await SendProductPage(Argumetns[0], Argumetns[1]);
+
+                    //следеющая стр. с категориями при выборе товара для редактирования
+                    case CategoryListMessage.NextPageCmd:
+                        return await SendCategoryPage(Argumetns[0]);
+
+                    // пред. стр с категориями при выборе товара для редактирования
+                    case CategoryListMessage.PreviuousPageCmd:
+                        return await SendCategoryPage(Argumetns[0]);
+
+                    case ProductEditorCmd:
+                        return await SendCategoryPage();
+
                     ///Пользователь нажал кнопку "Назад" что бы вернуться 
                     ///к выбору категории из которой будет выбирать товар для редактирования
                     case BackToAdminProductInCategoryCmd:
@@ -348,6 +369,37 @@ namespace MyTelegramBot.Bot
                 return null;
         }
 
+
+        private async Task<IActionResult> SendProductPage(int CategoryId, int PageNumber = 1)
+        {
+            AdminProductListMsg = new AdminProductListMessage(CategoryId, PageNumber);
+
+            var mess = AdminProductListMsg.BildMessage();
+
+            if (mess != null)
+                await EditMessage(mess);
+
+            else
+                await AnswerCallback("Данные отсутсвуют");
+
+            return OkResult;
+        }
+
+        /// <summary>
+        /// Пользователь хочет изменить товар. Для начала он выбирает категорию в которой этот товар находится.
+        /// </summary>
+        /// <param name="PageNumber">Номер страницы. Т.к товаров может быть много они бьются на страницы</param>
+        /// <returns></returns>
+        private async Task<IActionResult> SendCategoryPage(int PageNumber = 1)
+        {
+            CategoryListMsg = new CategoryListMessage(ModuleName, AdminProductInCategoryCmd,PageNumber);
+
+            await EditMessage(CategoryListMsg.BuildCategoryAdminPage());
+
+
+            return OkResult;
+        }
+
         /// <summary>
         /// Сохраняем новое значение валюты для цены
         /// </summary>
@@ -476,12 +528,12 @@ namespace MyTelegramBot.Bot
         private async Task<IActionResult> BackToAdminProductInCategory()
         {
 
-            if (await SendMessage(CategoryListMsg.BuildMessage(), MessageId) != null)
+            //if (await SendMessage(CategoryListMsg.Mess(), MessageId) != null)
                 return base.OkResult;
 
 
-            else
-                return base.NotFoundResult;
+            //else
+            //    return base.NotFoundResult;
         }
 
         /// <summary>
@@ -490,12 +542,12 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> ProductEditCategory()
         {
-            CategoryListMsg = new CategoryListMessage(this.ProductId);
-            if (await EditMessage(CategoryListMsg.BuildMessage()) != null)
+            //CategoryListMsg = new CategoryListMessage(this.ProductId);
+            //if (await EditMessage(CategoryListMsg.Mess()) != null)
                 return OkResult;
 
-            else
-                return NotFoundResult;
+            //else
+            //    return NotFoundResult;
         }
 
         /// <summary>
@@ -505,12 +557,16 @@ namespace MyTelegramBot.Bot
         private async Task<IActionResult> AdminProductInCategory()
         {
             AdminProductListMsg = new AdminProductListMessage(base.Argumetns[0]);
-            if (await EditMessage(AdminProductListMsg.BildMessage()) != null)
-                return base.OkResult;
 
+            var mess= AdminProductListMsg.BildMessage();
+
+            if (mess != null)
+                await EditMessage(mess);
 
             else
-                return base.NotFoundResult;
+                await AnswerCallback("Данные отсутствуют");
+
+            return OkResult;
         }
 
         /// <summary>
