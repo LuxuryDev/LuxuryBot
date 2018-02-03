@@ -43,15 +43,15 @@ namespace MyTelegramBot.Messages
         }
         public RaitingMessage BuildMessage()
         {
-            OneBtn = new InlineKeyboardCallbackButton("1", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,1));
+            OneBtn = BuildInlineBtn("1", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,1),base.StartEmodji);
 
-            TwoBtn = new InlineKeyboardCallbackButton("2", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,2));
+            TwoBtn = BuildInlineBtn("2", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,2), base.StartEmodji);
 
-            ThreeBtn = new InlineKeyboardCallbackButton("3", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,3));
+            ThreeBtn = BuildInlineBtn("3", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,3), base.StartEmodji);
 
-            FourBtn = new InlineKeyboardCallbackButton("4", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,4));
+            FourBtn = BuildInlineBtn("4", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,4), base.StartEmodji);
 
-            FiveBtn = new InlineKeyboardCallbackButton("5", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,5));
+            FiveBtn = BuildInlineBtn("5", BuildCallData(OrderBot.SelectRaitingCmd, OrderBot.ModuleName, FeedBackId,5), base.StartEmodji);
 
             db = new MarketBotDbContext();
 
