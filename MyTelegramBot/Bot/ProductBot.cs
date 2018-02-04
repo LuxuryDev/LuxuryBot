@@ -25,6 +25,8 @@ namespace MyTelegramBot.Bot
         /// </summary>
         private ProductAllPhotoMessage ProductAllPhotoMsg { get; set; }
 
+        private ViewAllProductInCategoryMessage ViewAllProductInCategoryMsg { get; set; }
+
         public const string GetProductCmd = "GetProduct";
 
         public const string AddToBasketCmd = "AddToBasket";
@@ -85,6 +87,9 @@ namespace MyTelegramBot.Bot
 
                 case ViewAllPhotoProductCmd:
                     return await SendAllProductPhoto();
+
+                case ViewAllProductInCategoryMessage.NextPageCmd:
+                    return await SendProductPage(Argumetns[1], Argumetns[0]);
             }
 
             //inlene поиск
@@ -107,6 +112,23 @@ namespace MyTelegramBot.Bot
                 return null;
         }
         
+        /// <summary>
+        /// Отправить стр. с товарами
+        /// </summary>
+        /// <param name="CategoryId">id категории</param>
+        /// <param name="PageNumber">номер стр.</param>
+        /// <returns></returns>
+        private async Task<IActionResult> SendProductPage(int CategoryId, int PageNumber = 1)
+        {
+            ViewAllProductInCategoryMsg = new ViewAllProductInCategoryMessage(CategoryId, PageNumber);
+
+            var mess = ViewAllProductInCategoryMsg.BuildMessage();
+
+            await EditMessage(mess);
+
+            return OkResult;
+        }
+
         private async Task<IActionResult> SendAllProductPhoto()
         {
             try

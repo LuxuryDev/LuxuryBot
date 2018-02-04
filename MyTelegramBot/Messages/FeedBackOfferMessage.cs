@@ -33,7 +33,7 @@ namespace MyTelegramBot.Messages
             if (Order != null)
             {
                 base.TextMessage = "Заказ №" + Order.Number.ToString() + " выполнен. Вы можете оставить отзыв к заказу.";
-                this.AddFeedBackBtn = new InlineKeyboardCallbackButton("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Bot.OrderBot.ModuleName, Order.Id));
+                this.AddFeedBackBtn = BuildInlineBtn("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Bot.OrderBot.ModuleName, Order.Id),NoteBookEmodji);
 
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                     new[]
