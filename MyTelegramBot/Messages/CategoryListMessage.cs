@@ -89,12 +89,12 @@ namespace MyTelegramBot.Messages
         {
             Pages = BuildPages();
 
-            var page = Pages[PageNumber];
+            
 
-            if (page != null)
+            if (Pages.Count>0 && Pages.Count>=PageNumber)
             {
                 int count = 0;
-
+                var page = Pages[PageNumber];
                 ViewAllBtn = new InlineKeyboardCallbackButton("Показать весь ассортимент",
                                                     BuildCallData("ViewAllProduct", Bot.CategoryBot.ModuleName));
 

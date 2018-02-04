@@ -15,10 +15,10 @@
 
 
 
-<table class="table">
+<table class="table tb_order__width">
     <tr > 
         <td>Номер заказа</td>
-        <td>Комментарий</td>
+        <td class="tb_order__comment">Комментарий</td>
         <td>Дата</td>
         <td>Бот</td>
         <td>Выполнен</td>
@@ -27,7 +27,7 @@
     {
         <tr>
             <td><a href="~/Order/Get/Get?Number=@order.Number">@("Заказ №"+@order.Number)</a></td>
-            <td>@order.Text</td>
+            <td class="tb_order__comment">@order.Text</td>
             <td>@order.DateAdd</td>
             <td><a href=@("https://t.me/" + order.BotInfo.Name)>@order.BotInfo.Name</a></td>
             @if (order.DoneId ==0)

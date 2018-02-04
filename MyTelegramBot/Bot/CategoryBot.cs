@@ -90,7 +90,11 @@ namespace MyTelegramBot.Bot
 
             var mess= categoryListMessage.BuildCategoryPage();
 
-            await EditMessage(mess);
+            if (mess != null)
+                await EditMessage(mess);
+
+            else
+                await AnswerCallback("Данные отсутствуют");
 
             return OkResult;
         }
@@ -98,11 +102,16 @@ namespace MyTelegramBot.Bot
         private async Task<IActionResult> SendCategoryList(int MessageId=0)
         {
             CategoryListMessage categoryListMessage = new CategoryListMessage();
-            if (await SendMessage(categoryListMessage.BuildCategoryPage(),MessageId) != null)
-                return base.OkResult;
+
+            var mess =categoryListMessage.BuildCategoryPage();
+
+            if (mess != null)
+                await SendMessage(mess, MessageId);
 
             else
-                return base.NotFoundResult;
+                await AnswerCallback("Данные отсутствуют");
+
+            return OkResult;
 
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Telegram.Bot;
 
 namespace MyTelegramBot.Controllers
 {
@@ -13,6 +14,10 @@ namespace MyTelegramBot.Controllers
         MarketBotDbContext db;
 
         Orders Order;
+
+        TelegramBotClient TelegramBotClient { get; set; }
+
+        Messages.FeedBackOfferMessage feedBackOffer { get; set; }
 
         public IActionResult Index()
         {
@@ -143,17 +148,20 @@ namespace MyTelegramBot.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddHistory ([FromBody] OrderHistory history)
+        public async  Task<IActionResult> AddHistory ([FromBody] OrderHistory history)
         {
             db = new MarketBotDbContext();
 
             var inwork = CheckInWork(history.OrderId);
 
+            string UserName = String.Empty;
 
             if (history != null)
             {
                 history.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
-                Order = db.Orders.Where(o => o.Id == history.OrderId).Include(o=>o.Done).Include(o => o.Delete).Include(o => o.Confirm).FirstOrDefault();
+                Order = db.Orders.Where(o => o.Id == history.OrderId).Include(o=>o.Done).Include(o => o.Delete).Include(o => o.Confirm).Include(o=>o.Follower).FirstOrDefault();
+                feedBackOffer = new Messages.FeedBackOfferMessage(Order);
+                UserName = Bot.GeneralFunction.FollowerFullName(history.FollowerId);
             }
 
             if (inwork.FollowerId != history.FollowerId)
@@ -164,6 +172,8 @@ namespace MyTelegramBot.Controllers
             {
                 Order.ConfirmId = InsertHistory(history);
                 db.SaveChanges();
+                TelegramAdminSendMessage("Заказ №" + Order.Number.ToString() + " согласован /order" + Order.Number.ToString()+ " | Пользователь:" + UserName);
+
                 return Json("Согласовано");
             }
 
@@ -172,6 +182,10 @@ namespace MyTelegramBot.Controllers
             {
                 Order.DoneId = InsertHistory(history);
                 db.SaveChanges();
+                await TelegramAdminSendMessage("Заказ № " + Order.Number.ToString() + " выполнен /order" + Order.Number.ToString()+ " | Пользователь:" + UserName);
+                var mess = feedBackOffer.BuildMessage();
+                //отрпаляем клиенту сообщение с предожением оставить отзыв
+                TelegramSendMessage(Order.Follower.ChatId, mess.TextMessage, mess.MessageReplyMarkup);
                 return Json("Выполнено");
             }
 
@@ -184,6 +198,7 @@ namespace MyTelegramBot.Controllers
             {
                 Order.DeleteId = InsertHistory(history);
                 db.SaveChanges();
+                TelegramAdminSendMessage("Заказ № " + Order.Number.ToString() + " удален /order" + Order.Number.ToString()+ " | Пользователь:" + UserName);
                 return Json("Удалено");
             }
 
@@ -197,6 +212,7 @@ namespace MyTelegramBot.Controllers
                 InsertHistory(history);
                 Order.Delete = null;
                 db.SaveChanges();
+                TelegramAdminSendMessage("Заказ № " + Order.Number.ToString() + " восстановлен /order" + Order.Number.ToString()+ " | Пользователь:" + UserName);
                 return Json("Восстановлено");
             }
 
@@ -218,7 +234,7 @@ namespace MyTelegramBot.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult TakeInWork([FromBody] OrdersInWork inWork)
+        public async  Task<IActionResult> TakeInWork([FromBody] OrdersInWork inWork)
         {
 
             if (db == null)
@@ -226,7 +242,11 @@ namespace MyTelegramBot.Controllers
 
             inWork.FollowerId = db.Follower.Where(f => f.ChatId == db.BotInfo.FirstOrDefault().OwnerChatId).FirstOrDefault().Id;
 
+            string UserName =Bot.GeneralFunction.FollowerFullName(inWork.FollowerId);
+
             var CurrentInWork = CheckInWork(Convert.ToInt32(inWork.OrderId));
+
+            this.Order = db.Orders.Find(inWork.OrderId);
 
             //заявка ни кем не обрабатывается или уже  обрабатывается текущим пользовтелем
             if (CurrentInWork == null || CurrentInWork != null && CurrentInWork.FollowerId == inWork.FollowerId)
@@ -234,15 +254,25 @@ namespace MyTelegramBot.Controllers
                 if (CurrentInWork == null ||
                     CurrentInWork != null && CurrentInWork.InWork == true && inWork.InWork == false
                     )
-                    // заявка ни кем не обрабатывается и пользователь берет ее в обработку или
-                    // пользователь хочет освободить заявку
+                // заявка ни кем не обрабатывается и пользователь берет ее в обработку или
+                // пользователь хочет освободить заявку
+                {
                     InsertInWork(inWork.OrderId, inWork.FollowerId, inWork.InWork);
-
+                   
+                }
                 if (inWork.InWork == true)
+                {
+                    TelegramAdminSendMessage("Пользователь: " + UserName + " | Взял в работу заказ №" + Order.Number.ToString() + " | /order" + Order.Number.ToString());
                     return Json("В работе");
+                }
+
 
                 else
+                {
+                    TelegramAdminSendMessage("Пользователь: " + UserName + " | Освободил заказ №" + Order.Number.ToString() + " | /order" + Order.Number.ToString());
                     return Json("Свободна");
+                    
+                }
             }
 
             else
@@ -318,6 +348,63 @@ namespace MyTelegramBot.Controllers
         }
         
 
+        private async Task<bool> TelegramAdminSendMessage(string Text)
+        {
+            if (db == null)
+                db = new MarketBotDbContext();
 
+            var BotInfo = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).Include(b=>b.Configuration).FirstOrDefault();
+
+            if (BotInfo != null)
+            {
+
+                var token = BotInfo.Token;
+
+                var GroupChat = BotInfo.Configuration.PrivateGroupChatId;
+
+                var OperatorsList = db.Admin.Where(a => a.Enable).Include(a => a.Follower).ToList();
+
+                TelegramBotClient = new TelegramBotClient(token);
+
+                foreach (var admin in OperatorsList) // Отправляем все админам в лс
+                {
+                    if (admin.NotyfiActive)
+                    {
+                        await TelegramBotClient.SendTextMessageAsync(admin.Follower.ChatId, Text);
+                        System.Threading.Thread.Sleep(300);
+                    }
+                }
+
+                //отправляем в групповой чат
+                await TelegramBotClient.SendTextMessageAsync(GroupChat, Text);
+
+                return true;
+            }
+
+            else
+                return false;
+        }
+
+        private async Task<bool> TelegramSendMessage(int ChatId, string Text, Telegram.Bot.Types.ReplyMarkups.IReplyMarkup reply)
+        {
+            if (db == null)
+                db = new MarketBotDbContext();
+
+            var BotInfo = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).Include(b => b.Configuration).FirstOrDefault();
+
+            if (BotInfo != null)
+            {
+                var token = BotInfo.Token;
+
+                TelegramBotClient = new TelegramBotClient(token);
+
+                await TelegramBotClient.SendTextMessageAsync(ChatId, Text,Telegram.Bot.Types.Enums.ParseMode.Default,false,false,0, reply);
+
+                return true;
+            }
+
+            else
+                return false;
+        }
     }
 }

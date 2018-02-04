@@ -127,6 +127,8 @@ namespace MyTelegramBot.Bot
         /// </summary>
         public const string ProductEditPhotoReply = "Изменить фотографию товара:";
 
+        public const string ProductEditCategoryReply = "Изменить категорию для товара:";
+
         /// <summary>
         /// Выбрать товар для редактирования
         /// </summary>
@@ -227,11 +229,6 @@ namespace MyTelegramBot.Bot
 
                     case ProductEditorCmd:
                         return await SendCategoryPage();
-
-                    ///Пользователь нажал кнопку "Назад" что бы вернуться 
-                    ///к выбору категории из которой будет выбирать товар для редактирования
-                    case BackToAdminProductInCategoryCmd:
-                        return await BackToAdminProductInCategory();
 
                     //Пользователь выбрал категорию.  Далее ему показываются все товары в этой категории
                     case AdminProductInCategoryCmd:
@@ -347,6 +344,9 @@ namespace MyTelegramBot.Bot
                 //пользователь прислал новую ссылку на Inline фотографию
                 if (base.OriginalMessage.Contains(InlineForceReply))
                     return await UpdateInlinePhotoUrl();
+
+                if (base.OriginalMessage.Contains(ProductEditCategoryReply))
+                    return await UpdateProductCategory();
 
                 if (base.CommandName.Contains(SetProductCmd)) // админская командка для быстрого отрытия панели упраления товаром
                 {
@@ -521,20 +521,6 @@ namespace MyTelegramBot.Bot
             }
         }
 
-        /// <summary>
-        /// Вернуться к выбору категориии
-        /// </summary>
-        /// <returns></returns>
-        private async Task<IActionResult> BackToAdminProductInCategory()
-        {
-
-            //if (await SendMessage(CategoryListMsg.Mess(), MessageId) != null)
-                return base.OkResult;
-
-
-            //else
-            //    return base.NotFoundResult;
-        }
 
         /// <summary>
         /// Показать все категории
@@ -542,12 +528,21 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> ProductEditCategory()
         {
-            //CategoryListMsg = new CategoryListMessage(this.ProductId);
-            //if (await EditMessage(CategoryListMsg.Mess()) != null)
-                return OkResult;
+            using (MarketBotDbContext db=new MarketBotDbContext())
+            {
+                var list = db.Category.ToList();
 
-            //else
-            //    return NotFoundResult;
+                string categoryListText = String.Empty;
+
+                foreach (Category cat in list)
+                    categoryListText += cat.Name+", ";
+
+                await SendMessage(new BotMessage { TextMessage ="Категории:"+ categoryListText });
+
+                await ForceReplyBuilder(ProductEditCategoryReply);
+
+                return OkResult;
+            }
         }
 
         /// <summary>
@@ -819,18 +814,30 @@ namespace MyTelegramBot.Bot
         /// <returns></returns>
         private async Task<IActionResult> UpdateProductCategory()
         {
+
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                var product = db.Product.Where(p => p.Id == ProductId).FirstOrDefault();
+                var product = db.Product.Where(p => p.Id == ProductGet(ProductEditCategoryReply)).FirstOrDefault();
 
-                if (product != null && base.Argumetns.Count == 2)
+                string CatName = base.ReplyToMessageText;
+
+                var cat = db.Category.Where(c => c.Name == CatName).FirstOrDefault();
+
+                if (cat != null)
                 {
-                    product.CategoryId = base.Argumetns[1];
+                    product.CategoryId = cat.Id;
+                    db.Update(product);
                     db.SaveChanges();
+                    return await SendProductFunc(product);
                 }
 
-                return await SendProductFunc(product, base.MessageId);
+                else
+                {
+                    await SendMessage(new BotMessage { TextMessage = "Категория не найдена!" });
+                    return await ProductEditCategory();
+                }
             }
+
         }
 
         /// <summary>

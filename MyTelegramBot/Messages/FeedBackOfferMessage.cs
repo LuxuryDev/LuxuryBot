@@ -24,8 +24,14 @@ namespace MyTelegramBot.Messages
             this.OrderId = OrderId;
         }
 
+        public FeedBackOfferMessage (Orders orders)
+        {
+            this.Order = orders;
+        }
+
         public FeedBackOfferMessage BuildMessage()
         {
+            if(this.Order==null)
             using(MarketBotDbContext db=new MarketBotDbContext())
                 Order = db.Orders.Where(o => o.Id == OrderId).FirstOrDefault();
             
