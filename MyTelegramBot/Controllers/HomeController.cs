@@ -36,7 +36,9 @@ namespace MyTelegramBot.Controllers
             {
                 botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
                 company = db.Company.FirstOrDefault();
-                ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name", botInfo.Configuration.CurrencyId);
+                
+                if(botInfo!=null)
+                    ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name", botInfo.Configuration.CurrencyId);
 
             }
 
@@ -53,7 +55,7 @@ namespace MyTelegramBot.Controllers
 
             Tuple<BotInfo, Company> tuple = new Tuple<BotInfo, Company>(botInfo, company);
 
-
+            db.Dispose();
             return View(tuple);
             
 
@@ -102,6 +104,7 @@ namespace MyTelegramBot.Controllers
                 {
                     conf.CurrencyId = _configuration.CurrencyId;
                     UpdatePriceCurrency(Convert.ToInt32(_configuration.CurrencyId));
+                    db.Dispose();
                 }
                     
 
@@ -125,28 +128,30 @@ namespace MyTelegramBot.Controllers
         {
             company = new Company();
 
-            if (db == null)
-                db = new MarketBotDbContext();
-
-            if (_company != null && _company.Id > 0)
-                company = db.Company.Where(c => c.Id == _company.Id).FirstOrDefault();
-
-            if (company != null)
+            using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                company.Instagram = _company.Instagram;
-                company.Vk = _company.Vk;
-                company.Chanel = _company.Chanel;
-                company.Chat = _company.Chat;
 
-                if (db.SaveChanges() >= 0)
-                    return Json("Сохранено");
+                if (_company != null && _company.Id > 0)
+                    company = db.Company.Where(c => c.Id == _company.Id).FirstOrDefault();
+
+                if (company != null)
+                {
+                    company.Instagram = _company.Instagram;
+                    company.Vk = _company.Vk;
+                    company.Chanel = _company.Chanel;
+                    company.Chat = _company.Chat;
+                    company.Text = _company.Text;
+
+                    if (db.SaveChanges() >= 0)
+                        return Json("Сохранено");
+
+                    else
+                        return Json("Ошибка");
+                }
 
                 else
                     return Json("Ошибка");
             }
-
-            else
-                return Json("Ошибка");
         }
 
 
@@ -197,75 +202,67 @@ namespace MyTelegramBot.Controllers
 
             }
 
-
+            db.Dispose();
             return View(bot);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveInfo(BotInfo _bot, IFormFile file =null)
+        public async Task<IActionResult> SaveInfo(BotInfo _bot, IFormFile file = null)
         {
-            db = new MarketBotDbContext();
 
-            if (_bot != null)
-            {
-                TelegramBot = new TelegramBotClient(_bot.Token);
-
-                var reapet_bot = db.BotInfo.Where(b => b.Name == _bot.Name).FirstOrDefault();
-
-                botInfo = db.BotInfo.Where(b => b.Id == _bot.Id).FirstOrDefault();
-
-                Telegram.Bot.Types.FileToSend toSend;
-
-                if (file != null)
-                    toSend = ConvertToFileToSend(file);
-
-                if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl!=null && file!=null) // обновляем вебхук
-                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/", toSend);
-
-                if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file == null) // обновляем вебхук
-                    await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/");
-
-                if (_bot.Id == 0 && reapet_bot==null) //Бот еще не настроен. Добавляем новые данные
+                if (_bot != null)
                 {
-                    _bot.Configuration=new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery=true, Pickup=false, ShipPrice=0, FreeShipPrice=0, CurrencyId=1 };
-                    _bot=InsertBotInfo(_bot);
-                    Company company = new Company { Instagram = String.Empty, Vk = String.Empty, Chanel = String.Empty, Chat = String.Empty };
-                    db.Company.Add(company);
-                    string key= Bot.GeneralFunction.GenerateHash();
-                    AddOwnerKey(key);
-                    return View("Own","/owner"+key);
-                    
-                }
+                    TelegramBot = new TelegramBotClient(_bot.Token);
 
-                if (_bot.Id == 0 && reapet_bot != null)
-                    return Json("В базе данных уже существует бот с таким именем");
+                    var reapet_bot = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).FirstOrDefault();
 
-                if (_bot.Id > 0) // редактируем уже сущестующие данные
-                {
-                    UpdateBotInfo(_bot);
-                    
-                    //если по каким то причинам пользователь не подрвердил себя как владельца
-                    if(_bot.OwnerChatId==null)
+                    botInfo = db.BotInfo.Where(b => b.Id == _bot.Id).FirstOrDefault();
+
+                    Telegram.Bot.Types.FileToSend toSend;
+
+                    if (file != null)
+                        toSend = ConvertToFileToSend(file);
+
+                    if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file != null) // обновляем вебхук
+                        await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/", toSend);
+
+                    if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file == null) // обновляем вебхук
+                        await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/");
+
+                    if (_bot.Id == 0 && reapet_bot == null) //Бот еще не настроен. Добавляем новые данные
                     {
-                        string key = Bot.GeneralFunction.GenerateHash();
-                        AddOwnerKey(key);
-                        return View("Own", "/owner" + key);
+                        _bot.Configuration = new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery = true, Pickup = false, ShipPrice = 0, FreeShipPrice = 0, CurrencyId = 1 };
+                        _bot = InsertBotInfo(_bot);
+                        Company company = new Company { Instagram = "https://www.instagram.com/", Vk = "https://vk.com/", Chanel = "https://t.me/", Chat = "https://t.me/" };
+                        db.Company.Add(company);
+                        return View("Own", "/owner" + _bot.Token.Split(':').ElementAt(1).Substring(0, 15));
+
                     }
 
-                    return RedirectToAction("Index");
+                    if (_bot.Id > 0) // редактируем уже сущестующие данные
+                    {
+                        UpdateBotInfo(_bot);
 
+                        //если по каким то причинам пользователь не подрвердил себя как владельца
+                        if (_bot.OwnerChatId == null)
+                        {
+                            return View("Own", "/owner" + _bot.Token.Split(':').ElementAt(1).Substring(0, 15));
+                        }
+
+                        return RedirectToAction("Index");
+
+                    }
+
+                    else
+                        return RedirectToAction("Index");
                 }
+
 
                 else
                     return RedirectToAction("Index");
-            }
 
-
-            else
-                return RedirectToAction("Index");
-
-
+            
         }
 
         private int UpdateBotInfo(BotInfo bot)
@@ -274,7 +271,6 @@ namespace MyTelegramBot.Controllers
                 db = new MarketBotDbContext();
 
             botInfo = db.BotInfo.Where(b => b.Id == bot.Id).Include(b => b.Configuration).FirstOrDefault();
-            botInfo.Name = bot.Name;
             botInfo.Token = bot.Token;
             botInfo.WebHookUrl = bot.WebHookUrl;
             return db.SaveChanges();

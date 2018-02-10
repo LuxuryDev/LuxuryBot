@@ -15,6 +15,14 @@
 
 @if (Model.Item1.Id > 0)
 {
+
+    if (Model.Item1.OwnerChatId == null)
+    {
+        var key = "Владелец бота не подтвержден! Отправьте боту команду /owner" + @Model.Item1.Token.Split(':').ElementAt(1).Substring(0, 15);
+       <h1><p class="text-danger">@key</p></h1>
+
+    }
+
 <h2>Бот</h2>
 <table class="table">
     <tr>
@@ -99,7 +107,7 @@
 
 @using (Html.BeginForm("ContactUpdate", "Home", FormMethod.Post))
 {
-    <h2>Контактные данные</h2>
+    <h2>О нас</h2>
     <p>
         @Html.HiddenFor(m => m.Item2.Id)
         <label>
@@ -128,6 +136,14 @@
             Чат в телеграм
         </label><br />
         @Html.TextBoxFor(m => m.Item2.Chat, new { @class = "form-control" })
+    </p>
+
+    <p>
+        <label>
+            Информация
+        </label><br />
+        @Html.TextAreaFor(m => m.Item2.Text, new { @class = "form-control" })
+
     </p>
 }
 
@@ -175,7 +191,8 @@
                 'Chanel': $("#Item2_Chanel").val(),
                 'Chat': $("#Item2_Chat").val(),
                 'Vk': $("#Item2_Vk").val(),
-                'Id': $("#Item2_Id").val()
+                'Id': $("#Item2_Id").val(),
+                'Text': $("#Item2_Text").val()
             }
             $.ajax({
                 type: "POST",

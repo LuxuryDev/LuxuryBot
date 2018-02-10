@@ -53,6 +53,8 @@ namespace MyTelegramBot.Messages
                 ChatBtn = new InlineKeyboardUrlButton("Чат в телеграм", "https://t.me/");
 
 
+            base.TextMessage = Company.Text;
+
             SetInlineKeyBoard();
 
 

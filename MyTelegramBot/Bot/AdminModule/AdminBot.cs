@@ -295,17 +295,20 @@ namespace MyTelegramBot.Bot.AdminModule
             }
         }
 
+        /// <summary>
+        /// Подтверждение владельца
+        /// </summary>
+        /// <returns></returns>
         private async Task<IActionResult> OwnerRegister()
         {
             string key = CommandName.Substring(OwnerReg.Length);
 
             using(MarketBotDbContext db=new MarketBotDbContext())
             {
-                var AdminKey = db.AdminKey.Where(a => a.KeyValue == key).FirstOrDefault();
+                base.BotInfo = db.BotInfo.Where(b => b.Id == BotInfo.Id).FirstOrDefault();
 
-                if (base.BotInfo.OwnerChatId == null && AdminKey!=null && AdminKey.Enable==true)
+                if (base.BotInfo.OwnerChatId == null && base.BotInfo.Token.Split(':').ElementAt(1).Substring(0, 15)== key)
                 {
-                    AdminKey.Enable = false;
                     db.BotInfo.Where(b => b.Id == BotInfo.Id).FirstOrDefault().OwnerChatId =Convert.ToInt32(ChatId);
                     if (db.SaveChanges() > 0)
                          await SendMessage(new BotMessage { TextMessage = "Добро пожаловать! Нажмите сюда /admin" });

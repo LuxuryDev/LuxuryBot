@@ -13,11 +13,6 @@
         @Html.HiddenFor(m => m.Id)
         @Html.HiddenFor(m=>m.OwnerChatId)
         <p>
-            <label>Название бота</label><br />
-            @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Введите название бота" })
-        </p>
-
-        <p>
             <label>Токен</label><br />
             @Html.TextBoxFor(m => m.Token, new { @class = "form-control", @placeholder = "Введите токен доступа который вы получили от BotFather" })
         </p>
@@ -39,9 +34,3 @@
         </p>
         
     }
-
-@if (Model.OwnerChatId ==null)
-{
-    <h3>Владелец бота не подтвержден! Нажмите кнопку сохранить</h3>
-
-}
