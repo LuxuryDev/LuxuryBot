@@ -47,7 +47,9 @@ namespace MyTelegramBot.Controllers
                 botInfo = new BotInfo
                 {
                     Name = "",
-                    Token = ""
+                    Token = "",
+                    ServerVersion=false,
+                    HomeVersion=false
                 };
 
                 company = new Company();
@@ -214,6 +216,8 @@ namespace MyTelegramBot.Controllers
                 if (_bot != null)
                 {
                     TelegramBot = new TelegramBotClient(_bot.Token);
+
+                    db = new MarketBotDbContext();
 
                     var reapet_bot = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).FirstOrDefault();
 

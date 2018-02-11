@@ -44,6 +44,8 @@ namespace MyTelegramBot.Controllers
 
             var conf = db.BotInfo.Where(b => b.Name == Bot.GeneralFunction.GetBotName()).Include(b=>b.Configuration).FirstOrDefault();
 
+            var catlist = db.Category.ToList();
+
             Product product = new Product();
             product.Id = 0;
             product.Name = String.Empty;
@@ -53,7 +55,14 @@ namespace MyTelegramBot.Controllers
             product.Text = String.Empty;
             product.PhotoUrl = String.Empty;
             product.ProductPrice.Add(new ProductPrice { CurrencyId = conf.Configuration.CurrencyId, Value = 0 });
-            ViewBag.Category = new SelectList(db.Category.ToList(), "Id", "Name", db.Category.FirstOrDefault().Id);
+
+            if(catlist.Count>0)
+            ViewBag.Category = new SelectList(catlist, "Id", "Name", db.Category.FirstOrDefault().Id);
+
+            else
+                ViewBag.Category = new SelectList(catlist, "Id", "Name", 0);
+
+
             ViewBag.Currency = db.Currency.ToList();
             ViewBag.Unit = new SelectList(db.Units.ToList(), "Id", "Name", product.UnitId);
             return View("Editor", product);

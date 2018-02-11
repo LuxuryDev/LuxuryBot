@@ -22,6 +22,9 @@ namespace MyTelegramBot
         public DateTime? Timestamp { get; set; }
         public int? OwnerChatId { get; set; }
         public string WebHookUrl { get; set; }
+        public bool ServerVersion { get; set; }
+
+        public bool HomeVersion { get; set; }
 
         public Configuration Configuration { get; set; }
         public ICollection<AttachmentTelegram> AttachmentTelegram { get; set; }
