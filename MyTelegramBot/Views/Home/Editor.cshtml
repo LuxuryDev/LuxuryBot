@@ -22,14 +22,17 @@
             @Html.TextBoxFor(m => m.WebHookUrl, new { @class = "form-control", @placeholder = "URL адрес бота" })
         </p>
 
-        if (Model.ServerVersion == true || Model.ServerVersion == false && Model.HomeVersion == false)
+        if (Model.ServerVersion == true)
         {
-        <p>
-            <label>
-                Файл сертификата формата PEM (не нужен если используете ngrok) <a href="https://tlgrm.ru/docs/bots/self-signed">Как создать сертификат ?</a>
-            </label>
-        <input type="file" name="file" />
-        </p>
+            <label>Серверная версия</label>
+
+        }
+
+        if (Model.ServerVersion == true)
+        {
+            <label>Домашняя версия</label>
+
+
         }
         <p>
             <input type="submit" value="Сохранить" />

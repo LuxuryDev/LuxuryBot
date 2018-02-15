@@ -44,7 +44,10 @@ namespace MyTelegramBot.Controllers
                     {
                         BotInf.Token = token;
                         BotInf.WebHookUrl = ngrok;
+                        BotInf.ServerVersion = false;
+                        BotInf.HomeVersion = true;
                         db.SaveChanges();
+
                         db.Dispose();
                         return Ok();
                     }
@@ -59,6 +62,53 @@ namespace MyTelegramBot.Controllers
                     if (await SetWebhookAsync(token, ngrok, new Telegram.Bot.Types.FileToSend { }))
                     {
                         InsertNewBotToDb(token, name, ngrok);
+                        db.Dispose();
+                        return Json(token.Split(':').ElementAt(1).Substring(0, 15));
+                    }
+
+                    else
+                        return NotFound();
+                }
+            }
+
+            else
+                return NotFound();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> InstallServerVersion(string token, string domainname)
+        {
+            db = new MarketBotDbContext();
+            string name = Bot.GeneralFunction.GetBotName();
+
+            if (token != null && domainname != null)
+            {
+                var BotInf = db.BotInfo.Where(b => b.Name == name).FirstOrDefault();
+
+                //в базе уже есть инф. об этом боте
+                if (BotInf != null)
+                {
+                    if (await SetWebhookAsync(token, "https://" + domainname + "/bot/", new Telegram.Bot.Types.FileToSend { }))
+                    {
+                        BotInf.Token = token;
+                        BotInf.WebHookUrl = "https://" + domainname + "/bot/";
+                        BotInf.ServerVersion = true;
+                        BotInf.HomeVersion = false;
+                        db.SaveChanges();
+                        db.Dispose();
+                        return Ok();
+                    }
+
+                    else
+                        return NotFound();
+                }
+
+
+                else // инф. в базе еще нет. Добавляем
+                {
+                    if (await SetWebhookAsync(token, "https://" + domainname + "/bot/", new Telegram.Bot.Types.FileToSend { }))
+                    {
+                        InsertNewBotToDb(token, name, "https://" + domainname + "/bot/",true);
                         db.Dispose();
                         return Json(token.Split(':').ElementAt(1).Substring(0, 15));
                     }
@@ -198,7 +248,7 @@ namespace MyTelegramBot.Controllers
             }
         }
 
-        private void InsertNewBotToDb(string token, string name, string Url)
+        private void InsertNewBotToDb(string token, string name, string Url, bool IsServerVersion=false)
         {
             if(db==null)
                 db = new MarketBotDbContext();
@@ -212,8 +262,8 @@ namespace MyTelegramBot.Controllers
                     Name = name,
                     WebHookUrl = Url,
                     Timestamp = DateTime.Now,
-                    HomeVersion = true,
-                    ServerVersion = false
+                    HomeVersion = !IsServerVersion,
+                    ServerVersion = IsServerVersion
                 };
 
                 db.BotInfo.Add(botInfo);
