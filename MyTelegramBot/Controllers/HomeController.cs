@@ -37,7 +37,7 @@ namespace MyTelegramBot.Controllers
                 botInfo = db.BotInfo.Where(b => b.Name == name).Include(b => b.Configuration).FirstOrDefault();
                 company = db.Company.FirstOrDefault();
                 
-                if(botInfo!=null)
+                if(botInfo!=null && botInfo.Configuration!=null)
                     ViewBag.Currency = new SelectList(db.Currency.ToList(), "Id", "Name", botInfo.Configuration.CurrencyId);
 
             }

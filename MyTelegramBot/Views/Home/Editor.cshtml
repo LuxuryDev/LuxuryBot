@@ -12,30 +12,23 @@
     {
         @Html.HiddenFor(m => m.Id)
         @Html.HiddenFor(m=>m.OwnerChatId)
+
+
         <p>
             <label>Токен</label><br />
             @Html.TextBoxFor(m => m.Token, new { @class = "form-control", @placeholder = "Введите токен доступа который вы получили от BotFather" })
         </p>
+
 
         <p>
             <label>Адрес вебхука</label><br />
             @Html.TextBoxFor(m => m.WebHookUrl, new { @class = "form-control", @placeholder = "URL адрес бота" })
         </p>
 
-        if (Model.ServerVersion == true)
+        if (Model.HomeVersion == true || Model.HomeVersion==false && Model.ServerVersion==false)
         {
-            <label>Серверная версия</label>
-
-        }
-
-        if (Model.ServerVersion == true)
-        {
-            <label>Домашняя версия</label>
-
-
-        }
         <p>
             <input type="submit" value="Сохранить" />
         </p>
-        
+        }
     }

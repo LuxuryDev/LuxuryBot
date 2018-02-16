@@ -76,7 +76,7 @@ namespace MyTelegramBot.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> InstallServerVersion(string token, string domainname)
+        public IActionResult InstallServerVersion(string token, string domainname)
         {
             db = new MarketBotDbContext();
             string name = Bot.GeneralFunction.GetBotName();
@@ -88,33 +88,22 @@ namespace MyTelegramBot.Controllers
                 //в базе уже есть инф. об этом боте
                 if (BotInf != null)
                 {
-                    if (await SetWebhookAsync(token, "https://" + domainname + "/bot/", new Telegram.Bot.Types.FileToSend { }))
-                    {
-                        BotInf.Token = token;
-                        BotInf.WebHookUrl = "https://" + domainname + "/bot/";
-                        BotInf.ServerVersion = true;
-                        BotInf.HomeVersion = false;
-                        db.SaveChanges();
-                        db.Dispose();
-                        return Ok();
-                    }
-
-                    else
-                        return NotFound();
+                    BotInf.Token = token;
+                    BotInf.WebHookUrl = "https://" + domainname + "/bot/";
+                    BotInf.ServerVersion = true;
+                    BotInf.HomeVersion = false;
+                    db.SaveChanges();
+                    db.Dispose();
+                    return Ok();
                 }
 
 
                 else // инф. в базе еще нет. Добавляем
-                {
-                    if (await SetWebhookAsync(token, "https://" + domainname + "/bot/", new Telegram.Bot.Types.FileToSend { }))
-                    {
-                        InsertNewBotToDb(token, name, "https://" + domainname + "/bot/",true);
-                        db.Dispose();
-                        return Json(token.Split(':').ElementAt(1).Substring(0, 15));
-                    }
-
-                    else
-                        return NotFound();
+                {               
+                    InsertNewBotToDb(token, name, "https://" + domainname + "/bot/",true);
+                    db.Dispose();
+                    return Json(token.Split(':').ElementAt(1).Substring(0, 15));
+                    
                 }
             }
 
