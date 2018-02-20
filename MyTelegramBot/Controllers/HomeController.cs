@@ -234,8 +234,13 @@ namespace MyTelegramBot.Controllers
                     if (_bot.WebHookUrl != null && TelegramBot != null && _bot.WebHookUrl != null && file == null) // обновляем вебхук
                         await TelegramBot.SetWebhookAsync(_bot.WebHookUrl + "/bot/");
 
+                    //TelegramBot.ExportChatInviteLinkAsync()
+
                     if (_bot.Id == 0 && reapet_bot == null) //Бот еще не настроен. Добавляем новые данные
                     {
+                        _bot.Name = Bot.GeneralFunction.GetBotName();
+                        _bot.ServerVersion = false;
+                        _bot.HomeVersion = false;
                         _bot.Configuration = new Configuration { VerifyTelephone = false, OwnerPrivateNotify = false, Delivery = true, Pickup = false, ShipPrice = 0, FreeShipPrice = 0, CurrencyId = 1 };
                         _bot = InsertBotInfo(_bot);
                         Company company = new Company { Instagram = "https://www.instagram.com/", Vk = "https://vk.com/", Chanel = "https://t.me/", Chat = "https://t.me/" };
@@ -296,6 +301,8 @@ namespace MyTelegramBot.Controllers
                 Timestamp = DateTime.Now,
                 WebHookUrl=bot.WebHookUrl,
                 Configuration=bot.Configuration
+                ,ServerVersion=bot.ServerVersion,
+                HomeVersion=bot.HomeVersion
                 
             };
 

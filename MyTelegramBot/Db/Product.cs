@@ -16,6 +16,7 @@ namespace MyTelegramBot
             ProductPrice = new HashSet<ProductPrice>();
             ProductPhoto = new HashSet<ProductPhoto>();
             Stock = new HashSet<Stock>();
+            FeedBack = new HashSet<FeedBack>();
         }
 
         public int Id { get; set; }
@@ -31,11 +32,15 @@ namespace MyTelegramBot
 
         public int? UnitId { get; set; }
 
+        public string Code { get; set; }
+
         public Category Category { get; set; }
         public ICollection<Basket> Basket { get; set; }
         public ICollection<Notification> Notification { get; set; }
         public ICollection<OrderProduct> OrderProduct { get; set; }
         public ICollection<ProductPrice> ProductPrice { get; set; }
+
+        public ICollection<FeedBack> FeedBack { get; set; }
 
         public ICollection<ProductPhoto> ProductPhoto { get; set; }
         public ICollection<Stock> Stock { get; set; }

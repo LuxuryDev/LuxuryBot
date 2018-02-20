@@ -61,12 +61,13 @@ namespace MyTelegramBot.Bot
         {
             using (MarketBotDbContext db = new MarketBotDbContext())
             {
-                var OrderTemp = db.OrderTemp.Where(o => o.BotInfoId == BotInfo.Id).Include(o=>o.PickupPoint).FirstOrDefault();
+                var OrderTemp = db.OrderTemp.Where(o => o.BotInfoId == BotInfo.Id && o.FollowerId==FollowerId).Include(o=>o.PickupPoint).FirstOrDefault();
 
                 if (OrderTemp != null)
                 {
                     OrderTemp.AddressId = AddressId;
                     OrderTemp.PickupPoint = null;
+
                 }
 
                 else
@@ -75,13 +76,14 @@ namespace MyTelegramBot.Bot
                     {
                         FollowerId = FollowerId,
                         BotInfoId = BotInfo.Id,
-                        PickupPointId = AddressId,
+                        AddressId = AddressId,
                     };
 
                     db.OrderTemp.Add(orderTemp);
+                    int save = db.SaveChanges();
                 }
 
-                db.SaveChanges();
+               
 
                 return await SendPaymentMethodsList();
             }

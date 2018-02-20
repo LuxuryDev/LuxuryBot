@@ -27,15 +27,17 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton ViewAddressOnMapBtn { get; set; }
 
-        private InlineKeyboardCallbackButton DoneBtn { get; set; }
+        private InlineKeyboardCallbackButton ViewInvoiceBtn { get; set; }
 
-        private InlineKeyboardCallbackButton DeleteBtn { get; set; }
+        /// <summary>
+        /// кнопка изменить статус заказа
+        /// </summary>
+        private InlineKeyboardCallbackButton EditStatusBtn { get; set; }
 
-        private InlineKeyboardCallbackButton RecoveryBtn { get; set; }
-
-        private InlineKeyboardCallbackButton ConfirmBtn { get; set; }
-
-        private InlineKeyboardCallbackButton ViewPaymentBtn { get; set; }
+        /// <summary>
+        /// кнопка посмотреть историю изменения статусов
+        /// </summary>
+        private InlineKeyboardCallbackButton StatusHistoryBtn { get; set; }
 
         /// <summary>
         /// Освободить заявку
@@ -98,6 +100,7 @@ namespace MyTelegramBot.Messages.Admin
                     Include(o => o.Delete).
                     Include(o => o.Done).
                     Include(o=>o.PickupPoint).
+                    Include(o=>o.CurrentStatusNavigation).
                     FirstOrDefault();
 
                 ///////////Провереряем какой способ оплаты ///////////
@@ -126,6 +129,12 @@ namespace MyTelegramBot.Messages.Admin
 
                 if (Order.BotInfo == null)
                     Order.BotInfo = db.BotInfo.Where(b => b.Id == Order.BotInfoId).FirstOrDefault();
+
+                if (Order.CurrentStatusNavigation == null)
+                    Order.CurrentStatusNavigation = db.OrderStatus.Find(Order.CurrentStatus);
+
+                if (Order.CurrentStatusNavigation != null && Order.CurrentStatusNavigation.Status == null)
+                    Order.CurrentStatusNavigation.Status = db.Status.Find(Order.CurrentStatusNavigation.StatusId);
 
 
                 if (Order.Paid == true)
@@ -160,6 +169,7 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Адрес доставки: ") + Address.House.Street.City.Name + ", " + Address.House.Street.Name + ", д. " + Address.House.Number+", "+Address.House.Apartment + NewLine()
                             + Bold("Время: ") + Order.DateAdd.ToString() +NewLine()
                             + Bold("Способ оплаты: ") + PaymentMethodName + NewLine() 
+                            +Bold("Статус заказа:")+ Order.CurrentStatusNavigation.Status.Name+NewLine()
                             +Bold("Оформлено через: ")+"@" + Order.BotInfo.Name +NewLine()
                             + Bold("Статус платежа: ") + Paid;
 
@@ -173,6 +183,7 @@ namespace MyTelegramBot.Messages.Admin
                             + Bold("Адрес доставки: ") + Order.PickupPoint.Name + NewLine()
                             + Bold("Время: ") + Order.DateAdd.ToString() + NewLine()
                             + Bold("Способ оплаты: ") + PaymentMethodName + NewLine()
+                            + Bold("Статус заказа:") + Order.CurrentStatusNavigation.Status.Name + NewLine()
                             + Bold("Оформлено через: ") + "@" + Order.BotInfo.Name + NewLine()
                             + Bold("Статус платежа: ") + Paid;
 
@@ -205,6 +216,8 @@ namespace MyTelegramBot.Messages.Admin
 
                 SetInlineKeyBoard();
 
+                db.Dispose();
+
                 return this;
             }
         }
@@ -234,31 +247,29 @@ namespace MyTelegramBot.Messages.Admin
 
             ViewAddressOnMapBtn = new InlineKeyboardCallbackButton("Показать на карте"+ " \ud83c\udfd8", BuildCallData(OrderProccesingBot.CmdViewAddressOnMap, OrderProccesingBot.ModuleName, Order.Id));
 
-            DoneBtn = new InlineKeyboardCallbackButton("Выполнено"+" \ud83d\udc4c\ud83c\udffb", BuildCallData(OrderProccesingBot.CmdDoneOrder, OrderProccesingBot.ModuleName, Order.Id));
-
-            DeleteBtn = new InlineKeyboardCallbackButton("Удалить"+ " \u2702\ufe0f", BuildCallData(OrderProccesingBot.CmdOrderDelete, OrderProccesingBot.ModuleName, Order.Id));
-
-            RecoveryBtn = new InlineKeyboardCallbackButton("Восстановить", BuildCallData(OrderProccesingBot.CmdRecoveryOrder, OrderProccesingBot.ModuleName, Order.Id));
-
-            ConfirmBtn = new InlineKeyboardCallbackButton("Согласован"+ " \ud83e\udd1d", BuildCallData(OrderProccesingBot.CmdConfirmOrder, OrderProccesingBot.ModuleName, Order.Id));
-
-            ViewPaymentBtn = new InlineKeyboardCallbackButton("Посмотреть счет" + " \ud83d\udcb5", BuildCallData("ViewInvoice", OrderProccesingBot.ModuleName, Order.Id));
+            ViewInvoiceBtn = new InlineKeyboardCallbackButton("Посмотреть счет" + " \ud83d\udcb5", BuildCallData("ViewInvoice", OrderProccesingBot.ModuleName, Order.Id));
 
             TakeOrderBtn = new InlineKeyboardCallbackButton("Взять в работу", BuildCallData("TakeOrder", OrderProccesingBot.ModuleName, Order.Id));
 
             FreeOrderBtn = new InlineKeyboardCallbackButton("Освободить", BuildCallData("FreeOrder", OrderProccesingBot.ModuleName, Order.Id));
+
+            EditStatusBtn = new InlineKeyboardCallbackButton("Изменить статус", BuildCallData(OrderProccesingBot.CmdStatusEditor, OrderProccesingBot.ModuleName, Order.Id));
+
+            StatusHistoryBtn = new InlineKeyboardCallbackButton("История изменений", BuildCallData(OrderProccesingBot.CmdStatusHistory, OrderProccesingBot.ModuleName, Order.Id));
+
         }
 
         private void SetInlineKeyBoard()
         {
             //Заявка еще ни кем не взята в обрабоку или Неизвстно кому мы отрпавляем это сообщение т.е переменная FollowerId=0
-            if (InWorkFollowerId == 0  || FollowerId==0 )
+            if (InWorkFollowerId == 0  || FollowerId==0 || InWorkFollowerId!=FollowerId)
                 base.MessageReplyMarkup = new InlineKeyboardMarkup(
                 new[]{
                     new[]
                     {
                         TakeOrderBtn
-                    }
+                    },
+
                 });
 
             ///Заявка взята в обработку пользователем. Рисуем основные кнопки
@@ -267,7 +278,7 @@ namespace MyTelegramBot.Messages.Admin
                 new[]{
                 new[]
                         {
-                            ViewPaymentBtn, FreeOrderBtn
+                            ViewInvoiceBtn, FreeOrderBtn
                         },
                 new[]
                         {
@@ -275,7 +286,7 @@ namespace MyTelegramBot.Messages.Admin
                         },
                 new[]
                         {
-                            ConfirmBtn,DeleteBtn
+                           EditStatusBtn, StatusHistoryBtn
                         },
                 new[]
                         {
@@ -285,68 +296,9 @@ namespace MyTelegramBot.Messages.Admin
 
                  });
 
-            ///Заявка взять в обработку пользователем. Но заказ удален.
-            if (Order.Delete!=null&& FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
-                base.MessageReplyMarkup = new InlineKeyboardMarkup(
-                new[]{
-                new[]
-                        {
-                            ViewPaymentBtn,FreeOrderBtn
-                        },
-                new[]
-                        {
-                            EditOrderPositionBtn
-                        },
-                new[]
-                        {
-                            RecoveryBtn
-                        },
-                new[]
-                        {
-                            ViewTelephoneNumberBtn,
-                            ViewAddressOnMapBtn
-                        },
+           
 
-                });
-            ///Заявка взять в обработку пользователем. Зазакз уже согласован
-            if (Order.Confirm!=null && Order.Delete==null&& FollowerId == InWorkFollowerId && InWorkFollowerId != 0)
-                    base.MessageReplyMarkup = new InlineKeyboardMarkup(
-                    new[]{
-                 new[]
-                        {
-                            ViewPaymentBtn,FreeOrderBtn
-                        },
-                new[]
-                        {
-                            EditOrderPositionBtn
-                        },
-                new[]
-                        {
-                            DoneBtn,DeleteBtn
-                        },
-                new[]
-                        {
-                            ViewTelephoneNumberBtn,
-                            ViewAddressOnMapBtn
-                        },
 
-                    });
-
-            ///Заявка взять в обработку пользователем или может быть просто открыта любым т.к она уже выполнена
-            if (Order.Done!=null)
-                base.MessageReplyMarkup = new InlineKeyboardMarkup(
-                new[]{
-                new[]
-                        {
-                            ViewPaymentBtn
-                        },
-                new[]
-                        {
-                            ViewTelephoneNumberBtn,
-                            ViewAddressOnMapBtn
-                        },
-
-                });
         }
 
     }

@@ -26,6 +26,8 @@ namespace MyTelegramBot
         public int? DoneId { get; set; }
         public int? PickupPointId { get; set; }
 
+        public int? CurrentStatus { get; set; }
+
         public BotInfo BotInfo { get; set; }
         public OrderHistory Confirm { get; set; }
         public OrderHistory Delete { get; set; }
@@ -38,6 +40,7 @@ namespace MyTelegramBot
         public ICollection<OrderProduct> OrderProduct { get; set; }
         public ICollection<OrdersInWork> OrdersInWork { get; set; }
 
+        public OrderStatus CurrentStatusNavigation { get; set; }
         /// <summary>
         /// Посчитать стоимость без учета стоимости доставки
         /// </summary>

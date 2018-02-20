@@ -1090,10 +1090,10 @@ namespace MyTelegramBot.Bot
                 
                 try
                 {
-                    if(this.ChatId!=BotOwner) // проверяем тот кто отправляет сообщения, не является ли он владельцем. Что бы не отправлять сообщение самому себе
-                        if(db.Configuration.Where(o => o.BotInfoId == BotOwner).FirstOrDefault()!=null &&
-                            db.Configuration.Where(o=>o.BotInfoId==BotOwner).FirstOrDefault().OwnerPrivateNotify)
-                            await SendMessage(BotOwner, message);
+                    
+                    if(db.Configuration.Where(o => o.BotInfoId == BotOwner).FirstOrDefault()!=null &&
+                        db.Configuration.Where(o=>o.BotInfoId==BotOwner).FirstOrDefault().OwnerPrivateNotify)
+                        await SendMessage(BotOwner, message);
 
                     if (list != null)
                     {

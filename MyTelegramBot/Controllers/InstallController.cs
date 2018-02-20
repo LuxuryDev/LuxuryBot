@@ -89,7 +89,7 @@ namespace MyTelegramBot.Controllers
                 if (BotInf != null)
                 {
                     BotInf.Token = token;
-                    BotInf.WebHookUrl = "https://" + domainname + "/bot/";
+                    BotInf.WebHookUrl = "https://" + domainname;
                     BotInf.ServerVersion = true;
                     BotInf.HomeVersion = false;
                     db.SaveChanges();
@@ -100,7 +100,7 @@ namespace MyTelegramBot.Controllers
 
                 else // инф. в базе еще нет. Добавляем
                 {               
-                    InsertNewBotToDb(token, name, "https://" + domainname + "/bot/",true);
+                    InsertNewBotToDb(token, name, "https://" + domainname,true);
                     db.Dispose();
                     return Json(token.Split(':').ElementAt(1).Substring(0, 15));
                     
@@ -128,7 +128,7 @@ namespace MyTelegramBot.Controllers
                     if (botinfo != null)
                     {
                         TelegramBot = new TelegramBotClient(botinfo.Token);
-                        await TelegramBot.DeleteWebhookAsync();
+                        //await TelegramBot.DeleteWebhookAsync();
                         await TelegramBot.SendTextMessageAsync(botinfo.OwnerChatId, "Бот остановлен");
                         return Ok();
                     }
@@ -244,6 +244,8 @@ namespace MyTelegramBot.Controllers
 
             if (token != null && name != null && Url != null)
             {
+                var spl = token.Split(':');
+                int chat_id = Convert.ToInt32(spl[0]);
 
                 BotInfo botInfo = new BotInfo
                 {
@@ -252,7 +254,9 @@ namespace MyTelegramBot.Controllers
                     WebHookUrl = Url,
                     Timestamp = DateTime.Now,
                     HomeVersion = !IsServerVersion,
-                    ServerVersion = IsServerVersion
+                    ServerVersion = IsServerVersion,
+                    ChatId = chat_id
+
                 };
 
                 db.BotInfo.Add(botInfo);

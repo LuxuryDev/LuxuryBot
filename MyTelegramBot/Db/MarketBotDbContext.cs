@@ -43,6 +43,7 @@ namespace MyTelegramBot
         public virtual DbSet<OrderProduct> OrderProduct { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<OrdersInWork> OrdersInWork { get; set; }
+        public virtual DbSet<OrderStatus> OrderStatus { get; set; }
         public virtual DbSet<OrderTemp> OrderTemp { get; set; }
         public virtual DbSet<Payment> Payment { get; set; }
         public virtual DbSet<PaymentType> PaymentType { get; set; }
@@ -54,6 +55,7 @@ namespace MyTelegramBot
         public virtual DbSet<Raiting> Raiting { get; set; }
         public virtual DbSet<Region> Region { get; set; }
         public virtual DbSet<ReportsRequestLog> ReportsRequestLog { get; set; }
+        public virtual DbSet<Status> Status { get; set; }
         public virtual DbSet<Stock> Stock { get; set; }
         public virtual DbSet<Street> Street { get; set; }
         public virtual DbSet<TelegramMessage> TelegramMessage { get; set; }
@@ -367,6 +369,11 @@ namespace MyTelegramBot
                     .HasForeignKey<FeedBack>(d => d.OrderId)
                     .HasConstraintName("FK_Feedback_Orders");
 
+                entity.HasOne(d => d.Product)
+                    .WithMany(p => p.FeedBack)
+                    .HasForeignKey(d => d.ProductId)
+                    .HasConstraintName("FK_FeedBack_Product");
+
                 entity.HasOne(d => d.Raiting)
                     .WithMany(p => p.FeedBack)
                     .HasForeignKey(d => d.RaitingId)
@@ -509,6 +516,10 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<House>(entity =>
             {
+                entity.Property(e => e.Apartment)
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.Number)
                     .HasMaxLength(10)
                     .IsUnicode(false);
@@ -517,10 +528,6 @@ namespace MyTelegramBot
                     .WithMany(p => p.House)
                     .HasForeignKey(d => d.StreetId)
                     .HasConstraintName("FK_House_Street");
-
-                entity.Property(e => e.Apartment)
-                        .HasMaxLength(10)
-                        .IsUnicode(false);
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -656,6 +663,11 @@ namespace MyTelegramBot
                     .HasForeignKey(d => d.ConfirmId)
                     .HasConstraintName("FK_Orders_OrderHistory_Confirm");
 
+                entity.HasOne(d => d.CurrentStatusNavigation)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.CurrentStatus)
+                    .HasConstraintName("FK_Orders_OrderStatus");
+
                 entity.HasOne(d => d.Delete)
                     .WithMany(p => p.OrdersDelete)
                     .HasForeignKey(d => d.DeleteId)
@@ -696,6 +708,20 @@ namespace MyTelegramBot
                     .WithMany(p => p.OrdersInWork)
                     .HasForeignKey(d => d.OrderId)
                     .HasConstraintName("FK_OrdersInWork_Orders");
+            });
+
+            modelBuilder.Entity<OrderStatus>(entity =>
+            {
+                entity.Property(e => e.Text)
+                    .HasMaxLength(500)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Timestamp).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Status)
+                   .WithMany(p => p.OrderStatus)
+                   .HasForeignKey(d => d.StatusId)
+                   .HasConstraintName("FK_OrderStatus_Status");
             });
 
             modelBuilder.Entity<OrderTemp>(entity =>
@@ -796,6 +822,10 @@ namespace MyTelegramBot
 
             modelBuilder.Entity<Product>(entity =>
             {
+                entity.Property(e => e.Code)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.DateAdd).HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
@@ -887,6 +917,15 @@ namespace MyTelegramBot
                     .WithMany(p => p.ReportsRequestLog)
                     .HasForeignKey(d => d.FollowerId)
                     .HasConstraintName("FK_ReportsRequestLog_Follower");
+            });
+
+            modelBuilder.Entity<Status>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Stock>(entity =>

@@ -104,6 +104,10 @@ namespace MyTelegramBot.Bot.Order
                     NewOrder.OrderProduct.Add(FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group));
 
 
+                NewOrder.CurrentStatus = InsertOrderStatus(NewOrder.Id).Id;
+                db.SaveChanges();
+                db.Dispose();
+
                 return NewOrder;
             }
 
@@ -348,6 +352,22 @@ namespace MyTelegramBot.Bot.Order
 
             else
                 return null;
+        }
+
+        private OrderStatus InsertOrderStatus(int OrderId,int StatusId = 1)
+        {
+            OrderStatus orderStatus = new OrderStatus
+            {
+                OrderId = OrderId,
+                StatusId = StatusId,
+                Timestamp = DateTime.Now,
+                Enable=true,
+                FollowerId=FollowerId
+            };
+
+            db.OrderStatus.Add(orderStatus);
+            db.SaveChanges();
+            return orderStatus;
         }
 
         /// <summary>

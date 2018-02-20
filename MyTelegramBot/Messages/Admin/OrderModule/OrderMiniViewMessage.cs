@@ -15,6 +15,12 @@ namespace MyTelegramBot.Messages.Admin
 
         private InlineKeyboardCallbackButton OpenBtn { get; set; }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Text">текст сообщения</param>
+        /// <param name="OrderId">айди заказа</param>
         public OrderMiniViewMessage(string Text, int OrderId)
         {
             this.OrderId = OrderId;
