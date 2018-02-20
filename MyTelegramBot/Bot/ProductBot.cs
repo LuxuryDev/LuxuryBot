@@ -27,6 +27,8 @@ namespace MyTelegramBot.Bot
 
         private ViewAllProductInCategoryMessage ViewAllProductInCategoryMsg { get; set; }
 
+        private ViewProductFeedBackMessage ViewProductFeedBackMsg { get; set; }
+
         public const string GetProductCmd = "GetProduct";
 
         public const string AddToBasketCmd = "AddToBasket";
@@ -38,6 +40,8 @@ namespace MyTelegramBot.Bot
         public const string ProductCmd = "/product";
 
         public const string ViewAllPhotoProductCmd = "ViewAllPhotoProduct";
+
+        public const string CmdViewFeedBack = "ViewFeedBack";
 
         public ProductBot(Update _update) : base(_update)
         {
@@ -90,6 +94,9 @@ namespace MyTelegramBot.Bot
 
                 case ViewAllProductInCategoryMessage.NextPageCmd:
                     return await SendProductPage(Argumetns[1], Argumetns[0]);
+
+                case CmdViewFeedBack:
+                    return await SendFeedBack();
             }
 
             //inlene поиск
@@ -125,6 +132,25 @@ namespace MyTelegramBot.Bot
             var mess = ViewAllProductInCategoryMsg.BuildMessage();
 
             await EditMessage(mess);
+
+            return OkResult;
+        }
+
+        private async Task<IActionResult> SendFeedBack ()
+        {
+            if(Argumetns.Count==1)
+                ViewProductFeedBackMsg = new ViewProductFeedBackMessage(Argumetns[0]);
+
+            if (Argumetns.Count == 2)
+                ViewProductFeedBackMsg = new ViewProductFeedBackMessage(Argumetns[0],Argumetns[1]);
+
+            var mess = ViewProductFeedBackMsg.BuildMessage();
+
+            if (mess != null)
+                await SendMessage(mess);
+
+            else
+                await AnswerCallback("Отзывы отсутствуют",true);
 
             return OkResult;
         }

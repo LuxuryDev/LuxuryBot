@@ -32,6 +32,11 @@ namespace MyTelegramBot.Messages
 
         private InlineKeyboardCallbackButton ViewAllPhotoBtn { get; set; }
 
+        /// <summary>
+        /// кнопка показать отзывы к товару
+        /// </summary>
+        private InlineKeyboardCallbackButton ViewFeedBackBtn { get; set; }
+
         private int NextProductId { get; set; }
 
         private int PreviousProductId { get; set; }
@@ -106,6 +111,8 @@ namespace MyTelegramBot.Messages
                     ViewBasketBtn = base.BuildInlineBtn("Перейти в корзину", base.BuildCallData(Bot.BasketBot.ViewBasketCmd, BasketBot.ModuleName), base.BasketEmodji);
 
                     ViewAllPhotoBtn = base.BuildInlineBtn("Все фотографии", BuildCallData("ViewAllPhotoProduct", ProductBot.ModuleName, Product.Id),base.PictureEmodji);
+
+                    ViewFeedBackBtn = BuildInlineBtn("Отзывы", BuildCallData(ProductBot.CmdViewFeedBack, ProductBot.ModuleName, Product.Id), base.StartEmodji);
 
 
                     if (Product.TelegraphUrl!=null && Product.TelegraphUrl.Length > 0) // Если есть ссылка на заметку то делаем кнопку "Подробнее"
@@ -188,7 +195,7 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            ViewAllPhotoBtn,InfoProductBtn
+                            ViewAllPhotoBtn,InfoProductBtn,ViewFeedBackBtn
                         }
                 ,
                 new[]
@@ -214,7 +221,7 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            ViewAllPhotoBtn
+                            ViewAllPhotoBtn,ViewFeedBackBtn
                         }
                 ,
 
@@ -241,7 +248,7 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            ViewAllPhotoBtn,InfoProductBtn
+                            ViewAllPhotoBtn,InfoProductBtn,ViewFeedBackBtn
                         }
                 ,
 
@@ -264,7 +271,7 @@ namespace MyTelegramBot.Messages
                         },
                 new[]
                         {
-                            ViewAllPhotoBtn
+                            ViewAllPhotoBtn,ViewFeedBackBtn
                         }
                 ,
 
