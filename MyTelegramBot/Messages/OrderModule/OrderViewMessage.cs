@@ -66,7 +66,7 @@ namespace MyTelegramBot.Messages
                     Order.OrderProduct = db.OrderProduct.Where(op => op.OrderId == Order.Id).ToList();
 
                 if (Order != null && Order.CurrentStatusNavigation != null && Order.CurrentStatusNavigation.Status==null)
-                    Order.CurrentStatusNavigation.Status = db.Status.Find(Order.CurrentStatus);
+                    Order.CurrentStatusNavigation.Status = db.Status.Find(Order.CurrentStatusNavigation.StatusId);
 
 
                 if (Order != null && Order.PickupPoint == null && Order.PickupPointId > 0)
@@ -92,17 +92,6 @@ namespace MyTelegramBot.Messages
 
                     try
                     {
-                        //int counter = 0; // счетчки цикла
-                    
-
-                        //foreach (OrderProduct p in Order.OrderProduct) // Состав заказа
-                        //{
-                        //    counter++;
-                        //    p.Product = db.Product.Where(x => x.Id == p.ProductId).Include(x => x.ProductPrice).FirstOrDefault();
-                        //    p.Price = db.ProductPrice.Where(price => price.Id == p.PriceId).Include(price=> price.Currency).FirstOrDefault();
-                        //    Position += counter.ToString() + ") " + p.ToString() + NewLine();
-                        //    total += p.Price.Value * p.Count;
-                        //}
 
                         if (Order.BotInfo == null)
                             Order.BotInfo = db.BotInfo.Where(o => o.Id == Order.BotInfoId).FirstOrDefault();
@@ -158,8 +147,6 @@ namespace MyTelegramBot.Messages
 
         private void SetButton()
         {
-
-            if (Order.FeedBack==null && Order.Done != null) 
                 base.MessageReplyMarkup = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(
                     new[]{
                                 new[]

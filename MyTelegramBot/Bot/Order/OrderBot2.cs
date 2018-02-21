@@ -13,6 +13,17 @@ namespace MyTelegramBot.Bot
 {
     public partial class OrderBot
     {
+        private async Task<IActionResult> SendFeedBackMyOrder(int OrderId)
+        {
+            FeedBackOfferMessage FeedBackOfferMsg = new FeedBackOfferMessage(OrderId);
+
+            var mess = FeedBackOfferMsg.BuildMessage();
+
+            await EditMessage(mess);
+
+            return OkResult;
+        }
+
         /// <summary>
         /// Добавляем оценку к отзыву
         /// </summary>

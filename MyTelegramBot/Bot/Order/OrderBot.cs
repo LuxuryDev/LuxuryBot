@@ -275,7 +275,7 @@ namespace MyTelegramBot.Bot
                     return await SelectRaiting();
 
                 case CmdAddFeedBack:
-                    return null;
+                    return await SendFeedBackMyOrder(Argumetns[0]);
 
 
                 default:
@@ -298,10 +298,6 @@ namespace MyTelegramBot.Bot
             //Пользователь нажал на кнопку "Я оплатил"
             if (base.CommandName == CheckPayCmd)
                 return OkResult;
-
-            //Пользователь нажал добавить отзыв, ему пришло форсе реплай сообещнеи "Оставить отзыв к заказу:N". Если отзыва еще нет
-            if (base.CommandName == CmdAddFeedBack && Order != null && Order.FeedBack == null)
-                return await ForceReplyBuilder(ForceReplyAddFeedBack + Order.Number);
 
             else
                 return null;

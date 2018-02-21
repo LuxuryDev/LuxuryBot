@@ -147,21 +147,21 @@ namespace MyTelegramBot.Messages.Admin
                 if (Order.OrderProduct == null || Order.OrderProduct != null && Order.OrderProduct.Count == 0)
                     Order.OrderProduct = db.OrderProduct.Where(o => o.OrderId == Order.Id).ToList();
 
-                foreach (OrderProduct p in Order.OrderProduct) // Вытаскиваем все товары из заказа
-                {
-                    counter++;
-                    p.Product = db.Product.Where(x => x.Id == p.ProductId).Include(x => x.ProductPrice).FirstOrDefault();
-                    if(p.Price==null)
-                        p.Price = p.Product.ProductPrice.FirstOrDefault();
+                //foreach (OrderProduct p in Order.OrderProduct) // Вытаскиваем все товары из заказа
+                //{
+                //    counter++;
+                //    p.Product = db.Product.Where(x => x.Id == p.ProductId).Include(x => x.ProductPrice).FirstOrDefault();
+                //    if(p.Price==null)
+                //        p.Price = p.Product.ProductPrice.FirstOrDefault();
 
-                    Position += counter.ToString() + ") " + p.AdminText() + NewLine();
-                    total += p.Price.Value * p.Count;
-                }
+                //    Position += counter.ToString() + ") " + p.AdminText() + NewLine();
+                //    total += p.Price.Value * p.Count;
+                //}
 
                 /////////Формируем основную часть сообщения - Доставка
                 if(Order != null && Order.OrderAddress!=null)
                     base.TextMessage = Bold("Номер заказа: ") + Order.Number.ToString() + NewLine()
-                            + Position + NewLine()
+                            + Order.PositionToString() + NewLine()
                             + Bold("Стоимость доставки:") + Order.OrderAddress.ShipPriceValue.ToString() + NewLine()
                             + Bold("Общая стоимость: ") + total.ToString() + NewLine()
                             + Bold("Комментарий: ") + Order.Text + NewLine()

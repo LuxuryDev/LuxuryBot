@@ -515,8 +515,10 @@ namespace MyTelegramBot.Bot
                 if (botMessage != null&& this.Update.CallbackQuery != null && this.CallBackQueryId != null)
                     await AnswerCallback(botMessage.CallBackTitleText);
 
-                if (botMessage != null)
+                if (botMessage != null && botMessage.TextMessage!=null)
                     return await TelegramClient.EditMessageTextAsync(this.ChatId, this.MessageId, botMessage.TextMessage, ParseMode.Html, false, replyMarkup);
+
+
 
                 else
                     return null;
