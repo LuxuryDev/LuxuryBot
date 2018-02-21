@@ -274,6 +274,10 @@ namespace MyTelegramBot.Bot
                 case SelectRaitingCmd:
                     return await SelectRaiting();
 
+                case CmdAddFeedBack:
+                    return null;
+
+
                 default:
                     break;
                     
@@ -298,11 +302,6 @@ namespace MyTelegramBot.Bot
             //Пользователь нажал добавить отзыв, ему пришло форсе реплай сообещнеи "Оставить отзыв к заказу:N". Если отзыва еще нет
             if (base.CommandName == CmdAddFeedBack && Order != null && Order.FeedBack == null)
                 return await ForceReplyBuilder(ForceReplyAddFeedBack + Order.Number);
-
-            ///Добавить отзыв
-            if (base.OriginalMessage.Contains(ForceReplyAddFeedBack))
-                return await AddNewFeedBack();
-
 
             else
                 return null;

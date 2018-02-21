@@ -594,13 +594,16 @@ namespace MyTelegramBot.Bot
                 await EditMessage(InvoiceViewMsg.BuildMessage());
             }
 
-            //то отправляем уведомление о новом заказке Админам
-            if (new_order!=null)
+            if(new_order!=null && new_order.Invoice == null)
             {
                 OrderViewMsg = new OrderViewMessage(new_order);
                 await EditMessage(OrderViewMsg.BuildMessage());
-                await OrderRedirectToAdmins(new_order.Id);
             }
+
+            //то отправляем уведомление о новом заказке Админам
+            if (new_order!=null)
+                await OrderRedirectToAdmins(new_order.Id);
+            
 
 
             return OkResult;

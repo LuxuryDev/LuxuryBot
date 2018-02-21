@@ -13,6 +13,9 @@ using System.IO;
 
 namespace MyTelegramBot.Messages
 {
+    /// <summary>
+    /// сообщение с отзывом для товара
+    /// </summary>
     public class ViewProductFeedBackMessage:Bot.BotMessage
     {
 
@@ -34,6 +37,7 @@ namespace MyTelegramBot.Messages
         {
             this.ProductId = ProductId;
             this.FeedBackId = FeedBackId;
+            BackBtn = BuildInlineBtn("Назад к товару", BuildCallData(ProductBot.GetProductCmd, ProductBot.ModuleName, ProductId));
         }
 
 
@@ -41,8 +45,7 @@ namespace MyTelegramBot.Messages
         {
             db = new MarketBotDbContext();
 
-            //list<int> styleID = new List<int>(); 
-            //int index = styleID.FindIndex(x => x == 998877);
+            Product = db.Product.Find(this.ProductId);
 
             var list = db.FeedBack.Where(f => f.ProductId == ProductId).ToList();
 
@@ -50,7 +53,7 @@ namespace MyTelegramBot.Messages
                 FeedBack = list.OrderBy(f => f.Id).FirstOrDefault();
 
             if(FeedBackId>0)
-                FeedBack= list.OrderBy(f => f.Id).FirstOrDefault();
+                FeedBack= list.Find(f => f.Id==FeedBackId);
 
             if (FeedBack != null)
             {
@@ -65,12 +68,57 @@ namespace MyTelegramBot.Messages
                     Bold("Комментарий:") + FeedBack.Text + NewLine() +
                     Bold("Оценка:") + ConcatEmodjiStar(Convert.ToInt32(FeedBack.RaitingValue));
 
+                SetButtons(FeedBack.Id);
+                db.Dispose();
                 return this;
             }
 
-            else
-                return null;
 
+
+            else
+            {
+                db.Dispose();
+                return null;
+            }
+
+        }
+
+        private void SetButtons(int FeedBackId)
+        {
+            int next, previous;
+
+            next = NextFeedbackId(FeedBackId);
+            previous = PreviousFeedbackId(FeedBackId);
+
+            if(next > 0 && previous > 0)
+            {
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                new[]{
+                new[]
+                        {
+                            BackBtn
+                        },
+                new[]
+                        {
+                            PreviusFeedBackBtn=BuildInlineBtn(base.PreviuosEmodji,BuildCallData(ProductBot.CmdViewFeedBack,ProductBot.ModuleName,ProductId,previous)),
+                            NextFeedBackBtn=BuildInlineBtn(base.NextEmodji,BuildCallData(ProductBot.CmdViewFeedBack,ProductBot.ModuleName,ProductId,next))
+                        }
+
+
+                });
+            }
+
+            if(next < 0 && previous < 0)
+            {
+                base.MessageReplyMarkup = new InlineKeyboardMarkup(
+                new[]{
+                new[]
+                        {
+                            BackBtn
+                        },
+
+                });
+            }
         }
 
         private string ConcatEmodjiStar (int count)
@@ -80,6 +128,44 @@ namespace MyTelegramBot.Messages
                 res += base.StartEmodji;
 
             return res;
+        }
+
+        private int NextFeedbackId (int CurrentFeedBackId)
+        {
+            var feedback = db.FeedBack.Where(f => f.Id > CurrentFeedBackId && f.ProductId == ProductId).FirstOrDefault();
+
+            if (feedback != null)
+                return feedback.Id;
+
+            else
+            {
+               feedback= db.FeedBack.Where(f => f.Id != CurrentFeedBackId && f.ProductId == ProductId).OrderBy(f=>f.Id).FirstOrDefault();
+
+                if (feedback != null)
+                    return feedback.Id;
+
+                else
+                    return -1;
+            }
+        }
+
+        private int PreviousFeedbackId(int CurrentFeedBackId)
+        {
+            var feedback = db.FeedBack.Where(f => f.Id < CurrentFeedBackId && f.ProductId == ProductId).OrderByDescending(f=>f.Id).FirstOrDefault();
+
+            if (feedback != null)
+                return feedback.Id;
+
+            else
+            {
+                feedback = db.FeedBack.Where(f => f.Id != CurrentFeedBackId && f.ProductId == ProductId).OrderByDescending(f => f.Id).FirstOrDefault();
+
+                if (feedback != null)
+                    return feedback.Id;
+
+                else
+                    return -1;
+            }
         }
     }
 }

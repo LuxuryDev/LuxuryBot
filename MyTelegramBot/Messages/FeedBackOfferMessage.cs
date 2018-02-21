@@ -19,6 +19,10 @@ namespace MyTelegramBot.Messages
 
         private Orders Order { get; set; }
 
+        private InlineKeyboardCallbackButton [][] ProductsBtn { get; set; }
+
+        MarketBotDbContext db;
+
         public FeedBackOfferMessage(int OrderId)
         {
             this.OrderId = OrderId;
@@ -31,25 +35,13 @@ namespace MyTelegramBot.Messages
 
         public FeedBackOfferMessage BuildMessage()
         {
+            db = new MarketBotDbContext();
+
             if(this.Order==null)
-            using(MarketBotDbContext db=new MarketBotDbContext())
-                Order = db.Orders.Where(o => o.Id == OrderId).FirstOrDefault();
+                Order = db.Orders.Where(o => o.Id == OrderId).Include(o=>o.OrderProduct).FirstOrDefault();
             
 
-            if (Order != null)
-            {
-                base.TextMessage = "Заказ №" + Order.Number.ToString() + " выполнен. Вы можете оставить отзыв к заказу.";
-                this.AddFeedBackBtn = BuildInlineBtn("Добавить отзыв", BuildCallData(Bot.OrderBot.CmdAddFeedBack, Bot.OrderBot.ModuleName, Order.Id),NoteBookEmodji);
 
-                base.MessageReplyMarkup = new InlineKeyboardMarkup(
-                    new[]
-                    {
-                        new[]
-                        {
-                            AddFeedBackBtn
-                        }
-                    });
-            }
 
             return this;
 

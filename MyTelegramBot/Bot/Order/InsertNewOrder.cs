@@ -99,15 +99,15 @@ namespace MyTelegramBot.Bot.Order
                 if (OrderTmp!=null)
                     AddAddressToOrder(NewOrder.Id, OrderTmp.AddressId, ShipPrice);
 
-                // переносим в корзины в Состав заказа
-                foreach (var group in Basket) 
-                    NewOrder.OrderProduct.Add(FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group));
+                // переносим из корзины в Состав заказа
+                foreach (var group in Basket)
+                    NewOrder.OrderProduct.Concat(FromBasketToOrderPosition(group.ElementAt(0).ProductId, NewOrder.Id, group));
 
 
-                NewOrder.CurrentStatus = InsertOrderStatus(NewOrder.Id).Id;
+                var CurrentStarus= InsertOrderStatus(NewOrder.Id);
+                NewOrder.CurrentStatusNavigation = CurrentStarus;
                 db.SaveChanges();
                 db.Dispose();
-
                 return NewOrder;
             }
 
@@ -145,38 +145,40 @@ namespace MyTelegramBot.Bot.Order
         /// </summary>
         /// <param name="ProductId"></param>
         /// <param name="OrderId"></param>
-        /// <param name="group"></param>
+        /// <param name="group">Группа записей одного товара из таблицы  Basket</param>
         /// <returns></returns>
-        private OrderProduct FromBasketToOrderPosition(int ProductId, int OrderId, IGrouping<int, Basket> group)
+        private List<OrderProduct> FromBasketToOrderPosition(int ProductId, int OrderId, IGrouping<int, Basket> group)
         {
-            var Summa = group.Sum(p => p.Amount);
+            ProductPrice price = db.ProductPrice.Where(p => p.ProductId == ProductId && p.Enabled).Include(p=>p.Currency).FirstOrDefault();
 
-                ProductPrice price = db.ProductPrice.Where(p => p.ProductId == ProductId && p.Enabled).Include(p=>p.Currency).FirstOrDefault();
+            List<OrderProduct> list = new List<OrderProduct>();
 
             if (price != null)
             {
-
-                OrderProduct orderProduct = new OrderProduct
-                {
-                    ProductId = ProductId,
-                    OrderId = OrderId,
-                    DateAdd = DateTime.Now,
-                    Count = Summa,
-                    PriceId = price.Id,
-
-                };
-
                 foreach (var product in group)
-                    db.Basket.Remove(product);
+                {
+                    OrderProduct orderProduct = new OrderProduct
+                    {
+                        ProductId = ProductId,
+                        OrderId = OrderId,
+                        DateAdd = DateTime.Now,
+                        Count = 1,
+                        PriceId = price.Id,
 
-                db.OrderProduct.Add(orderProduct);
+                    };
 
-                db.SaveChanges();
+                    db.Basket.Remove(product); // удаляем из корзины
 
-                orderProduct.Price = price;
+                    db.OrderProduct.Add(orderProduct); // вставляем в заказ
 
-                return orderProduct;
+                    db.SaveChanges();
 
+                    orderProduct.Price = price;
+
+                    list.Add(orderProduct);
+                }
+
+                return list;
             }
 
             else

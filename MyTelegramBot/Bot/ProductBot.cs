@@ -138,16 +138,24 @@ namespace MyTelegramBot.Bot
 
         private async Task<IActionResult> SendFeedBack ()
         {
-            if(Argumetns.Count==1)
+            if (Argumetns.Count == 1)
+            {
                 ViewProductFeedBackMsg = new ViewProductFeedBackMessage(Argumetns[0]);
+                var mess = ViewProductFeedBackMsg.BuildMessage();
 
-            if (Argumetns.Count == 2)
-                ViewProductFeedBackMsg = new ViewProductFeedBackMessage(Argumetns[0],Argumetns[1]);
+                if (mess != null)
+                    await SendMessage(mess);
 
-            var mess = ViewProductFeedBackMsg.BuildMessage();
+            }
+            if (Argumetns.Count == 2) // перелистывание отзывов в одном сообщении.
+            {
+                ViewProductFeedBackMsg = new ViewProductFeedBackMessage(Argumetns[0], Argumetns[1]);
+                var mess = ViewProductFeedBackMsg.BuildMessage();
 
-            if (mess != null)
-                await SendMessage(mess);
+                if (mess != null)
+                    await EditMessage(mess);
+            }
+           
 
             else
                 await AnswerCallback("Отзывы отсутствуют",true);
